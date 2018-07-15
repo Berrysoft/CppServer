@@ -34,6 +34,9 @@ int main()
         case 'r':
             ser.refresh_module();
             break;
+        case 'c':
+            ser.close_children();
+            break;
         }
     }
 

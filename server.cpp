@@ -48,6 +48,17 @@ void server::refresh_module()
     }
 }
 
+void server::close_children()
+{
+    printf("关闭子Socket...\n");
+    while (!child_sockets.empty())
+    {
+        vector<int>::iterator it = child_sockets.begin();
+        close(*it);
+        child_sockets.erase(it);
+    }
+}
+
 void server::start(const sockaddr *addr, socklen_t len, int n)
 {
     bind(sock, addr, len);

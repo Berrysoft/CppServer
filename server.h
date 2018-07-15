@@ -24,6 +24,7 @@ public:
     ~server();
 
     void refresh_module();
+    void close_children();
 
     void start(const sockaddr* addr, socklen_t len, int n);
     void stop();
