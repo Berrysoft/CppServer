@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <algorithm>
 #include "html_content.h"
 #include "read_modules.h"
 
@@ -58,6 +59,13 @@ void server::stop()
 {
     printf("关闭Socket。\n");
     close(sock);
+    {
+        lock_guard<mutex> locker(children_mutex);
+        for (int &s : child_sockets)
+        {
+            close(s);
+        }
+    }
     printf("关闭线程池。\n");
     loop_thread.join();
 }
@@ -72,6 +80,7 @@ void server::accept_loop(int *sock, thread_pool<tuple<int, server *>> *pool, ser
         if (newsock < 0)
             break;
         printf("接收到请求。\n");
+        ser->child_sockets.push_back(newsock);
         tuple<int, server *> *tpl = new tuple<int, server *>(newsock, ser);
         pool->post(tpl);
     }
@@ -79,26 +88,39 @@ void server::accept_loop(int *sock, thread_pool<tuple<int, server *>> *pool, ser
 
 void server::process_job(tuple<int, server *> *tpl)
 {
-    printf("正在处理请求...\n");
     int fd = get<0>(*tpl);
-    char buffer[4096];
-    memset(buffer, 0, sizeof(buffer));
-    ssize_t size = read(fd, buffer, sizeof(buffer));
-    if (size < sizeof(buffer))
-        buffer[size] = '\0';
-    html_content content(buffer);
+    server *pser = get<1>(*tpl);
+    while (true)
     {
-        lock_guard<mutex> locker(get<1>(*tpl)->modules_mutex);
-        size = content.send(fd, get<1>(*tpl)->modules);
-    }
-    if (size < 0)
-    {
-        printf("信息发送失败。\n");
-    }
-    else
-    {
-        printf("信息已发送。\n");
+        printf("正在处理请求...\n");
+        char buffer[4096];
+        memset(buffer, 0, sizeof(buffer));
+        ssize_t size = read(fd, buffer, sizeof(buffer));
+        if (size < 0)
+            break;
+        if (size < sizeof(buffer))
+            buffer[size] = '\0';
+        html_content content(buffer);
+        {
+            lock_guard<mutex> locker(pser->modules_mutex);
+            size = content.send(fd, pser->modules);
+        }
+        if (size < 0)
+        {
+            printf("信息发送失败。\n");
+            break;
+        }
+        else
+        {
+            printf("信息已发送。\n");
+        }
+        //close(fd);
     }
     close(fd);
+    {
+        lock_guard<mutex> locker(pser->children_mutex);
+        vector<int>::iterator it = find(pser->child_sockets.begin(), pser->child_sockets.end(), fd);
+        pser->child_sockets.erase(it);
+    }
     delete tpl;
 }

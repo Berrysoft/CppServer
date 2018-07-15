@@ -1,6 +1,6 @@
 #include "html_content.h"
 #include <cstring>
-#include <csignal>
+//#include <csignal>
 #include <sstream>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -138,7 +138,7 @@ ssize_t html_content::send(int fd, map<string, module> &modules)
         {
             return result;
         }
-        signal(SIGPIPE, SIG_IGN);
+        //signal(SIGPIPE, SIG_IGN);
         ssize_t t = res->send(fd);
         if (t < 0)
         {
