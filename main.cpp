@@ -8,7 +8,7 @@ using std::printf;
 
 int main()
 {
-    const int amount = 7, m = 10, n = 10;
+    const int amount = 10000, m = 10, n = 10;
     const int port = 3342;
 
     server ser(amount, m, n);
@@ -33,9 +33,6 @@ int main()
         {
         case 'r':
             ser.refresh_module();
-            break;
-        case 'c':
-            ser.close_children();
             break;
         }
     }

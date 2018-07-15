@@ -1,5 +1,6 @@
 #pragma once
 #include <netinet/in.h>
+#include <sys/epoll.h>
 #include <thread>
 #include <map>
 #include <string>
@@ -17,18 +18,18 @@ private:
     std::thread loop_thread;
     std::map<std::string, module> modules;
     std::mutex modules_mutex;
-    std::vector<int> child_sockets;
-    std::mutex children_mutex;
+    int epoll_fd;
+    unsigned int amount;
+    epoll_event *event_list;
 public:
     server(unsigned int amount, std::size_t rec, std::size_t doj);
     ~server();
 
     void refresh_module();
-    void close_children();
 
     void start(const sockaddr* addr, socklen_t len, int n);
     void stop();
 private:
-    static void accept_loop(int *sock, thread_pool<std::tuple<int, server *>> *pool, server *ser);
+    static void accept_loop(server *ser);
     static void process_job(std::tuple<int, server *> *tpl);
 };
