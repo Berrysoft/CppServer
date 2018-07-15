@@ -57,7 +57,7 @@ markdown.o: markdown.cpp markdown.h html_writer.h
 	g++ -c markdown.cpp -std=c++11 -fPIC
 
 # 运行
-run:
+run: server.out file.so cpu.so version.so disk.so markdown.so
 	./server.out
 
 # 清理
