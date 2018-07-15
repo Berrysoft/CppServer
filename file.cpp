@@ -25,11 +25,6 @@ ssize_t file_response::send(int fd)
         result += writer.write_head("大作业-主页");
         result += writer.write_h1("大作业-主页");
         result += writer.write_p("欢迎光临！");
-        /*if (!access("README.md", 0))
-        {
-            result += writer.write_h2("说明");
-            result += writer.write_p("<a href=\"../markdown/README.md\">说明文件（Markdown格式）</a>");
-        }*/
         result += writer.write_h2("动态加载功能");
         vector<string> lines = read_modules_file();
         vector<string> texts;
@@ -73,7 +68,7 @@ ssize_t file_response::send(int fd)
             memset(buffer, 0, sizeof(buffer));
             while (len = fread(buffer, sizeof(char), sizeof(buffer), furl))
             {
-                result += ::send(fd, buffer, len, 0);
+                result += send_with_chunk(fd, buffer, len, 0);
             }
             fclose(furl);
         }

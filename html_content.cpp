@@ -1,6 +1,6 @@
 #include "html_content.h"
 #include <cstring>
-//#include <csignal>
+#include <csignal>
 #include <sstream>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -116,7 +116,7 @@ ssize_t html_content::send(int fd, map<string, module> &modules)
         res = deal_commands("error", modules, resp_value, m);
     }
 
-    const char head[] = "HTTP/1.1 %d %s\r\nServer:Berrysoft.Linux.Cpp.Server\r\nContent-Type:text/html;charset=UTF-8\r\n\r\n";
+    const char head[] = "HTTP/1.1 %d %s\r\nServer:Berrysoft.Linux.Cpp.Server\r\nContent-Type:text/html;charset=UTF-8\r\nTransfer-Encoding:chunked\r\n\r\n";
     char realhead[256];
     memset(realhead, 0, sizeof(realhead));
     switch (resp_value)
@@ -138,7 +138,7 @@ ssize_t html_content::send(int fd, map<string, module> &modules)
         {
             return result;
         }
-        //signal(SIGPIPE, SIG_IGN);
+        signal(SIGPIPE, [](int fd) -> void { close(fd); });
         ssize_t t = res->send(fd);
         if (t < 0)
         {
@@ -147,6 +147,7 @@ ssize_t html_content::send(int fd, map<string, module> &modules)
         else
         {
             result += t;
+            result += ::send(fd, "\0\r\n\r\n", 5, 0);
         }
         delete res;
         m.close();

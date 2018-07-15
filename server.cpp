@@ -82,6 +82,7 @@ void server::accept_loop(int *sock, thread_pool<tuple<int, server *>> *pool, ser
         printf("接收到请求。\n");
         ser->child_sockets.push_back(newsock);
         tuple<int, server *> *tpl = new tuple<int, server *>(newsock, ser);
+        printf("正在排队...\n");
         pool->post(tpl);
     }
 }
@@ -95,15 +96,19 @@ void server::process_job(tuple<int, server *> *tpl)
         printf("正在处理请求...\n");
         char buffer[4096];
         memset(buffer, 0, sizeof(buffer));
-        ssize_t size = read(fd, buffer, sizeof(buffer));
-        if (size < 0)
-            break;
+        ssize_t size;
+        size = recv(fd, buffer, sizeof(buffer), 0);
+        if (size <= 0)
+            goto outbre;
+        //printf("here, %s, %ld\n", buffer, size);
         if (size < sizeof(buffer))
             buffer[size] = '\0';
         html_content content(buffer);
         {
             lock_guard<mutex> locker(pser->modules_mutex);
+            //printf("start send\n");
             size = content.send(fd, pser->modules);
+            //printf("end send\n");
         }
         if (size < 0)
         {
@@ -116,6 +121,7 @@ void server::process_job(tuple<int, server *> *tpl)
         }
         //close(fd);
     }
+outbre:
     close(fd);
     {
         lock_guard<mutex> locker(pser->children_mutex);

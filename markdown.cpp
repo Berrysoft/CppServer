@@ -15,6 +15,7 @@ markdown_response::markdown_response(string filename)
 
 ssize_t markdown_response::send(int fd)
 {
+    //printf("start markdown\n");
     ssize_t result = 0;
     if (!access(filename.c_str(), 0))
     {
@@ -40,7 +41,7 @@ ssize_t markdown_response::send(int fd)
                     result += writer.write_ul(ul_texts);
                     in_ul = false;
                 }
-                result += ::send(fd, "<br/>", 5, 0);
+                result += send_with_chunk(fd, "<br/>", 5, 0);
             }
             else if (line.length() > 4 && line.substr(0, 4) == "### ")
             {
@@ -80,13 +81,13 @@ ssize_t markdown_response::send(int fd)
             {
                 if (in_code)
                 {
-                    result += ::send(fd, line.c_str(), line.size(), 0);
+                    result += send_with_chunk(fd, line.c_str(), line.size(), 0);
                 }
                 else
                 {
                     result += writer.write_p(line);
                 }
-                result += ::send(fd, "\n", 1, 0);
+                result += send_with_chunk(fd, "\n", 1, 0);
             }
         }
         result += writer.write_end();

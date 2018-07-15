@@ -56,6 +56,10 @@ markdown.so: markdown.o html_writer.o
 markdown.o: markdown.cpp markdown.h html_writer.h
 	g++ -c markdown.cpp -std=c++11 -fPIC
 
+# 运行
+run:
+	./server.out
+
 # 清理
 clean:
 	rm *.o

@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+ssize_t send_with_chunk(int fd, const void *buffer, size_t length, int flag);
+
 class html_writer
 {
 private:
