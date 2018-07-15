@@ -11,12 +11,8 @@ ssize_t send_with_chunk(int fd, const void *buffer, size_t length, int flag)
     ssize_t result = 0;
     ssize_t t;
     char buf[9];
-    int len = sprintf(buf, "%02lX", length);
+    int len = sprintf(buf, "%lX\r\n", length);
     t = send(fd, buf, len, flag);
-    if (t < 0)
-        return t;
-    result += t;
-    t = send(fd, "\r\n", 2, flag);
     if (t < 0)
         return t;
     result += t;

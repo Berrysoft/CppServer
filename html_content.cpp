@@ -145,7 +145,7 @@ ssize_t html_content::send(int fd, map<string, module> &modules)
         else
         {
             result += t;
-            result += ::send(fd, "\0\r\n\r\n", 5, 0);
+            result += ::send(fd, "0\r\n\r\n", 5, 0);
         }
         delete res;
         m.close();
