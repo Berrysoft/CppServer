@@ -11,7 +11,7 @@ ssize_t send_with_chunk(int fd, const void *buffer, size_t length, int flag)
     ssize_t result = 0;
     ssize_t t;
     char buf[9];
-    int len = sprintf(buf, "%lX", length);
+    int len = sprintf(buf, "%02lX", length);
     t = send(fd, buf, len, flag);
     if (t < 0)
         return t;
@@ -102,18 +102,6 @@ ssize_t html_writer::write_ul(vector<string> texts)
     for (string &text : texts)
     {
         string te = "<li>" + text + "</li>";
-        /*t = send_with_chunk(fd, "<li>", 4, 0);
-        if (t < 0)
-            return t;
-        result += t;
-        t = send_with_chunk(fd, text.c_str(), text.length(), 0);
-        if (t < 0)
-            return t;
-        result += t;
-        t = send_with_chunk(fd, "</li>", 5, 0);
-        if (t < 0)
-            return t;
-        result += t;*/
         t = send_with_chunk(fd, te.c_str(), te.length(), 0);
         if (t < 0)
             return t;
@@ -138,15 +126,6 @@ ssize_t html_writer::write_table_start(vector<string> texts)
     result += t;
     for (string &text : texts)
     {
-        /*t = send_with_chunk(fd, "<th>", 4, 0);
-        if (t < 0)
-            return t;
-        result += t;
-        t = send_with_chunk(fd, text.c_str(), text.length(), 0);
-        if (t < 0)
-            return t;
-        result += t;
-        t = send_with_chunk(fd, "</th>", 5, 0);*/
         string te = "<th>" + text + "</th>";
         t = send_with_chunk(fd, te.c_str(), te.length(), 0);
         if (t < 0)
@@ -170,15 +149,6 @@ ssize_t html_writer::write_tr(vector<string> texts)
     result += t;
     for (string &text : texts)
     {
-        /*t = send_with_chunk(fd, "<td>", 4, 0);
-        if (t < 0)
-            return t;
-        result += t;
-        t = send_with_chunk(fd, text.c_str(), text.length(), 0);
-        if (t < 0)
-            return t;
-        result += t;
-        t = send_with_chunk(fd, "</td>", 5, 0);*/
         string te = "<td>" + text + "</td>";
         t = send_with_chunk(fd, te.c_str(), te.length(), 0);
         if (t < 0)
