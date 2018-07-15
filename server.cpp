@@ -13,14 +13,14 @@
 
 using namespace std;
 
-server::server(unsigned int amount, size_t rec, size_t doj) : amount(amount)
+server::server(size_t amount, size_t doj) : amount(amount)
 {
     printf("初始化Socket...\n");
     sock = socket(AF_INET, SOCK_STREAM, 0);
     printf("初始化Epoll...\n");
     event_list = new epoll_event[amount];
     printf("初始化线程池...\n");
-    pool = new thread_pool<tuple<int, server *>>(process_job, amount, rec, doj);
+    pool = new thread_pool<tuple<int, server *>>(process_job, doj);
     refresh_module();
 }
 
@@ -103,16 +103,24 @@ void server::accept_loop(server *ser)
         {
             if ((ser->event_list[i].events & EPOLLERR) || (ser->event_list[i].events & EPOLLHUP) || !(ser->event_list[i].events & EPOLLIN))
             {
-                printf("Epoll错误。\n");
-                goto bre;
+                printf("Epoll错误，关闭该Socket。\n");
+                /*epoll_event e;
+                e.data.fd = ser->event_list[i].data.fd;
+                e.events = EPOLLERR;
+                epoll_ctl(ser->epoll_fd, EPOLL_CTL_DEL, ser->event_list[i].data.fd, &e);*/
+                close(ser->event_list[i].data.fd);
+                continue;
             }
             if (ser->event_list[i].data.fd == ser->sock)
             {
                 sockaddr_in paddr;
                 socklen_t len = sizeof(sockaddr_in);
-                int newsock = accept(ser->sock, (sockaddr *)&paddr, &len);
+                int newsock;
+                newsock = accept(ser->sock, (sockaddr *)&paddr, &len);
                 if (newsock < 0)
+                {
                     continue;
+                }
                 epoll_event e;
                 e.data.fd = newsock;
                 e.events = EPOLLIN | EPOLLET;
@@ -126,7 +134,6 @@ void server::accept_loop(server *ser)
             }
         }
     }
-bre:
     for (int i = 0; i < ser->amount; i++)
     {
         close(ser->event_list[i].data.fd);
@@ -140,11 +147,13 @@ void server::process_job(tuple<int, server *> *tpl)
     int fd = get<0>(*tpl);
     server *pser = get<1>(*tpl);
     printf("正在处理请求...\n");
-    signal(SIGPIPE, [](int fd) -> void { close(fd); });
+    //signal(SIGPIPE, [](int fd) -> void { printf("Broken pipe.\n");close(fd); });
+    signal(SIGPIPE, SIG_IGN);
     char buffer[4096];
     memset(buffer, 0, sizeof(buffer));
     ssize_t size;
     size = recv(fd, buffer, sizeof(buffer), 0);
+    printf("请求长度为%ld。\n", size);
     //printf("请求为：\n%s\n长度：%ld\n", buffer, size);
     if (size > 0)
     {
@@ -166,5 +175,10 @@ void server::process_job(tuple<int, server *> *tpl)
             printf("信息已发送。\n");
         }
     }
+    else if (fd == 0)
+    {
+        close(fd);
+    }
+    //close(fd);
     delete tpl;
 }

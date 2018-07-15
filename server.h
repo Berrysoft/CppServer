@@ -19,10 +19,10 @@ private:
     std::map<std::string, module> modules;
     std::mutex modules_mutex;
     int epoll_fd;
-    unsigned int amount;
+    std::size_t amount;
     epoll_event *event_list;
 public:
-    server(unsigned int amount, std::size_t rec, std::size_t doj);
+    server(std::size_t amount, std::size_t doj);
     ~server();
 
     void refresh_module();
