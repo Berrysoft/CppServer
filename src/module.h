@@ -1,3 +1,4 @@
+//模块类，用于动态加载模块。
 #pragma once
 #include "mdl/response.h"
 

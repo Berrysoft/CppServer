@@ -1,3 +1,5 @@
+//响应HTTP请求的类。
+//类名有“html”是由于之前在这里直接回复HTML，后来分离了功能。
 #pragma once
 #include <cstdio>
 #include <map>

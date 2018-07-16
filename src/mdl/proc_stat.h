@@ -1,3 +1,4 @@
+//生成CPU使用信息。
 #pragma once
 #include <vector>
 

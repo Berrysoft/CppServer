@@ -1,6 +1,5 @@
 ﻿#include "server.h"
 #include <sys/socket.h>
-#include <sys/timerfd.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <cstring>
@@ -70,7 +69,7 @@ void server::refresh_module()
     }
 }
 
-void server::start(const sockaddr *addr, socklen_t len, int n)
+void server::start(const sockaddr *addr, socklen_t len, int n, int epoll_timeout, timespec interval, int clock_timeout)
 {
     bind(sock, addr, len);
     listen(sock, n);
@@ -83,10 +82,12 @@ void server::start(const sockaddr *addr, socklen_t len, int n)
         printf("时钟获取失败。\n");
         return;
     }
-    itimer.it_value.tv_sec = 60;
+    /*itimer.it_value.tv_sec = 60;
     itimer.it_value.tv_nsec = 0;
     itimer.it_interval.tv_sec = 60;
-    itimer.it_interval.tv_nsec = 0;
+    itimer.it_interval.tv_nsec = 0;*/
+    itimer.it_value = interval;
+    itimer.it_interval = interval;
     if (timerfd_settime(timer_fd, 0, &itimer, nullptr) < 0)
     {
         printf("时钟设置失败。\n");
@@ -111,7 +112,7 @@ void server::start(const sockaddr *addr, socklen_t len, int n)
         return;
     }
 
-    loop_thread = thread(accept_loop, this);
+    loop_thread = thread(accept_loop, epoll_timeout, clock_timeout, this);
 }
 
 void server::clean(unsigned long long ostamp)
@@ -147,12 +148,11 @@ void server::stop()
     loop_thread.join();
 }
 
-void server::accept_loop(server *ser)
+void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
 {
-    const int TIMEOUT = 2000;
     while (true)
     {
-        int ret = epoll_wait(ser->epoll_fd, ser->event_list, ser->amount, TIMEOUT);
+        int ret = epoll_wait(ser->epoll_fd, ser->event_list, ser->amount, epoll_timeout);
         if (ret < 0 && ret != EINTR)
         {
             printf("Epoll已关闭。\n");
@@ -168,7 +168,14 @@ void server::accept_loop(server *ser)
         {
             if ((ser->event_list[i].events & EPOLLERR) || (ser->event_list[i].events & EPOLLHUP) || (ser->event_list[i].events & EPOLLRDHUP) || !(ser->event_list[i].events & EPOLLIN))
             {
-                printf("Epoll错误，关闭Socket %d。\n", ser->event_list[i].data.fd);
+                if (ser->event_list[i].events & EPOLLRDHUP)
+                {
+                    printf("客户端已关闭Socket %d。\n", ser->event_list[i].data.fd);
+                }
+                else
+                {
+                    printf("Epoll错误，关闭Socket %d。\n", ser->event_list[i].data.fd);
+                }
                 epoll_ctl(ser->epoll_fd, EPOLL_CTL_DEL, ser->event_list[i].data.fd, &(ser->event_list[i]));
                 close(ser->event_list[i].data.fd);
                 {
@@ -224,10 +231,9 @@ void server::accept_loop(server *ser)
                 }
                 ser->time_stamp += timer_buf;
                 printf("时间戳：%llu\n", ser->time_stamp);
-                const unsigned long long time_out = 1;
-                if (ser->time_stamp > time_out)
+                if (ser->time_stamp > clock_timeout)
                 {
-                    ser->clean(ser->time_stamp - time_out);
+                    ser->clean(ser->time_stamp - clock_timeout);
                 }
             }
             else

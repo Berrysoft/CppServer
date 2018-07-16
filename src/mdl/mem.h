@@ -1,3 +1,4 @@
+//生成内存信息。
 #pragma once
 
 struct mem_info

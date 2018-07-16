@@ -1,3 +1,6 @@
+//用来向一个文件描述符写HTML文档，
+//需要用到程序运行目录下的`style.css`样式表。
+//由于文档是动态生成的，所以采用Chunked编码方式传输。
 #pragma once
 #include <unistd.h>
 #include <string>

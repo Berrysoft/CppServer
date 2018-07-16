@@ -1,3 +1,4 @@
+//线程池模板类。
 #pragma once
 #include <vector>
 #include <valarray>

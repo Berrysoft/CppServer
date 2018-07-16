@@ -1,3 +1,4 @@
+//生成CPU信息。
 #pragma once
 #include <string>
 #include <vector>

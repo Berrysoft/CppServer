@@ -1,6 +1,8 @@
+//服务器头文件，管理一个循环线程和一个线程池。
 #pragma once
 #include <netinet/in.h>
 #include <sys/epoll.h>
+#include <sys/timerfd.h>
 #include <thread>
 #include <map>
 #include <string>
@@ -36,12 +38,12 @@ public:
 
     void refresh_module();
 
-    void start(const sockaddr* addr, socklen_t len, int n);
+    void start(const sockaddr *addr, socklen_t len, int n, int epoll_timeout = 2000, timespec interval = {60, 0}, int clock_timeout = 2);
     void clean(unsigned long long ostamp);
     void stop();
 
     unsigned long long get_time_stamp() { return time_stamp; }
 private:
-    static void accept_loop(server *ser);
-    static void process_job(int fd, server *pser);
+  static void accept_loop(int epoll_timeout, int clock_timeout, server *ser);
+  static void process_job(int fd, server *pser);
 };
