@@ -3,15 +3,20 @@
 #include <string>
 #include <vector>
 
+class broken_pipe
+{
+};
+
 ssize_t send_with_chunk(int fd, const void *buffer, size_t length, int flag);
 
 class html_writer
 {
-private:
+  private:
     int fd;
 
     ssize_t write_spe(std::string spe, std::string text);
-public:
+
+  public:
     html_writer(int fd) : fd(fd) {}
 
     ssize_t write_head(std::string title);

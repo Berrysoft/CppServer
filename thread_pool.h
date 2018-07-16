@@ -1,5 +1,5 @@
 #pragma once
-#include <queue>
+#include <vector>
 #include <valarray>
 #include <thread>
 #include <mutex>
@@ -10,18 +10,20 @@ class thread_pool
 {
 private:
     void (*task)(T *);
-    std::queue<T *> jobs;
+    std::vector<T *> jobs;
     std::valarray<std::thread> do_threads;
 
     std::mutex m_mutex;
     std::condition_variable cond;
     std::mutex cond_mutex;
+
+    bool stop;
 public:
     thread_pool(void (*task)(T *), std::size_t dojob = 8);
     ~thread_pool();
 
     void post(T *job);
-
+    void remove(T *job);
 private:
     static void do_job(thread_pool<T> *pool);
 };
@@ -29,6 +31,7 @@ private:
 template <typename T>
 thread_pool<T>::thread_pool(void (*task)(T *), std::size_t dojob) : task(task)
 {
+    stop = false;
     if (dojob < 1)
         dojob = 1;
     do_threads = std::valarray<std::thread>(dojob);
@@ -41,6 +44,7 @@ thread_pool<T>::thread_pool(void (*task)(T *), std::size_t dojob) : task(task)
 template <typename T>
 thread_pool<T>::~thread_pool()
 {
+    stop = true;
     cond.notify_all();
     for (std::thread &t : do_threads)
     {
@@ -59,9 +63,24 @@ void thread_pool<T>::post(T *job)
 {
     {
         std::lock_guard<std::mutex> locker(m_mutex);
-        jobs.push(job);
+        jobs.push_back(job);
     }
     cond.notify_one();
+}
+
+template <typename T>
+void thread_pool<T>::remove(T *job)
+{
+    {
+        std::lock_guard<std::mutex> locker(m_mutex);
+        for (std::size_t i = 0; i < jobs.size(); i++)
+        {
+            if (jobs[i] == job || *(jobs[i]) == *job)
+            {
+                jobs.erase(jobs.begin() + i);
+            }
+        }
+    }
 }
 
 template <typename T>
@@ -73,13 +92,16 @@ void thread_pool<T>::do_job(thread_pool<T> *pool)
             std::unique_lock<std::mutex> locker(pool->cond_mutex);
             pool->cond.wait(locker);
         }
+        if (pool->stop)
+            break;
         T *j = nullptr;
         {
             std::lock_guard<std::mutex> locker(pool->m_mutex);
             if (!pool->jobs.empty())
             {
-                j = pool->jobs.front();
-                pool->jobs.pop();
+                typename std::vector<T *>::iterator it = pool->jobs.begin();
+                j = *it;
+                pool->jobs.erase(it);
             }
         }
         if (!j)
