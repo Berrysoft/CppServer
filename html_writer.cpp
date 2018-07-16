@@ -38,8 +38,7 @@ ssize_t html_writer::write_head(string title)
     ssize_t result = 0;
     ssize_t t;
     const char head_start[] = "<!DOCTYPE html>\n<html>\n<head>\n<meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\">\n<title>%s</title>\n<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.10.0-alpha/dist/katex.min.css\" integrity=\"sha384-BTL0nVi8DnMrNdMQZG1Ww6yasK9ZGnUxL1ZWukXQ7fygA1py52yPp9W4wrR00VML\" crossorigin=\"anonymous\">\n<style>\n";
-    const char head_mid[] = "\n</style>\n<script type=\"text/javascript\">\n";
-    const char head_end[] = "\n</script>\n</head>\n";
+    const char head_end[] = "\n</style>\n</head>\n";
     char buffer[4096];
     memset(buffer, 0, sizeof(buffer));
     int len = sprintf(buffer, head_start, title.c_str());
@@ -58,22 +57,6 @@ ssize_t html_writer::write_head(string title)
             result += t;
         }
         fclose(fcss);
-    }
-    t = send_with_chunk(fd, head_mid, sizeof(head_mid) - 1, 0);
-    if (t < 0)
-        return t;
-    result += t;
-    FILE *fjs = fopen("norefresh.js", "r");
-    if (fjs)
-    {
-        while (len = fread(buffer, sizeof(char), sizeof(buffer), fjs))
-        {
-            t = send_with_chunk(fd, buffer, len, 0);
-            if (t < 0)
-                return t;
-            result += t;
-        }
-        fclose(fjs);
     }
     t = send_with_chunk(fd, head_end, sizeof(head_end) - 1, 0);
     if (t < 0)
