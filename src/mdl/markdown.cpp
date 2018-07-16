@@ -98,5 +98,5 @@ ssize_t markdown_response::send(int fd)
 
 void *get_instance_response(const char *command)
 {
-    return new markdown_response("README.md");
+    return new markdown_response("../README.md");
 }

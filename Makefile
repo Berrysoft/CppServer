@@ -1,65 +1,79 @@
+SOURCE := src/
+MODULE := src/mdl/
+BIN := bin/
+OBJ := obj/
+
+STD := -std=c++11
+STDFIPC := -std=c++11 -fPIC
+
+# 编译所有
+ALL := $(BIN)server.out $(BIN)file.so $(BIN)cpu.so $(BIN)version.so $(BIN)disk.so $(BIN)markdown.so $(BIN)modules $(BIN)style.css
+all: $(ALL)
+
 # 主程序
-server.out: main.o server.o sem.o html_content.o module.o read_modules.o
-	g++ -o server.out main.o server.o sem.o html_content.o module.o read_modules.o -lpthread -ldl
-main.o: main.cpp server.h thread_pool.h sem.h module.h html_content.h response.h
-	g++ -c main.cpp -std=c++11
-server.o: server.cpp server.h thread_pool.h apply_tuple.h sem.h html_content.h module.h read_modules.h
-	g++ -c server.cpp -std=c++11
-sem.o: sem.cpp sem.h
-	g++ -c sem.cpp -std=c++11
-html_content.o: html_content.cpp html_content.h response.h module.h
-	g++ -c html_content.cpp -std=c++11
-module.o: module.cpp module.h
-	g++ -c module.cpp -std=c++11
+MAIN_OBJ := $(OBJ)main.o $(OBJ)server.o $(OBJ)html_content.o $(OBJ)module.o $(OBJ)read_modules.o
+$(BIN)server.out: $(MAIN_OBJ)
+	g++ -o $(BIN)server.out $(MAIN_OBJ) -lpthread -ldl
+$(OBJ)main.o: $(SOURCE)main.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)module.h $(SOURCE)html_content.h $(MODULE)response.h
+	g++ -o $(OBJ)main.o -c $(SOURCE)main.cpp $(STD)
+$(OBJ)server.o: $(SOURCE)server.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)apply_tuple.h $(SOURCE)html_content.h $(SOURCE)module.h $(SOURCE)read_modules.h
+	g++ -o $(OBJ)server.o -c $(SOURCE)server.cpp $(STD)
+$(OBJ)html_content.o: $(SOURCE)html_content.cpp $(SOURCE)html_content.h $(MODULE)response.h $(SOURCE)module.h
+	g++ -o $(OBJ)html_content.o -c $(SOURCE)html_content.cpp $(STD)
+$(OBJ)module.o: $(SOURCE)module.cpp $(SOURCE)module.h
+	g++ -o $(OBJ)module.o -c $(SOURCE)module.cpp $(STD)
 
 # HTML Writer 目标对象
-html_writer.o: html_writer.cpp html_writer.h
-	g++ -c html_writer.cpp -std=c++11 -fPIC
+$(OBJ)html_writer.o:$(MODULE)html_writer.cpp $(MODULE)html_writer.h
+	g++ -o $(OBJ)html_writer.o -c $(MODULE)html_writer.cpp $(STDFIPC)
 
 # Read module 目标对象
-read_modules.o: read_modules.cpp read_modules.h
-	g++ -c read_modules.cpp -std=c++11 -fPIC
+$(OBJ)read_modules.o: $(SOURCE)read_modules.cpp $(SOURCE)read_modules.h
+	g++ -o $(OBJ)read_modules.o -c $(SOURCE)read_modules.cpp $(STDFIPC)
 
 # file模块
-file.so: file.o html_writer.o read_modules.o
-	g++ -shared -o file.so file.o html_writer.o read_modules.o
-file.o: file.cpp response.h html_writer.h read_modules.h
-	g++ -c file.cpp -std=c++11 -fPIC
+$(BIN)file.so: $(OBJ)file.o $(OBJ)html_writer.o $(OBJ)read_modules.o
+	g++ -shared -o $(BIN)file.so $(OBJ)file.o $(OBJ)html_writer.o $(OBJ)read_modules.o
+$(OBJ)file.o: $(MODULE)file.cpp $(MODULE)response.h $(MODULE)html_writer.h $(SOURCE)read_modules.h
+	g++ -o $(OBJ)file.o -c $(MODULE)file.cpp $(STDFIPC)
 
 # cpu模块
-cpu.so: cpu.o proc_cpuinfo.o proc_stat.o html_writer.o
-	g++ -shared -o cpu.so cpu.o proc_cpuinfo.o proc_stat.o html_writer.o
-cpu.o: cpu.cpp cpu.h response.h id.h proc_cpuinfo.h proc_stat.h html_writer.h
-	g++ -c cpu.cpp -std=c++11 -fPIC
-proc_cpuinfo.o: proc_cpuinfo.cpp proc_cpuinfo.h
-	g++ -c proc_cpuinfo.cpp -std=c++11 -fPIC
-proc_stat.o: proc_stat.cpp proc_stat.h
-	g++ -c proc_stat.cpp -std=c++11 -fPIC
+$(BIN)cpu.so: $(OBJ)cpu.o $(OBJ)proc_cpuinfo.o $(OBJ)proc_stat.o $(OBJ)html_writer.o
+	g++ -shared -o $(BIN)cpu.so $(OBJ)cpu.o $(OBJ)proc_cpuinfo.o $(OBJ)proc_stat.o $(OBJ)html_writer.o
+$(OBJ)cpu.o: $(MODULE)cpu.cpp $(MODULE)cpu.h $(MODULE)response.h $(MODULE)id.h $(MODULE)proc_cpuinfo.h $(MODULE)proc_stat.h $(MODULE)html_writer.h
+	g++ -o $(OBJ)cpu.o -c $(MODULE)cpu.cpp $(STDFIPC)
+$(OBJ)proc_cpuinfo.o: $(MODULE)proc_cpuinfo.cpp $(MODULE)proc_cpuinfo.h
+	g++ -o $(OBJ)proc_cpuinfo.o -c $(MODULE)proc_cpuinfo.cpp $(STDFIPC)
+$(OBJ)proc_stat.o: $(MODULE)proc_stat.cpp $(MODULE)proc_stat.h
+	g++ -o $(OBJ)proc_stat.o -c $(MODULE)proc_stat.cpp $(STDFIPC)
 
 # version模块
-version.so: version.o mem.o html_writer.o
-	g++ -shared -o version.so version.o mem.o html_writer.o
-version.o: version.cpp version.h response.h mem.h html_writer.h
-	g++ -c version.cpp -std=c++11 -fPIC
-mem.o: mem.cpp mem.h
-	g++ -c mem.cpp -std=c++11 -fPIC
+$(BIN)version.so: $(OBJ)version.o $(OBJ)mem.o $(OBJ)html_writer.o
+	g++ -shared -o $(BIN)version.so $(OBJ)version.o $(OBJ)mem.o $(OBJ)html_writer.o
+$(OBJ)version.o: $(MODULE)version.cpp $(MODULE)version.h $(MODULE)response.h $(MODULE)mem.h $(MODULE)html_writer.h
+	g++ -o $(OBJ)version.o -c $(MODULE)version.cpp $(STDFIPC)
+$(OBJ)mem.o: $(MODULE)mem.cpp $(MODULE)mem.h
+	g++ -o $(OBJ)mem.o -c $(MODULE)mem.cpp $(STDFIPC)
 
 # disk模块
-disk.so: disk.o html_writer.o
-	g++ -shared -o disk.so disk.o html_writer.o
-disk.o: disk.cpp disk.h html_writer.h
-	g++ -c disk.cpp -std=c++11 -fPIC
+$(BIN)disk.so: $(OBJ)disk.o $(OBJ)html_writer.o
+	g++ -shared -o $(BIN)disk.so $(OBJ)disk.o $(OBJ)html_writer.o
+$(OBJ)disk.o: $(MODULE)disk.cpp $(MODULE)disk.h $(MODULE)html_writer.h
+	g++ -o $(OBJ)disk.o -c $(MODULE)disk.cpp $(STDFIPC)
 
 # Markdown模块
-markdown.so: markdown.o html_writer.o
-	g++ -shared -o markdown.so markdown.o html_writer.o
-markdown.o: markdown.cpp markdown.h html_writer.h
-	g++ -c markdown.cpp -std=c++11 -fPIC
+$(BIN)markdown.so: $(OBJ)markdown.o $(OBJ)html_writer.o
+	g++ -shared -o $(BIN)markdown.so $(OBJ)markdown.o $(OBJ)html_writer.o
+$(OBJ)markdown.o: $(MODULE)markdown.cpp $(MODULE)markdown.h $(MODULE)html_writer.h
+	g++ -o $(OBJ)markdown.o -c $(MODULE)markdown.cpp $(STDFIPC)
 
-# 运行
-run: server.out file.so cpu.so version.so disk.so markdown.so
-	./server.out
+# 特殊文件
+$(BIN)modules: $(SOURCE)modules
+	cp $(SOURCE)modules $(BIN)modules
+
+$(BIN)style.css: $(SOURCE)style.css
+	cp $(SOURCE)style.css $(BIN)style.css
 
 # 清理
 clean:
-	rm *.o
+	rm $(OBJ)/*.o
