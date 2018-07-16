@@ -15,22 +15,19 @@ ssize_t send_with_chunk(int fd, const void *buffer, size_t length, int flag)
     t = send(fd, buf, len, flag);
     if (t < 0)
     {
-        //printf("First.\n");
-        throw broken_pipe();
+        return t;
     }
     result += t;
     t = send(fd, buffer, length, flag);
     if (t < 0)
     {
-        //printf("Second.\n");
-        throw broken_pipe();
+        return t;
     }
     result += t;
     t = send(fd, "\r\n", 2, flag);
     if (t < 0)
     {
-        //printf("Third.\n");
-        throw broken_pipe();
+        return t;
     }
     result += t;
     return result;

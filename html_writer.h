@@ -3,10 +3,6 @@
 #include <string>
 #include <vector>
 
-class broken_pipe
-{
-};
-
 ssize_t send_with_chunk(int fd, const void *buffer, size_t length, int flag);
 
 class html_writer

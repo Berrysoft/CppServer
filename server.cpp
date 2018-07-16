@@ -11,7 +11,6 @@
 #include <algorithm>
 #include "html_content.h"
 #include "read_modules.h"
-#include "html_writer.h"
 
 using namespace std;
 
@@ -171,17 +170,7 @@ void server::process_job(tuple<int, server *> *tpl)
         {
             lock_guard<mutex> locker(pser->modules_mutex);
             printf("开始发送%d。\n", fd);
-            try
-            {
-                size = content.send(fd, pser->modules);
-            }
-            catch (const broken_pipe &)
-            {
-                printf("%d异常断开。\n", fd);
-                close(fd);
-                pser->pool->remove(tpl);
-                size = -1;
-            }
+            size = content.send(fd, pser->modules);
             printf("发送结束%d。\n", fd);
         }
         if (size < 0)
