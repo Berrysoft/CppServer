@@ -23,7 +23,7 @@ int main()
 
     printf("请在自己的电脑上访问 http://127.0.0.1:%d/\n", port);
     printf("网站在Edge、IE、Chrome、Safari(iPhone)下测试通过。\n");
-    printf("按r <回车>刷新模块，q <回车>结束服务器。\n");
+    printf("按r <回车>刷新模块，c <回车>清除超时连接，q <回车>结束服务器。\n");
 
     char c;
     while ((c = getchar()) != 'q')

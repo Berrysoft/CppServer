@@ -117,17 +117,20 @@ void server::start(const sockaddr *addr, socklen_t len, int n)
 void server::clean(unsigned long long ostamp)
 {
     printf("开始清理。\n");
-    for (vector<fd_with_time>::iterator it = clients.begin(); it != clients.end();)
     {
-        if (it->time < ostamp)
+        lock_guard<mutex> locker(clients_mutex);
+        for (vector<fd_with_time>::iterator it = clients.begin(); it != clients.end();)
         {
-            printf("清理%d。\n", it->fd);
-            clients.erase(it);
-            close(it->fd);
-        }
-        else
-        {
-            it++;
+            if (it->time < ostamp)
+            {
+                printf("清理%d。\n", it->fd);
+                clients.erase(it);
+                close(it->fd);
+            }
+            else
+            {
+                it++;
+            }
         }
     }
     printf("清理完成。\n");
@@ -157,10 +160,10 @@ void server::accept_loop(server *ser)
         }
         else if (ret == 0)
         {
-            printf("超时。\n");
+            //printf("超时。\n");
             continue;
         }
-        printf("接收到%d个事件。\n", ret);
+        //printf("接收到%d个事件。\n", ret);
         for (int i = 0; i < ret; i++)
         {
             if ((ser->event_list[i].events & EPOLLERR) || (ser->event_list[i].events & EPOLLHUP) || (ser->event_list[i].events & EPOLLRDHUP) || !(ser->event_list[i].events & EPOLLIN))
@@ -168,6 +171,21 @@ void server::accept_loop(server *ser)
                 printf("Epoll错误，关闭Socket %d。\n", ser->event_list[i].data.fd);
                 epoll_ctl(ser->epoll_fd, EPOLL_CTL_DEL, ser->event_list[i].data.fd, &(ser->event_list[i]));
                 close(ser->event_list[i].data.fd);
+                {
+                    lock_guard<mutex> locker(ser->clients_mutex);
+                    for (vector<fd_with_time>::iterator it = ser->clients.begin(); it != ser->clients.end();)
+                    {
+                        if (it->fd == ser->event_list[i].data.fd)
+                        {
+                            ser->clients.erase(it);
+                            close(it->fd);
+                        }
+                        else
+                        {
+                            it++;
+                        }
+                    }
+                }
                 continue;
             }
             if (ser->event_list[i].data.fd == ser->sock)
@@ -189,15 +207,24 @@ void server::accept_loop(server *ser)
                     }
                     else
                     {
-                        fd_with_time fwt = {newsock, ser->time_stamp};
-                        ser->clients.push_back(fwt);
+                        {
+                            lock_guard<mutex> locker(ser->clients_mutex);
+                            ser->clients.push_back({newsock, ser->time_stamp});
+                        }
                     }
                 }
             }
             else if (ser->event_list[i].data.fd == ser->timer_fd)
             {
-                ser->time_stamp++;
-                const unsigned long long time_out = 2;
+                unsigned long long timer_buf;
+                ssize_t len = read(ser->timer_fd, &timer_buf, sizeof(timer_buf));
+                if (len < 0)
+                {
+                    continue;
+                }
+                ser->time_stamp += timer_buf;
+                printf("时间戳：%llu\n", ser->time_stamp);
+                const unsigned long long time_out = 1;
                 if (ser->time_stamp > time_out)
                 {
                     ser->clean(ser->time_stamp - time_out);
@@ -206,7 +233,16 @@ void server::accept_loop(server *ser)
             else
             {
                 int fd = (int)(ser->event_list[i].data.fd);
-                //printf("正在排队%d...\n", fd);
+                {
+                    lock_guard<mutex> locker(ser->clients_mutex);
+                    for (vector<fd_with_time>::iterator it = ser->clients.begin(); it != ser->clients.end(); it++)
+                    {
+                        if (it->fd == fd)
+                        {
+                            it->time = ser->time_stamp;
+                        }
+                    }
+                }
                 ser->pool->post(fd, ser);
             }
         }
@@ -227,7 +263,6 @@ void server::process_job(int fd, server *pser)
     memset(buffer, 0, sizeof(buffer));
     ssize_t size;
     size = read(fd, buffer, sizeof(buffer));
-    //printf("%d请求长度为%ld。\n", fd, size);
     if (size > 0)
     {
         if (size < sizeof(buffer))
@@ -235,9 +270,7 @@ void server::process_job(int fd, server *pser)
         html_content content(buffer);
         {
             lock_guard<mutex> locker(pser->modules_mutex);
-            //printf("开始发送%d。\n", fd);
             size = content.send(fd, pser->modules);
-            //printf("发送结束%d。\n", fd);
         }
         if (size < 0)
         {
