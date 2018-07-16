@@ -21,7 +21,7 @@ server::server(size_t amount, size_t doj) : amount(amount)
     printf("初始化Epoll...\n");
     event_list = new epoll_event[amount];
     printf("初始化线程池...\n");
-    pool = new thread_pool<tuple<int, server *>>(doj, process_job);
+    pool = new thread_pool<int, server *>(doj, process_job);
     refresh_module();
 }
 
@@ -88,11 +88,9 @@ void server::stop()
 void server::accept_loop(server *ser)
 {
     const int TIMEOUT = 2000;
-    sigset_t sigs;
-    sigaddset(&sigs, SIGPIPE);
     while (true)
     {
-        int ret = epoll_pwait(ser->epoll_fd, ser->event_list, ser->amount, TIMEOUT, &sigs);
+        int ret = epoll_wait(ser->epoll_fd, ser->event_list, ser->amount, TIMEOUT);
         if (ret < 0 && ret != EINTR)
         {
             printf("Epoll已关闭。\n");
@@ -134,9 +132,9 @@ void server::accept_loop(server *ser)
             }
             else
             {
-                tuple<int, server *> *tpl = new tuple<int, server *>((int)(ser->event_list[i].data.fd), ser);
-                printf("正在排队%d...\n", ser->event_list[i].data.fd);
-                ser->pool->post(tpl);
+                int fd = (int)(ser->event_list[i].data.fd);
+                printf("正在排队%d...\n", fd);
+                ser->pool->post(fd, ser);
             }
         }
     }
@@ -148,20 +146,15 @@ void server::accept_loop(server *ser)
     close(ser->sock);
 }
 
-void server::process_job(tuple<int, server *> *tpl)
+void server::process_job(int fd, server *pser)
 {
-    int fd = get<0>(*tpl);
-    server *pser = get<1>(*tpl);
     printf("正在处理请求%d...\n", fd);
     signal(SIGPIPE, SIG_IGN);
     char buffer[4096];
     memset(buffer, 0, sizeof(buffer));
     ssize_t size;
-    do
-    {
-        size = read(fd, buffer, sizeof(buffer));
-        printf("%d请求长度为%ld。\n", fd, size);
-    } while (size == sizeof(buffer));
+    size = read(fd, buffer, sizeof(buffer));
+    printf("%d请求长度为%ld。\n", fd, size);
     if (size > 0)
     {
         if (size < sizeof(buffer))
@@ -182,5 +175,4 @@ void server::process_job(tuple<int, server *> *tpl)
             printf("信息已发送%d。\n", fd);
         }
     }
-    delete tpl;
 }

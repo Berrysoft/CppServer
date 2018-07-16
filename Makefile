@@ -3,7 +3,7 @@ server.out: main.o server.o sem.o html_content.o module.o read_modules.o
 	g++ -o server.out main.o server.o sem.o html_content.o module.o read_modules.o -lpthread -ldl
 main.o: main.cpp server.h thread_pool.h sem.h module.h html_content.h response.h
 	g++ -c main.cpp -std=c++11
-server.o: server.cpp server.h thread_pool.h sem.h html_content.h module.h read_modules.h
+server.o: server.cpp server.h thread_pool.h apply_tuple.h sem.h html_content.h module.h read_modules.h
 	g++ -c server.cpp -std=c++11
 sem.o: sem.cpp sem.h
 	g++ -c sem.cpp -std=c++11

@@ -4,7 +4,6 @@
 #include <thread>
 #include <map>
 #include <string>
-#include <tuple>
 #include <mutex>
 #include <vector>
 #include "thread_pool.h"
@@ -14,7 +13,7 @@ class server
 {
 private:
     int sock;
-    thread_pool<std::tuple<int, server*>> *pool;
+    thread_pool<int, server*> *pool;
     std::thread loop_thread;
     std::map<std::string, module> modules;
     std::mutex modules_mutex;
@@ -31,5 +30,5 @@ public:
     void stop();
 private:
     static void accept_loop(server *ser);
-    static void process_job(std::tuple<int, server *> *tpl);
+    static void process_job(int fd, server *pser);
 };

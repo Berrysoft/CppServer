@@ -4,13 +4,15 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <tuple>
+#include "apply_tuple.h"
 
-template <typename T>
+template <typename... TArgs>
 class thread_pool
 {
-private:
-    void (*task)(T *);
-    std::vector<T *> jobs;
+  private:
+    void (*task)(TArgs... tpl);
+    std::vector<std::tuple<TArgs...> *> jobs;
     std::valarray<std::thread> do_threads;
 
     std::mutex m_mutex;
@@ -19,19 +21,19 @@ private:
 
     bool stop;
 
-public:
-    thread_pool(std::size_t dojob, void (*task)(T *));
+  public:
+    thread_pool(std::size_t dojob, void (*task)(TArgs...));
     ~thread_pool();
 
-    void post(T *job);
-    void remove(T *job);
+    void post(TArgs... args);
+    void broadcast();
 
-private:
-    static void do_job(thread_pool<T> *pool);
+  private:
+    static void do_job(thread_pool<TArgs...> *pool);
 };
 
-template <typename T>
-thread_pool<T>::thread_pool(std::size_t dojob, void (*task)(T *)) : task(task)
+template <typename... TArgs>
+thread_pool<TArgs...>::thread_pool(std::size_t dojob, void (*task)(TArgs...)) : task(task)
 {
     stop = false;
     if (dojob < 1)
@@ -43,8 +45,8 @@ thread_pool<T>::thread_pool(std::size_t dojob, void (*task)(T *)) : task(task)
     }
 }
 
-template <typename T>
-thread_pool<T>::~thread_pool()
+template <typename... TArgs>
+thread_pool<TArgs...>::~thread_pool()
 {
     stop = true;
     cond.notify_all();
@@ -60,33 +62,25 @@ thread_pool<T>::~thread_pool()
     }
 }
 
-template <typename T>
-void thread_pool<T>::post(T *job)
+template <typename... TArgs>
+void thread_pool<TArgs...>::post(TArgs... args)
 {
     {
         std::lock_guard<std::mutex> locker(m_mutex);
-        jobs.push_back(job);
+        std::tuple<TArgs...> *tpl = new std::tuple<TArgs...>(args...);
+        jobs.push_back(tpl);
     }
     cond.notify_one();
 }
 
-template <typename T>
-void thread_pool<T>::remove(T *job)
+template <typename... TArgs>
+void thread_pool<TArgs...>::broadcast()
 {
-    {
-        std::lock_guard<std::mutex> locker(m_mutex);
-        for (std::size_t i = 0; i < jobs.size(); i++)
-        {
-            if (jobs[i] == job || *(jobs[i]) == *job)
-            {
-                jobs.erase(jobs.begin() + i);
-            }
-        }
-    }
+    cond.notify_all();
 }
 
-template <typename T>
-void thread_pool<T>::do_job(thread_pool<T> *pool)
+template <typename... TArgs>
+void thread_pool<TArgs...>::do_job(thread_pool<TArgs...> *pool)
 {
     while (true)
     {
@@ -97,18 +91,20 @@ void thread_pool<T>::do_job(thread_pool<T> *pool)
         }
         if (pool->stop)
             break;
-        T *j = nullptr;
+        std::tuple<TArgs...> *j = nullptr;
         {
             std::lock_guard<std::mutex> locker(pool->m_mutex);
             if (!pool->jobs.empty())
             {
-                typename std::vector<T *>::iterator it = pool->jobs.begin();
+                typename std::vector<std::tuple<TArgs...> *>::iterator it = pool->jobs.begin();
                 j = *it;
                 pool->jobs.erase(it);
             }
         }
-        if (!j)
-            continue;
-        pool->task(j);
+        if (j)
+        {
+            apply(pool->task, *j);
+            delete j;
+        }
     }
 }
