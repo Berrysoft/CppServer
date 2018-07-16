@@ -18,13 +18,11 @@ using namespace std;
 server::server(size_t amount, size_t doj) : amount(amount)
 {
     printf("初始化Socket...\n");
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-    int flags = fcntl(sock, F_GETFL, 0);
-    fcntl(sock, F_GETFL, flags | O_NONBLOCK);
+    sock = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
     printf("初始化Epoll...\n");
     event_list = new epoll_event[amount];
     printf("初始化线程池...\n");
-    pool = new thread_pool<tuple<int, server *>>(process_job, doj);
+    pool = new thread_pool<tuple<int, server *>>(doj, process_job);
     refresh_module();
 }
 
@@ -68,7 +66,7 @@ void server::start(const sockaddr *addr, socklen_t len, int n)
 
     epoll_fd = epoll_create(amount);
     epoll_event event;
-    event.events = EPOLLIN | EPOLLET;
+    event.events = EPOLLIN;
     event.data.fd = sock;
     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, sock, &event) < 0)
     {
@@ -109,7 +107,7 @@ void server::accept_loop(server *ser)
         printf("接收到%d个事件。\n", ret);
         for (int i = 0; i < ret; i++)
         {
-            if ((ser->event_list[i].events & EPOLLERR) || (ser->event_list[i].events & EPOLLHUP) || !(ser->event_list[i].events & EPOLLIN))
+            if ((ser->event_list[i].events & EPOLLERR) || (ser->event_list[i].events & EPOLLHUP) || (ser->event_list[i].events & EPOLLRDHUP) || !(ser->event_list[i].events & EPOLLIN))
             {
                 printf("Epoll错误，关闭Socket %d。\n", ser->event_list[i].data.fd);
                 epoll_ctl(ser->epoll_fd, EPOLL_CTL_DEL, ser->event_list[i].data.fd, &(ser->event_list[i]));
@@ -128,7 +126,7 @@ void server::accept_loop(server *ser)
                     fcntl(newsock, F_GETFL, flags | O_NONBLOCK);
                     epoll_event e;
                     e.data.fd = newsock;
-                    e.events = EPOLLIN | EPOLLOUT | EPOLLET;
+                    e.events = EPOLLIN | EPOLLRDHUP | EPOLLET;
                     if (epoll_ctl(ser->epoll_fd, EPOLL_CTL_ADD, newsock, &e) < 0)
                     {
                         printf("接收%d错误。\n", newsock);
@@ -165,7 +163,7 @@ void server::process_job(tuple<int, server *> *tpl)
         size = read(fd, buffer, sizeof(buffer));
         printf("%d请求长度为%ld。\n", fd, size);
     } while (size == sizeof(buffer));
-    if (size > 0 || (size < 0 && errno == EAGAIN))
+    if (size > 0)
     {
         if (size < sizeof(buffer))
             buffer[size] = '\0';
@@ -195,9 +193,5 @@ void server::process_job(tuple<int, server *> *tpl)
             printf("信息已发送%d。\n", fd);
         }
     }
-    /*else
-    {
-        close(fd);
-    }*/
     delete tpl;
 }

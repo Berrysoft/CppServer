@@ -18,18 +18,20 @@ private:
     std::mutex cond_mutex;
 
     bool stop;
+
 public:
-    thread_pool(void (*task)(T *), std::size_t dojob = 8);
+    thread_pool(std::size_t dojob, void (*task)(T *));
     ~thread_pool();
 
     void post(T *job);
     void remove(T *job);
+
 private:
     static void do_job(thread_pool<T> *pool);
 };
 
 template <typename T>
-thread_pool<T>::thread_pool(void (*task)(T *), std::size_t dojob) : task(task)
+thread_pool<T>::thread_pool(std::size_t dojob, void (*task)(T *)) : task(task)
 {
     stop = false;
     if (dojob < 1)
@@ -88,6 +90,7 @@ void thread_pool<T>::do_job(thread_pool<T> *pool)
 {
     while (true)
     {
+        if (pool->jobs.empty())
         {
             std::unique_lock<std::mutex> locker(pool->cond_mutex);
             pool->cond.wait(locker);
@@ -105,7 +108,7 @@ void thread_pool<T>::do_job(thread_pool<T> *pool)
             }
         }
         if (!j)
-            break;
+            continue;
         pool->task(j);
     }
 }
