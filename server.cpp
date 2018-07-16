@@ -1,5 +1,6 @@
 ﻿#include "server.h"
 #include <sys/socket.h>
+#include <sys/timerfd.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <cstring>
@@ -18,6 +19,19 @@ server::server(size_t amount, size_t doj) : amount(amount)
 {
     printf("初始化Socket...\n");
     sock = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+    if (sock < 0)
+    {
+        printf("Socket初始化失败。\n");
+        return;
+    }
+    printf("初始化时钟...\n");
+    time_stamp = 0;
+    timer_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
+    if (timer_fd < 0)
+    {
+        printf("时钟初始化失败。\n");
+        return;
+    }
     printf("初始化Epoll...\n");
     event_list = new epoll_event[amount];
     printf("初始化线程池...\n");
@@ -61,7 +75,23 @@ void server::start(const sockaddr *addr, socklen_t len, int n)
     bind(sock, addr, len);
     listen(sock, n);
     printf("监听数：%d\n", n);
-    printf("Main socket: %d.\n", sock);
+    printf("监听Socket：%d.\n", sock);
+
+    itimerspec itimer;
+    if (clock_gettime(CLOCK_MONOTONIC, &itimer.it_value) < 0)
+    {
+        printf("时钟获取失败。\n");
+        return;
+    }
+    itimer.it_value.tv_sec = 60;
+    itimer.it_value.tv_nsec = 0;
+    itimer.it_interval.tv_sec = 60;
+    itimer.it_interval.tv_nsec = 0;
+    if (timerfd_settime(timer_fd, 0, &itimer, nullptr) < 0)
+    {
+        printf("时钟设置失败。\n");
+        return;
+    }
 
     epoll_fd = epoll_create(amount);
     epoll_event event;
@@ -69,17 +99,46 @@ void server::start(const sockaddr *addr, socklen_t len, int n)
     event.data.fd = sock;
     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, sock, &event) < 0)
     {
-        printf("Epoll启动失败。\n");
+        printf("Socket启动失败。\n");
+        return;
+    }
+
+    event.events = EPOLLIN | EPOLLET;
+    event.data.fd = timer_fd;
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, timer_fd, &event) < 0)
+    {
+        printf("时钟启动失败。\n");
         return;
     }
 
     loop_thread = thread(accept_loop, this);
 }
 
+void server::clean(unsigned long long ostamp)
+{
+    printf("开始清理。\n");
+    for (vector<fd_with_time>::iterator it = clients.begin(); it != clients.end();)
+    {
+        if (it->time < ostamp)
+        {
+            printf("清理%d。\n", it->fd);
+            clients.erase(it);
+            close(it->fd);
+        }
+        else
+        {
+            it++;
+        }
+    }
+    printf("清理完成。\n");
+}
+
 void server::stop()
 {
     printf("关闭Socket。\n");
     close(sock);
+    printf("关闭时钟。\n");
+    close(timer_fd);
     printf("关闭Epoll。\n");
     close(epoll_fd);
     loop_thread.join();
@@ -128,12 +187,26 @@ void server::accept_loop(server *ser)
                     {
                         printf("接收%d错误。\n", newsock);
                     }
+                    else
+                    {
+                        fd_with_time fwt = {newsock, ser->time_stamp};
+                        ser->clients.push_back(fwt);
+                    }
+                }
+            }
+            else if (ser->event_list[i].data.fd == ser->timer_fd)
+            {
+                ser->time_stamp++;
+                const unsigned long long time_out = 2;
+                if (ser->time_stamp > time_out)
+                {
+                    ser->clean(ser->time_stamp - time_out);
                 }
             }
             else
             {
                 int fd = (int)(ser->event_list[i].data.fd);
-                printf("正在排队%d...\n", fd);
+                //printf("正在排队%d...\n", fd);
                 ser->pool->post(fd, ser);
             }
         }
@@ -154,7 +227,7 @@ void server::process_job(int fd, server *pser)
     memset(buffer, 0, sizeof(buffer));
     ssize_t size;
     size = read(fd, buffer, sizeof(buffer));
-    printf("%d请求长度为%ld。\n", fd, size);
+    //printf("%d请求长度为%ld。\n", fd, size);
     if (size > 0)
     {
         if (size < sizeof(buffer))
@@ -162,9 +235,9 @@ void server::process_job(int fd, server *pser)
         html_content content(buffer);
         {
             lock_guard<mutex> locker(pser->modules_mutex);
-            printf("开始发送%d。\n", fd);
+            //printf("开始发送%d。\n", fd);
             size = content.send(fd, pser->modules);
-            printf("发送结束%d。\n", fd);
+            //printf("发送结束%d。\n", fd);
         }
         if (size < 0)
         {

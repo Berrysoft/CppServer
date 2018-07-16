@@ -33,6 +33,9 @@ int main()
         case 'r':
             ser.refresh_module();
             break;
+        case 'c':
+            ser.clean(ser.get_time_stamp() + 1);
+            break;
         }
     }
 

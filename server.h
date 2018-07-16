@@ -9,6 +9,12 @@
 #include "thread_pool.h"
 #include "module.h"
 
+struct fd_with_time
+{
+    int fd;
+    unsigned long long time;
+};
+
 class server
 {
 private:
@@ -20,6 +26,9 @@ private:
     int epoll_fd;
     std::size_t amount;
     epoll_event *event_list;
+    int timer_fd;
+    unsigned long long time_stamp;
+    std::vector<fd_with_time> clients;
 public:
     server(std::size_t amount, std::size_t doj);
     ~server();
@@ -27,7 +36,10 @@ public:
     void refresh_module();
 
     void start(const sockaddr* addr, socklen_t len, int n);
+    void clean(unsigned long long ostamp);
     void stop();
+
+    unsigned long long get_time_stamp() { return time_stamp; }
 private:
     static void accept_loop(server *ser);
     static void process_job(int fd, server *pser);
