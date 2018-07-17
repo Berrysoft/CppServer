@@ -9,18 +9,18 @@ using namespace std;
 
 ssize_t disk_response::send(int fd)
 {
-    ssize_t result = 0;
+    INIT_RESULT_AND_TEMP;
     html_writer writer(fd);
-    result += writer.write_head("大作业-硬盘");
-    result += writer.write_h1("硬盘信息");
-    result += writer.write_p("由于WSL中没有/proc/partitions文件，本模块采用VFS文件系统获取根目录信息。");
+    IF_NEGATIVE_EXIT(writer.write_head("大作业-硬盘"));
+    IF_NEGATIVE_EXIT(writer.write_h1("硬盘信息"));
+    IF_NEGATIVE_EXIT(writer.write_p("由于WSL中没有/proc/partitions文件，本模块采用VFS文件系统获取根目录信息。"));
     vector<string> texts;
     texts.push_back("扇区大小");
     texts.push_back("总扇区数");
     texts.push_back("总大小");
     texts.push_back("剩余扇区数");
     texts.push_back("剩余大小");
-    result += writer.write_table_start(texts);
+    IF_NEGATIVE_EXIT(writer.write_table_start(texts));
     struct statfs disk;
     statfs("/", &disk);
     unsigned long long b = disk.f_bsize;
@@ -40,10 +40,10 @@ ssize_t disk_response::send(int fd)
     texts.push_back(buffer);
     sprintf(buffer, "%llu GB", fbss >> 30);
     texts.push_back(buffer);
-    result += writer.write_tr(texts);
-    result += writer.write_table_end();
-    result += writer.write_end();
-    return result;
+    IF_NEGATIVE_EXIT(writer.write_tr(texts));
+    IF_NEGATIVE_EXIT(writer.write_table_end());
+    IF_NEGATIVE_EXIT(writer.write_end());
+    RETURN_RESULT;
 }
 
 void *get_instance_response(const char *command)

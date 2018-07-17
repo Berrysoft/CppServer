@@ -6,16 +6,23 @@
 #include <string>
 #include <vector>
 
+#define INIT_RESULT_AND_TEMP ssize_t result = 0, t
+#define IF_NEGATIVE_EXIT(exp) \
+    if ((t = (exp)) < 0)      \
+        return t;             \
+    result += t
+#define RETURN_RESULT return result
+
 ssize_t send_with_chunk(int fd, const void *buffer, size_t length, int flag);
 
 class html_writer
 {
-  private:
+private:
     int fd;
 
     ssize_t write_spe(std::string spe, std::string text);
 
-  public:
+public:
     html_writer(int fd) : fd(fd) {}
 
     ssize_t write_head(std::string title);

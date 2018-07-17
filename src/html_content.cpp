@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "mdl/response.h"
+#include "mdl/html_writer.h"
 
 using namespace std;
 
@@ -133,14 +134,11 @@ ssize_t html_content::send(int fd, map<string, module> &modules)
         sprintf(realhead, head, 404, "Not Found");
         break;
     }
-    ssize_t result = ::send(fd, realhead, strlen(realhead), 0);
+    INIT_RESULT_AND_TEMP;
+    IF_NEGATIVE_EXIT(::send(fd, realhead, strlen(realhead), 0));
     if (res)
     {
-        if (result < 0)
-        {
-            return result;
-        }
-        ssize_t t = res->send(fd);
+        t = res->send(fd);
         if (t < 0)
         {
             result = -1;
@@ -153,5 +151,5 @@ ssize_t html_content::send(int fd, map<string, module> &modules)
         delete res;
         m.close();
     }
-    return result;
+    RETURN_RESULT;
 }

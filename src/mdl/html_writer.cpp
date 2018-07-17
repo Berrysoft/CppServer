@@ -8,61 +8,35 @@ using namespace std;
 
 ssize_t send_with_chunk(int fd, const void *buffer, size_t length, int flag)
 {
-    ssize_t result = 0;
-    ssize_t t;
+    INIT_RESULT_AND_TEMP;
     char buf[9];
     int len = sprintf(buf, "%lX\r\n", length);
-    t = send(fd, buf, len, flag);
-    if (t < 0)
-    {
-        return t;
-    }
-    result += t;
-    t = send(fd, buffer, length, flag);
-    if (t < 0)
-    {
-        return t;
-    }
-    result += t;
-    t = send(fd, "\r\n", 2, flag);
-    if (t < 0)
-    {
-        return t;
-    }
-    result += t;
-    return result;
+    IF_NEGATIVE_EXIT(send(fd, buf, len, flag));
+    IF_NEGATIVE_EXIT(send(fd, buffer, length, flag));
+    IF_NEGATIVE_EXIT(send(fd, "\r\n", 2, flag));
+    RETURN_RESULT;
 }
 
 ssize_t html_writer::write_head(string title)
 {
-    ssize_t result = 0;
-    ssize_t t;
+    INIT_RESULT_AND_TEMP;
     const char head_start[] = "<!DOCTYPE html>\n<html>\n<head>\n<meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\">\n<title>%s</title>\n<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.10.0-alpha/dist/katex.min.css\" integrity=\"sha384-BTL0nVi8DnMrNdMQZG1Ww6yasK9ZGnUxL1ZWukXQ7fygA1py52yPp9W4wrR00VML\" crossorigin=\"anonymous\">\n<style>\n";
     const char head_end[] = "\n</style>\n</head>\n";
     char buffer[4096];
     memset(buffer, 0, sizeof(buffer));
     int len = sprintf(buffer, head_start, title.c_str());
-    t = send_with_chunk(fd, buffer, len, 0);
-    if (t < 0)
-        return t;
-    result += t;
+    IF_NEGATIVE_EXIT(send_with_chunk(fd, buffer, len, 0));
     FILE *fcss = fopen("style.css", "r");
     if (fcss)
     {
         while (len = fread(buffer, sizeof(char), sizeof(buffer), fcss))
         {
-            t = send_with_chunk(fd, buffer, len, 0);
-            if (t < 0)
-                return t;
-            result += t;
+            IF_NEGATIVE_EXIT(send_with_chunk(fd, buffer, len, 0));
         }
         fclose(fcss);
     }
-    t = send_with_chunk(fd, head_end, sizeof(head_end) - 1, 0);
-    if (t < 0)
-        return t;
-    result += t;
-    return result;
+    IF_NEGATIVE_EXIT(send_with_chunk(fd, head_end, sizeof(head_end) - 1, 0));
+    RETURN_RESULT;
 }
 
 ssize_t html_writer::write_spe(string spe, string text)
@@ -95,73 +69,43 @@ ssize_t html_writer::write_h3(string title)
 
 ssize_t html_writer::write_ul(vector<string> texts)
 {
-    ssize_t result = 0;
-    ssize_t t;
-    t = send_with_chunk(fd, "<ul>", 4, 0);
-    if (t < 0)
-        return t;
-    result += t;
+    INIT_RESULT_AND_TEMP;
+    IF_NEGATIVE_EXIT(send_with_chunk(fd, "<ul>", 4, 0));
     for (string &text : texts)
     {
         string te = "<li>" + text + "</li>";
-        t = send_with_chunk(fd, te.c_str(), te.length(), 0);
-        if (t < 0)
-            return t;
-        result += t;
+        IF_NEGATIVE_EXIT(send_with_chunk(fd, te.c_str(), te.length(), 0));
     }
-    t = send_with_chunk(fd, "</ul>", 5, 0);
-    if (t < 0)
-        return t;
-    result += t;
-    return result;
+    IF_NEGATIVE_EXIT(send_with_chunk(fd, "</ul>", 5, 0));
+    RETURN_RESULT;
 }
 
 ssize_t html_writer::write_table_start(vector<string> texts)
 {
-    ssize_t result = 0;
-    ssize_t t;
+    INIT_RESULT_AND_TEMP;
     const char table_start[] = "<table><thead><tr>";
     const char thead_end[] = "</tr></thead><tbody>";
-    t = send_with_chunk(fd, table_start, sizeof(table_start) - 1, 0);
-    if (t < 0)
-        return t;
-    result += t;
+    IF_NEGATIVE_EXIT(send_with_chunk(fd, table_start, sizeof(table_start) - 1, 0));
     for (string &text : texts)
     {
         string te = "<th>" + text + "</th>";
-        t = send_with_chunk(fd, te.c_str(), te.length(), 0);
-        if (t < 0)
-            return t;
-        result += t;
+        IF_NEGATIVE_EXIT(send_with_chunk(fd, te.c_str(), te.length(), 0));
     }
-    t = send_with_chunk(fd, thead_end, sizeof(thead_end) - 1, 0);
-    if (t < 0)
-        return t;
-    result += t;
-    return result;
+    IF_NEGATIVE_EXIT(send_with_chunk(fd, thead_end, sizeof(thead_end) - 1, 0));
+    RETURN_RESULT;
 }
 
 ssize_t html_writer::write_tr(vector<string> texts)
 {
-    ssize_t result = 0;
-    ssize_t t;
-    t = send_with_chunk(fd, "<tr>", 4, 0);
-    if (t < 0)
-        return t;
-    result += t;
+    INIT_RESULT_AND_TEMP;
+    IF_NEGATIVE_EXIT(send_with_chunk(fd, "<tr>", 4, 0));
     for (string &text : texts)
     {
         string te = "<td>" + text + "</td>";
-        t = send_with_chunk(fd, te.c_str(), te.length(), 0);
-        if (t < 0)
-            return t;
-        result += t;
+        IF_NEGATIVE_EXIT(send_with_chunk(fd, te.c_str(), te.length(), 0));
     }
-    t = send_with_chunk(fd, "</tr>", 5, 0);
-    if (t < 0)
-        return t;
-    result += t;
-    return result;
+    IF_NEGATIVE_EXIT(send_with_chunk(fd, "</tr>", 5, 0));
+    RETURN_RESULT;
 }
 
 ssize_t html_writer::write_table_end()

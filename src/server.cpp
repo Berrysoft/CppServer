@@ -83,10 +83,6 @@ void server::start(const sockaddr *addr, socklen_t len, int n, int epoll_timeout
         printf("时钟获取失败。\n");
         return;
     }
-    /*itimer.it_value.tv_sec = 60;
-    itimer.it_value.tv_nsec = 0;
-    itimer.it_interval.tv_sec = 60;
-    itimer.it_interval.tv_nsec = 0;*/
     itimer.it_value = interval;
     itimer.it_interval = interval;
     if (timerfd_settime(timer_fd, 0, &itimer, nullptr) < 0)

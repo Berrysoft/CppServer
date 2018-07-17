@@ -18,14 +18,14 @@ file_response::file_response(const char *filename)
 
 ssize_t file_response::send(int fd)
 {
-    ssize_t result = 0;
+    INIT_RESULT_AND_TEMP;
     html_writer writer(fd);
     if (filename == "index.html")
     {
-        result += writer.write_head("大作业-主页");
-        result += writer.write_h1("大作业-主页");
-        result += writer.write_p("欢迎光临！");
-        result += writer.write_h2("动态加载功能");
+        IF_NEGATIVE_EXIT(writer.write_head("大作业-主页"));
+        IF_NEGATIVE_EXIT(writer.write_h1("大作业-主页"));
+        IF_NEGATIVE_EXIT(writer.write_p("欢迎光临！"));
+        IF_NEGATIVE_EXIT(writer.write_h2("动态加载功能"));
         vector<string> lines = read_modules_file();
         vector<string> texts;
         for (string &line : lines)
@@ -37,29 +37,29 @@ ssize_t file_response::send(int fd)
             oss << "<a href=\"../" << key << "/\">" << text << "</a>";
             texts.push_back(oss.str());
         }
-        result += writer.write_ul(texts);
-        result += writer.write_end();
+        IF_NEGATIVE_EXIT(writer.write_ul(texts));
+        IF_NEGATIVE_EXIT(writer.write_end());
     }
     else if (filename == "error.html")
     {
-        result += writer.write_head("大作业-错误");
-        result += writer.write_h1("出错啦！");
-        result += writer.write_p("我们找不到请求的文件或者请求无效，请返回到上一页。");
-        result += writer.write_end();
+        IF_NEGATIVE_EXIT(writer.write_head("大作业-错误"));
+        IF_NEGATIVE_EXIT(writer.write_h1("出错啦！"));
+        IF_NEGATIVE_EXIT(writer.write_p("我们找不到请求的文件或者请求无效，请返回到上一页。"));
+        IF_NEGATIVE_EXIT(writer.write_end());
     }
     else if (filename.length() == 0)
     {
-        result += writer.write_head("大作业-文件");
-        result += writer.write_h1("查看文件");
-        result += writer.write_p("想要查看文件，直接在地址栏输入即可，不需要加上/file/请求。");
-        result += writer.write_end();
+        IF_NEGATIVE_EXIT(writer.write_head("大作业-文件"));
+        IF_NEGATIVE_EXIT(writer.write_h1("查看文件"));
+        IF_NEGATIVE_EXIT(writer.write_p("想要查看文件，直接在地址栏输入即可，不需要加上/file/请求。"));
+        IF_NEGATIVE_EXIT(writer.write_end());
     }
     else
     {
-        result += writer.write_head("大作业-文件");
-        result += writer.write_h1(filename);
-        result += writer.write_code_start();
-        result += writer.write_xmp_start();
+        IF_NEGATIVE_EXIT(writer.write_head("大作业-文件"));
+        IF_NEGATIVE_EXIT(writer.write_h1(filename));
+        IF_NEGATIVE_EXIT(writer.write_pre_code_start());
+        IF_NEGATIVE_EXIT(writer.write_xmp_start());
         FILE *furl = fopen(filename.c_str(), "r");
         if (furl)
         {
@@ -68,15 +68,15 @@ ssize_t file_response::send(int fd)
             memset(buffer, 0, sizeof(buffer));
             while (len = fread(buffer, sizeof(char), sizeof(buffer), furl))
             {
-                result += send_with_chunk(fd, buffer, len, 0);
+                IF_NEGATIVE_EXIT(send_with_chunk(fd, buffer, len, 0));
             }
             fclose(furl);
         }
-        result += writer.write_xmp_end();
-        result += writer.write_code_end();
-        result += writer.write_end();
+        IF_NEGATIVE_EXIT(writer.write_xmp_end());
+        IF_NEGATIVE_EXIT(writer.write_pre_code_end());
+        IF_NEGATIVE_EXIT(writer.write_end());
     }
-    return result;
+    RETURN_RESULT;
 }
 
 void *get_instance_response(const char *command)

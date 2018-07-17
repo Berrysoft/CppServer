@@ -34,16 +34,16 @@ string get_time()
 
 ssize_t version_response::send(int fd)
 {
-    ssize_t result = 0;
+    INIT_RESULT_AND_TEMP;
     html_writer writer(fd);
-    result += writer.write_head("大作业-系统信息");
-    result += writer.write_h1("<a href=\"..//proc/version\">系统版本</a>");
-    result += writer.write_p(get_version());
+    IF_NEGATIVE_EXIT(writer.write_head("大作业-系统信息"));
+    IF_NEGATIVE_EXIT(writer.write_h1("<a href=\"..//proc/version\">系统版本</a>"));
+    IF_NEGATIVE_EXIT(writer.write_p(get_version()));
 
-    result += writer.write_h1("本地时间");
-    result += writer.write_p(get_time());
+    IF_NEGATIVE_EXIT(writer.write_h1("本地时间"));
+    IF_NEGATIVE_EXIT(writer.write_p(get_time()));
 
-    result += writer.write_h1("<a href=\"..//proc/meminfo\">内存信息</a>");
+    IF_NEGATIVE_EXIT(writer.write_h1("<a href=\"..//proc/meminfo\">内存信息</a>"));
     mem_info info = read_proc_meminfo();
     vector<string> texts;
     texts.push_back("Total");
@@ -52,7 +52,7 @@ ssize_t version_response::send(int fd)
     texts.push_back("Cached");
     texts.push_back("Active");
     texts.push_back("Inactive");
-    result += writer.write_table_start(texts);
+    IF_NEGATIVE_EXIT(writer.write_table_start(texts));
     texts.clear();
     int *p = (int *)(&info);
     for (int i = 0; i < 6; i++)
@@ -61,10 +61,10 @@ ssize_t version_response::send(int fd)
         sprintf(buffer, "%d kB", p[i]);
         texts.push_back(buffer);
     }
-    result += writer.write_tr(texts);
-    result += writer.write_table_end();
-    result += writer.write_end();
-    return result;
+    IF_NEGATIVE_EXIT(writer.write_tr(texts));
+    IF_NEGATIVE_EXIT(writer.write_table_end());
+    IF_NEGATIVE_EXIT(writer.write_end());
+    RETURN_RESULT;
 }
 
 void *get_instance_response(const char *command)
