@@ -44,6 +44,26 @@ string deal_with_code(string line)
     return oss.str();
 }
 
+ssize_t deal_with_ul(bool &in_ul, html_writer &writer, vector<string> &texts)
+{
+    if (in_ul)
+    {
+        in_ul = false;
+        return writer.write_ul(texts);
+    }
+    return 0;
+}
+
+ssize_t deal_with_p(bool &in_p, html_writer &writer)
+{
+    if(in_p)
+    {
+        in_p = false;
+        return writer.write_p_end();
+    }
+    return 0;
+}
+
 ssize_t markdown_response::send(int fd)
 {
     INIT_RESULT_AND_TEMP;
@@ -67,51 +87,30 @@ ssize_t markdown_response::send(int fd)
             }
             if (line.length() == 0)
             {
-                if (in_ul)
-                {
-                    IF_NEGATIVE_EXIT(writer.write_ul(ul_texts));
-                    in_ul = false;
-                }
-                if (in_p)
-                {
-                    IF_NEGATIVE_EXIT(send_with_chunk(fd, "</p>", 4, 0));
-                    in_p = false;
-                }
+                IF_NEGATIVE_EXIT(deal_with_ul(in_ul, writer, ul_texts));
+                IF_NEGATIVE_EXIT(deal_with_p(in_p, writer));
             }
             else if (line.length() > 4 && line.substr(0, 4) == "### ")
             {
-                if (in_p)
-                {
-                    IF_NEGATIVE_EXIT(send_with_chunk(fd, "</p>", 4, 0));
-                    in_p = false;
-                }
+                IF_NEGATIVE_EXIT(deal_with_ul(in_ul, writer, ul_texts));
+                IF_NEGATIVE_EXIT(deal_with_p(in_p, writer));
                 IF_NEGATIVE_EXIT(writer.write_h3(deal_with_code(line.substr(4))));
             }
             else if (line.length() > 3 && line.substr(0, 3) == "## ")
             {
-                if (in_p)
-                {
-                    IF_NEGATIVE_EXIT(send_with_chunk(fd, "</p>", 4, 0));
-                    in_p = false;
-                }
+                IF_NEGATIVE_EXIT(deal_with_ul(in_ul, writer, ul_texts));
+                IF_NEGATIVE_EXIT(deal_with_p(in_p, writer));
                 IF_NEGATIVE_EXIT(writer.write_h2(deal_with_code(line.substr(3))));
             }
             else if (line.length() > 2 && line.substr(0, 2) == "# ")
             {
-                if (in_p)
-                {
-                    IF_NEGATIVE_EXIT(send_with_chunk(fd, "</p>", 4, 0));
-                    in_p = false;
-                }
+                IF_NEGATIVE_EXIT(deal_with_ul(in_ul, writer, ul_texts));
+                IF_NEGATIVE_EXIT(deal_with_p(in_p, writer));
                 IF_NEGATIVE_EXIT(writer.write_h1(deal_with_code(line.substr(2))));
             }
             else if (line.length() > 2 && line.substr(0, 3) == "```")
             {
-                if (in_p)
-                {
-                    IF_NEGATIVE_EXIT(send_with_chunk(fd, "</p>", 4, 0));
-                    in_p = false;
-                }
+                IF_NEGATIVE_EXIT(deal_with_p(in_p, writer));
                 if (in_code)
                 {
                     IF_NEGATIVE_EXIT(writer.write_pre_code_end());
@@ -125,11 +124,7 @@ ssize_t markdown_response::send(int fd)
             }
             else if (line.length() > 1 && line.substr(0, 2) == "* ")
             {
-                if (in_p)
-                {
-                    IF_NEGATIVE_EXIT(send_with_chunk(fd, "</p>", 4, 0));
-                    in_p = false;
-                }
+                IF_NEGATIVE_EXIT(deal_with_p(in_p, writer));
                 if (!in_ul)
                 {
                     ul_texts.clear();
@@ -151,31 +146,6 @@ ssize_t markdown_response::send(int fd)
                         in_p = true;
                         IF_NEGATIVE_EXIT(send_with_chunk(fd, "<p>", 3, 0));
                     }
-                    /*int index;
-                    bool in_c = false;
-                    if (line[0] == '`')
-                    {
-                        IF_NEGATIVE_EXIT(writer.write_code_start());
-                        in_c = true;
-                        line = line.substr(1);
-                    }
-                    while ((index = line.find_first_of('`')) > 0)
-                    {
-                        string temp = line.substr(0, index);
-                        line = line.substr(index + 1);
-                        IF_NEGATIVE_EXIT(send_with_chunk(fd, temp.c_str(), temp.size(), 0));
-                        if (in_c)
-                        {
-                            IF_NEGATIVE_EXIT(writer.write_code_end());
-                            in_c = false;
-                        }
-                        else
-                        {
-                            IF_NEGATIVE_EXIT(writer.write_code_start());
-                            in_c = true;
-                        }
-                    }
-                    IF_NEGATIVE_EXIT(send_with_chunk(fd, line.c_str(), line.size(), 0));*/
                     line = deal_with_code(line);
                     IF_NEGATIVE_EXIT(send_with_chunk(fd, line.c_str(), line.length(), 0));
                     IF_NEGATIVE_EXIT(send_with_chunk(fd, " ", 1, 0));

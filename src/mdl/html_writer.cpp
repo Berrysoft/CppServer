@@ -20,12 +20,14 @@ ssize_t send_with_chunk(int fd, const void *buffer, size_t length, int flag)
 ssize_t html_writer::write_head(string title)
 {
     INIT_RESULT_AND_TEMP;
-    const char head_start[] = "<!DOCTYPE html>\n<html>\n<head>\n<meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\">\n<title>%s</title>\n<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.10.0-alpha/dist/katex.min.css\" integrity=\"sha384-BTL0nVi8DnMrNdMQZG1Ww6yasK9ZGnUxL1ZWukXQ7fygA1py52yPp9W4wrR00VML\" crossorigin=\"anonymous\">\n<style>\n";
-    const char head_end[] = "\n</style>\n</head>\n";
+    const char head_start[] = "<!DOCTYPE html><html><head><meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\"><title>";
+    const char head_mid[] = "</title><link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.10.0-alpha/dist/katex.min.css\" integrity=\"sha384-BTL0nVi8DnMrNdMQZG1Ww6yasK9ZGnUxL1ZWukXQ7fygA1py52yPp9W4wrR00VML\" crossorigin=\"anonymous\"><style>";
+    const char head_end[] = "</style></head>";
+    IF_NEGATIVE_EXIT(send_with_chunk(fd, head_start, sizeof(head_start) - 1, 0));
+    IF_NEGATIVE_EXIT(send_with_chunk(fd, title.c_str(), title.length(), 0));
+    IF_NEGATIVE_EXIT(send_with_chunk(fd, head_mid, sizeof(head_mid) - 1, 0));
+    size_t len;
     char buffer[4096];
-    memset(buffer, 0, sizeof(buffer));
-    int len = sprintf(buffer, head_start, title.c_str());
-    IF_NEGATIVE_EXIT(send_with_chunk(fd, buffer, len, 0));
     FILE *fcss = fopen("style.css", "r");
     if (fcss)
     {
@@ -42,7 +44,7 @@ ssize_t html_writer::write_head(string title)
 ssize_t html_writer::write_spe(string spe, string text)
 {
     ostringstream oss;
-    oss << "<" << spe << ">" << text << "</" << spe << ">";
+    oss << '<' << spe << '>' << text << "</" << spe << '>';
     string s = oss.str();
     return send_with_chunk(fd, s.c_str(), s.length(), 0);
 }
@@ -67,17 +69,38 @@ ssize_t html_writer::write_h3(string title)
     return write_spe("h3", title);
 }
 
+ssize_t html_writer::write_spe_start(string spe)
+{
+    string t = '<' + spe + '>';
+    return send_with_chunk(fd, t.c_str(), t.length(), 0);
+}
+
+ssize_t html_writer::write_spe_end(string spe)
+{
+    string t = "</" + spe + '>';
+    return send_with_chunk(fd, t.c_str(), t.length(), 0);
+}
+
 ssize_t html_writer::write_ul(vector<string> texts)
 {
     INIT_RESULT_AND_TEMP;
-    IF_NEGATIVE_EXIT(send_with_chunk(fd, "<ul>", 4, 0));
+    IF_NEGATIVE_EXIT(write_spe_start("ul"));
     for (string &text : texts)
     {
-        string te = "<li>" + text + "</li>";
-        IF_NEGATIVE_EXIT(send_with_chunk(fd, te.c_str(), te.length(), 0));
+        IF_NEGATIVE_EXIT(write_spe("li", text));
     }
-    IF_NEGATIVE_EXIT(send_with_chunk(fd, "</ul>", 5, 0));
+    IF_NEGATIVE_EXIT(write_spe_end("ul"));
     RETURN_RESULT;
+}
+
+ssize_t html_writer::write_p_start()
+{
+    return write_spe_start("p");
+}
+
+ssize_t html_writer::write_p_end()
+{
+    return write_spe_end("p");
 }
 
 ssize_t html_writer::write_table_start(vector<string> texts)
@@ -88,8 +111,7 @@ ssize_t html_writer::write_table_start(vector<string> texts)
     IF_NEGATIVE_EXIT(send_with_chunk(fd, table_start, sizeof(table_start) - 1, 0));
     for (string &text : texts)
     {
-        string te = "<th>" + text + "</th>";
-        IF_NEGATIVE_EXIT(send_with_chunk(fd, te.c_str(), te.length(), 0));
+        IF_NEGATIVE_EXIT(write_spe("th", text));
     }
     IF_NEGATIVE_EXIT(send_with_chunk(fd, thead_end, sizeof(thead_end) - 1, 0));
     RETURN_RESULT;
@@ -98,13 +120,12 @@ ssize_t html_writer::write_table_start(vector<string> texts)
 ssize_t html_writer::write_tr(vector<string> texts)
 {
     INIT_RESULT_AND_TEMP;
-    IF_NEGATIVE_EXIT(send_with_chunk(fd, "<tr>", 4, 0));
+    IF_NEGATIVE_EXIT(write_spe_start("tr"));
     for (string &text : texts)
     {
-        string te = "<td>" + text + "</td>";
-        IF_NEGATIVE_EXIT(send_with_chunk(fd, te.c_str(), te.length(), 0));
+        IF_NEGATIVE_EXIT(write_spe("td", text));
     }
-    IF_NEGATIVE_EXIT(send_with_chunk(fd, "</tr>", 5, 0));
+    IF_NEGATIVE_EXIT(write_spe_end("tr"));
     RETURN_RESULT;
 }
 
@@ -128,30 +149,25 @@ ssize_t html_writer::write_pre_code_end()
 
 ssize_t html_writer::write_code_start()
 {
-    const char code_start[] = "<code>";
-    return send_with_chunk(fd, code_start, sizeof(code_start) - 1, 0);
+    return write_spe_start("code");
 }
 
 ssize_t html_writer::write_code_end()
 {
-    const char code_end[] = "</code>";
-    return send_with_chunk(fd, code_end, sizeof(code_end) - 1, 0);
+    return write_spe_end("code");
 }
 
 ssize_t html_writer::write_xmp_start()
 {
-    const char xmp_start[] = "<xmp>";
-    return send_with_chunk(fd, xmp_start, sizeof(xmp_start) - 1, 0);
+    return write_spe_start("xmp");
 }
 
 ssize_t html_writer::write_xmp_end()
 {
-    const char xmp_end[] = "</xmp>";
-    return send_with_chunk(fd, xmp_end, sizeof(xmp_end) - 1, 0);
+    return write_spe_end("xmp");
 }
 
 ssize_t html_writer::write_end()
 {
-    const char html_end[] = "</html>";
-    return send_with_chunk(fd, html_end, sizeof(html_end) - 1, 0);
+    return write_spe_end("html");
 }

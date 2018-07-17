@@ -32,11 +32,10 @@ make run
 * markdown.so（自述模块）
 * style.css（HTML样式表）
 * ../README.md（自述文件）
-
 ## 功能说明
 在服务器端输入`r`刷新模块加载，输入`c`清理所有连接，输入`q`退出。
 
-默认超过2分钟无响应的连接会自动清理。
+默认超过2分钟无响应的连接会自动清理。一些浏览器（如Edge）会一直使用一个连接进行导航，可能因此导致连接中断，刷新即可。
 
 默认启动4个线程，监听数为16384，Epoll的等待时间为2秒。
 
@@ -48,7 +47,6 @@ make run
 * 系统版本、时间与内存信息
 * 硬盘信息
 * 说明文档（简单Markdown解释器）
-
 ### 查看文件
 查看文件模块是必需的，如果删除会导致400错误。
 
@@ -62,13 +60,17 @@ make run
 ### 硬盘信息
 WSL没有`/proc/partitions`文件，因此采用VFS文件系统获取根目录信息。
 ### 说明文档
-说明文档用的是`../README.md`绝对路径，打开的就是本文件。
+用的是`../README.md`绝对路径，打开的就是本文件。
 ## 为本程序开发模块
 想要为本程序开发模块，需要引入`mdl`文件夹下的头文件`response.h`，并实现`void *get_instance_response(const char *command)`方法。这个方法应当返回一个指向继承`response`的类的指针，并可以被`delete`。
 
-`response`类只定义了一个抽象方法`ssize_t send(int fd)`，这是用来向文件描述符`fd`直接写HTML文档的函数。建议引入`html_writer.h`头文件写HTML。
+`response`类只定义了一个抽象方法`ssize_t send(int fd)`，这是用来向文件描述符`fd`直接写HTML文档的函数。建议引入`html_writer.h`头文件写HTML，这里面定义了一个向文件描述符写HTML文档的类，并使用了`style.css`的绝对路径。
 
-`html_writer.h`中定义了3个有用的宏：
+`html_writer.h`中还定义了3个有用的宏：
 * `INIT_RESULT_AND_TEMP`：初始化两个类型为`ssize_t`的变量，名为`result`和`t`。
 * `IF_NEGATIVE_EXIT(exp)`：判断`exp`是否为负值，如果为负，返回；反之加在`result`上。
 * `RETURN_RESULT`：返回`result`。
+
+如果处理`send`或者`write`等函数的返回值不当，可能会阻塞线程，导致服务器无响应。
+## 许可证
+本程序源代码采用MIT许可证授权。
