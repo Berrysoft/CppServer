@@ -72,10 +72,10 @@ $(OBJ)markdown.o: $(MODULE)markdown.cpp $(MODULE)markdown.h $(MODULE)html_writer
 	g++ -o $@ -c $(MODULE)markdown.cpp $(STDFIPC)
 
 # 特殊文件
-$(BIN)modules: $(SOURCE)modules
+$(BIN)modules: $(MODULE)modules
 	cp $^ $@
 
-$(BIN)style.css: $(SOURCE)style.css
+$(BIN)style.css: $(MODULE)style.css
 	cp $^ $@
 
 # 清理
