@@ -8,7 +8,7 @@ using std::printf;
 
 int main()
 {
-    const int amount = 10000, n = 4;
+    const int amount = 16384, n = 4;
     const int port = 3342;
 
     server ser(amount, n);

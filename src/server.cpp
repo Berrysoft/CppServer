@@ -65,6 +65,7 @@ void server::refresh_module()
             string key, module_name;
             iss >> key >> module_name;
             modules.insert(map<string, module>::value_type(key, module(module_name.c_str())));
+            printf("加载模块：%s\n", key.c_str());
         }
     }
 }
@@ -268,7 +269,7 @@ void server::process_job(int fd, server *pser)
     char buffer[4096];
     memset(buffer, 0, sizeof(buffer));
     ssize_t size;
-    size = read(fd, buffer, sizeof(buffer));
+    size = recv(fd, buffer, sizeof(buffer), 0);
     if (size > 0)
     {
         if (size < sizeof(buffer))

@@ -13,7 +13,10 @@ html_content::html_content(const char *request)
     iss >> method >> url;
     if (url.length() > 0)
     {
-        url = url.substr(1);
+        if (url[0] == '/')
+        {
+            url = url.substr(1);
+        }
         if (url.length() > 0)
         {
             if (url[url.length() - 1] == '/')
