@@ -85,7 +85,7 @@ ssize_t markdown_response::send(int fd)
                     IF_NEGATIVE_EXIT(send_with_chunk(fd, "</p>", 4, 0));
                     in_p = false;
                 }
-                IF_NEGATIVE_EXIT(writer.write_h3(line.substr(4)));
+                IF_NEGATIVE_EXIT(writer.write_h3(deal_with_code(line.substr(4))));
             }
             else if (line.length() > 3 && line.substr(0, 3) == "## ")
             {
@@ -94,7 +94,7 @@ ssize_t markdown_response::send(int fd)
                     IF_NEGATIVE_EXIT(send_with_chunk(fd, "</p>", 4, 0));
                     in_p = false;
                 }
-                IF_NEGATIVE_EXIT(writer.write_h2(line.substr(3)));
+                IF_NEGATIVE_EXIT(writer.write_h2(deal_with_code(line.substr(3))));
             }
             else if (line.length() > 2 && line.substr(0, 2) == "# ")
             {
@@ -103,7 +103,7 @@ ssize_t markdown_response::send(int fd)
                     IF_NEGATIVE_EXIT(send_with_chunk(fd, "</p>", 4, 0));
                     in_p = false;
                 }
-                IF_NEGATIVE_EXIT(writer.write_h1(line.substr(2)));
+                IF_NEGATIVE_EXIT(writer.write_h1(deal_with_code(line.substr(2))));
             }
             else if (line.length() > 2 && line.substr(0, 3) == "```")
             {
