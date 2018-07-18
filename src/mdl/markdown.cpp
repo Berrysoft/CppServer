@@ -98,10 +98,13 @@ ssize_t markdown_response::send(int fd)
         {
             string line;
             getline(ifs, line);
-            int index = line.find_first_not_of(' ');
-            if (index > 0)
+            if (!in_code)
             {
-                line = line.substr(index);
+                int index = line.find_first_not_of(' ');
+                if (index > 0)
+                {
+                    line = line.substr(index);
+                }
             }
             if (line.length() == 0)
             {
