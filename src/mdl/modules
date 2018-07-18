@@ -1,10 +1,11 @@
 # 文件格式：键名 库路径 显示信息
 # 注释开头用“#”
-# 虽然可以注释file这一行，但是非常不建议这么做
-file ./file.so 查看文件（必需）
+# 虽然可以注释下面这两行，但是非常不建议这么做
+file ./file.so 查看文件（默认为主页）
+error ./error.so 错误网页
 
 # 以下的可以随意注释
 cpu ./cpu.so CPU与进程信息
 version ./version.so 系统版本、时间与内存信息
 disk ./disk.so 硬盘信息
-markdown ./markdown.so 说明文档（简单Markdown解释器）
+markdown ./markdown.so 简单Markdown解释器（默认为说明文档）

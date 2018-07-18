@@ -1,5 +1,6 @@
 #include "markdown.h"
 #include "html_writer.h"
+#include <cstring>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -10,7 +11,14 @@ using namespace std;
 
 markdown_response::markdown_response(string filename)
 {
-    this->filename = filename;
+    if (filename.length() > 0)
+    {
+        this->filename = filename;
+    }
+    else
+    {
+        this->filename = "../README.md";
+    }
 }
 
 string deal_with_code(string line)
@@ -56,12 +64,22 @@ ssize_t deal_with_ul(bool &in_ul, html_writer &writer, vector<string> &texts)
 
 ssize_t deal_with_p(bool &in_p, html_writer &writer)
 {
-    if(in_p)
+    if (in_p)
     {
         in_p = false;
         return writer.write_p_end();
     }
     return 0;
+}
+
+bool markdown_response::supports(const char *version)
+{
+    string v(version);
+    if (v == "HTTP/1.0")
+    {
+        return false;
+    }
+    return true;
 }
 
 ssize_t markdown_response::send(int fd)
@@ -71,7 +89,7 @@ ssize_t markdown_response::send(int fd)
     {
         ifstream ifs(filename);
         html_writer writer(fd);
-        IF_NEGATIVE_EXIT(writer.write_head(filename));
+        IF_NEGATIVE_EXIT(writer.write_head("大作业-Markdown"));
         bool in_code = false;
         bool in_ul = false;
         bool in_p = false;
@@ -90,19 +108,19 @@ ssize_t markdown_response::send(int fd)
                 IF_NEGATIVE_EXIT(deal_with_ul(in_ul, writer, ul_texts));
                 IF_NEGATIVE_EXIT(deal_with_p(in_p, writer));
             }
-            else if (line.length() > 4 && line.substr(0, 4) == "### ")
+            else if (!in_code && line.length() > 4 && line.substr(0, 4) == "### ")
             {
                 IF_NEGATIVE_EXIT(deal_with_ul(in_ul, writer, ul_texts));
                 IF_NEGATIVE_EXIT(deal_with_p(in_p, writer));
                 IF_NEGATIVE_EXIT(writer.write_h3(deal_with_code(line.substr(4))));
             }
-            else if (line.length() > 3 && line.substr(0, 3) == "## ")
+            else if (!in_code && line.length() > 3 && line.substr(0, 3) == "## ")
             {
                 IF_NEGATIVE_EXIT(deal_with_ul(in_ul, writer, ul_texts));
                 IF_NEGATIVE_EXIT(deal_with_p(in_p, writer));
                 IF_NEGATIVE_EXIT(writer.write_h2(deal_with_code(line.substr(3))));
             }
-            else if (line.length() > 2 && line.substr(0, 2) == "# ")
+            else if (!in_code && line.length() > 2 && line.substr(0, 2) == "# ")
             {
                 IF_NEGATIVE_EXIT(deal_with_ul(in_ul, writer, ul_texts));
                 IF_NEGATIVE_EXIT(deal_with_p(in_p, writer));
@@ -161,5 +179,7 @@ ssize_t markdown_response::send(int fd)
 
 void *get_instance_response(const char *command)
 {
-    return new markdown_response("../README.md");
+    if (strlen(command) > 0 && access(command, 0))
+        return nullptr;
+    return new markdown_response(command);
 }

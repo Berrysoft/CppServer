@@ -17,12 +17,17 @@ ssize_t send_with_chunk(int fd, const void *buffer, size_t length, int flag)
     RETURN_RESULT;
 }
 
+ssize_t send_chunk_end(int fd, int flag)
+{
+    return send(fd, "0\r\n\r\n", 5, flag);
+}
+
 ssize_t html_writer::write_head(string title)
 {
     INIT_RESULT_AND_TEMP;
     const char head_start[] = "<!DOCTYPE html><html><head><meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\"><title>";
     const char head_mid[] = "</title><link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.10.0-alpha/dist/katex.min.css\" integrity=\"sha384-BTL0nVi8DnMrNdMQZG1Ww6yasK9ZGnUxL1ZWukXQ7fygA1py52yPp9W4wrR00VML\" crossorigin=\"anonymous\"><style>";
-    const char head_end[] = "</style></head>";
+    const char head_end[] = "</style></head><body>";
     IF_NEGATIVE_EXIT(send_with_chunk(fd, head_start, sizeof(head_start) - 1, 0));
     IF_NEGATIVE_EXIT(send_with_chunk(fd, title.c_str(), title.length(), 0));
     IF_NEGATIVE_EXIT(send_with_chunk(fd, head_mid, sizeof(head_mid) - 1, 0));
@@ -169,5 +174,9 @@ ssize_t html_writer::write_xmp_end()
 
 ssize_t html_writer::write_end()
 {
-    return write_spe_end("html");
+    INIT_RESULT_AND_TEMP;
+    const char html_end[] = "</body></html>";
+    IF_NEGATIVE_EXIT(send_with_chunk(fd, html_end, sizeof(html_end) - 1, 0));
+    IF_NEGATIVE_EXIT(send_chunk_end(fd, 0));
+    RETURN_RESULT;
 }

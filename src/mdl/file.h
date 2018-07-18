@@ -11,5 +11,6 @@ public:
     virtual ~file_response(){}
     file_response(const char *filename);
 
+    virtual bool supports(const char *version);
     virtual ssize_t send(int fd);
 };

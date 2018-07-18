@@ -14,6 +14,7 @@
 #define RETURN_RESULT return result
 
 ssize_t send_with_chunk(int fd, const void *buffer, size_t length, int flag);
+ssize_t send_chunk_end(int fd, int flag);
 
 class html_writer
 {

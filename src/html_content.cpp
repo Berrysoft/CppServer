@@ -20,7 +20,7 @@ html_content::html_content(const char *request)
         }
         if (url.length() > 0)
         {
-            if (url[url.length() - 1] == '/')
+            if (url.back() == '/')
             {
                 url = url.substr(0, url.length() - 1);
             }
@@ -59,84 +59,81 @@ response *get_command_response(string command, string response_command, map<stri
     }
 }
 
-response *get_file_response(string command, map<string, module> &modules, int &resp, module &m)
-{
-    if (access(command.c_str(), 0) && command != "index.html")
-    {
-        resp = 404;
-        command = "error.html";
-    }
-    else
-    {
-        resp = 200;
-    }
-    response *result = get_command_response("file", command, modules, m);
-    if (result)
-    {
-        return result;
-    }
-    else
-    {
-        resp = 400;
-        return nullptr;
-    }
-}
-
-response *deal_commands(string command, map<string, module> &modules, int &resp, module &m)
+response *deal_commands(string command, map<string, module> &modules, /*int &resp, */ module &m)
 {
     if (command.length() == 0)
-        command = "index.html";
-    if (command == "error")
+        command = "file/";
+    string temp;
+    int index = command.find_first_of('/');
+    if (index > 0)
     {
-        return get_file_response("error.html", modules, resp, m);
+        temp = command.substr(index + 1);
+        command = command.substr(0, index);
     }
-    else
+    else if (index = 0)
     {
-        response *result = get_command_response(command, string(), modules, m);
-        if (result)
-        {
-            resp = 200;
-            return result;
-        }
-        else
-        {
-            return get_file_response(command, modules, resp, m);
-        }
+        temp = command;
+        command = string();
     }
+    response *result = get_command_response(command, temp, modules, m);
+    if (!result)
+    {
+        result = get_command_response("error", string(), modules, m);
+    }
+    return result;
 }
 
 ssize_t html_content::send(int fd, map<string, module> &modules)
 {
-    int resp_value;
+    //int resp_value;
     response *res = nullptr;
     module m;
-    if (method == "GET" && version == "HTTP/1.1")
+    if (method == "GET")
     {
-        res = deal_commands(url, modules, resp_value, m);
-    }
-    else if (version == "HTTP/1.0")
-    {
-        res = nullptr;
-        resp_value = 400;
+        res = deal_commands(url, modules, /*resp_value, */ m);
     }
     else
     {
-        res = deal_commands("error", modules, resp_value, m);
+        res = deal_commands("error", modules, /*resp_value, */ m);
+    }
+    if (res && (!res->supports(version.c_str())))
+    {
+        res = deal_commands("error", modules, m);
     }
 
-    const char head[] = "HTTP/1.1 %d %s\r\nServer: Berrysoft.Linux.Cpp.Server\r\nContent-Type: text/html;charset=UTF-8\r\nConnection: keep-alive\r\nTransfer-Encoding: chunked\r\n\r\n";
+    const char head[] = "HTTP/1.1 %d %s\r\nServer: Berrysoft.Linux.Cpp.Server\r\nContent-Type: text/html;charset=UTF-8\r\nConnection: keep-alive\r\n%s\r\n\r\n";
     char realhead[256];
-    memset(realhead, 0, sizeof(realhead));
-    switch (resp_value)
+    //memset(realhead, 0, sizeof(realhead));
+    char length[64];
+    int res_status;
+    if (res)
+    {
+        int res_length = res->length();
+        if (res_length < 0)
+        {
+            strcpy(length, "Transfer-Encoding: chunked");
+        }
+        else
+        {
+            sprintf(length, "Content-Length: %d", res_length);
+        }
+        res_status = res->status();
+    }
+    else
+    {
+        length[0] = '\0';
+        res_status = 400;
+    }
+    switch (res_status)
     {
     case 200:
-        sprintf(realhead, head, 200, "OK");
+        sprintf(realhead, head, 200, "OK", length);
         break;
     case 400:
-        sprintf(realhead, head, 400, "Bad Request");
+        sprintf(realhead, head, 400, "Bad Request", length);
         break;
     case 404:
-        sprintf(realhead, head, 404, "Not Found");
+        sprintf(realhead, head, 404, "Not Found", length);
         break;
     }
     INIT_RESULT_AND_TEMP;
@@ -151,7 +148,7 @@ ssize_t html_content::send(int fd, map<string, module> &modules)
         else
         {
             result += t;
-            result += ::send(fd, "0\r\n\r\n", 5, 0);
+            //result += ::send(fd, "0\r\n\r\n", 5, 0);
         }
         delete res;
         m.close();

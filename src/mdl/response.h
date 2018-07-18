@@ -6,6 +6,9 @@ class response
 {
 public:
     virtual ~response(){}
+    virtual bool supports(const char *version) = 0;
+    virtual int status() { return 200; }
+    virtual int length() { return -1; }
     virtual ssize_t send(int fd) = 0;
 };
 

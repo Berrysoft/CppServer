@@ -6,5 +6,6 @@ class version_response : public response
 {
 public:
     virtual ~version_response() {}
+    virtual bool supports(const char *version);
     virtual ssize_t send(int fd);
 };

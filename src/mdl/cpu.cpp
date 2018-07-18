@@ -20,6 +20,16 @@ void push_linuxcpu(vector<string> &texts, const linuxcpu &cpu)
     }
 }
 
+bool cpu_response::supports(const char* version)
+{
+    string v(version);
+    if (v == "HTTP/1.0")
+    {
+        return false;
+    }
+    return true;
+}
+
 ssize_t cpu_response::send(int fd)
 {
     INIT_RESULT_AND_TEMP;
@@ -27,7 +37,7 @@ ssize_t cpu_response::send(int fd)
     IF_NEGATIVE_EXIT(writer.write_head("大作业-CPU信息"));
     IF_NEGATIVE_EXIT(writer.write_h1("CPU信息"));
 
-    IF_NEGATIVE_EXIT(writer.write_h2("<a href=\"..//proc/cpuinfo\">硬件信息</a>"));
+    IF_NEGATIVE_EXIT(writer.write_h2("<a href=\"../file//proc/cpuinfo\">硬件信息</a>"));
     vector<string> texts;
     texts.push_back("名称");
     texts.push_back("核心数");
@@ -47,7 +57,7 @@ ssize_t cpu_response::send(int fd)
     }
     IF_NEGATIVE_EXIT(writer.write_table_end());
 
-    IF_NEGATIVE_EXIT(writer.write_h2("<a href=\"..//proc/stat\">软件信息</a>"));
+    IF_NEGATIVE_EXIT(writer.write_h2("<a href=\"../file//proc/stat\">软件信息</a>"));
     texts.clear();
     texts.push_back("序号");
     texts.push_back("user");
@@ -86,7 +96,7 @@ ssize_t cpu_response::send(int fd)
 
     id i = get_id();
     char buffer[64];
-    sprintf(buffer, "<a href=\"..//proc/%d/status\">进程信息</a>", i.pid);
+    sprintf(buffer, "<a href=\"../file//proc/%d/status\">进程信息</a>", i.pid);
     IF_NEGATIVE_EXIT(writer.write_h1(buffer));
     oss.str("");
     oss << "UID: " << i.uid << "<br/>" << endl;

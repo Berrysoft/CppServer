@@ -32,18 +32,28 @@ string get_time()
     return oss.str();
 }
 
+bool version_response::supports(const char* version)
+{
+    string v(version);
+    if (v == "HTTP/1.0")
+    {
+        return false;
+    }
+    return true;
+}
+
 ssize_t version_response::send(int fd)
 {
     INIT_RESULT_AND_TEMP;
     html_writer writer(fd);
     IF_NEGATIVE_EXIT(writer.write_head("大作业-系统信息"));
-    IF_NEGATIVE_EXIT(writer.write_h1("<a href=\"..//proc/version\">系统版本</a>"));
+    IF_NEGATIVE_EXIT(writer.write_h1("<a href=\"../file//proc/version\">系统版本</a>"));
     IF_NEGATIVE_EXIT(writer.write_p(get_version()));
 
     IF_NEGATIVE_EXIT(writer.write_h1("本地时间"));
     IF_NEGATIVE_EXIT(writer.write_p(get_time()));
 
-    IF_NEGATIVE_EXIT(writer.write_h1("<a href=\"..//proc/meminfo\">内存信息</a>"));
+    IF_NEGATIVE_EXIT(writer.write_h1("<a href=\"../file//proc/meminfo\">内存信息</a>"));
     mem_info info = read_proc_meminfo();
     vector<string> texts;
     texts.push_back("Total");

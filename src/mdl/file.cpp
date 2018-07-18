@@ -16,15 +16,25 @@ file_response::file_response(const char *filename)
     this->filename = string(filename);
 }
 
+bool file_response::supports(const char *version)
+{
+    string v(version);
+    if (v == "HTTP/1.0")
+    {
+        return false;
+    }
+    return true;
+}
+
 ssize_t file_response::send(int fd)
 {
     INIT_RESULT_AND_TEMP;
     html_writer writer(fd);
-    if (filename == "index.html")
+    if (filename.length() == 0)
     {
         IF_NEGATIVE_EXIT(writer.write_head("大作业-主页"));
         IF_NEGATIVE_EXIT(writer.write_h1("大作业-主页"));
-        IF_NEGATIVE_EXIT(writer.write_p("欢迎光临！"));
+        IF_NEGATIVE_EXIT(writer.write_p("欢迎光临！想要查看文件，在请求/file/后面加上文件路径。"));
         IF_NEGATIVE_EXIT(writer.write_h2("动态加载功能"));
         vector<string> lines = read_modules_file();
         vector<string> texts;
@@ -38,20 +48,6 @@ ssize_t file_response::send(int fd)
             texts.push_back(oss.str());
         }
         IF_NEGATIVE_EXIT(writer.write_ul(texts));
-        IF_NEGATIVE_EXIT(writer.write_end());
-    }
-    else if (filename == "error.html")
-    {
-        IF_NEGATIVE_EXIT(writer.write_head("大作业-错误"));
-        IF_NEGATIVE_EXIT(writer.write_h1("出错啦！"));
-        IF_NEGATIVE_EXIT(writer.write_p("我们找不到请求的文件或者请求无效，请返回到上一页。"));
-        IF_NEGATIVE_EXIT(writer.write_end());
-    }
-    else if (filename.length() == 0)
-    {
-        IF_NEGATIVE_EXIT(writer.write_head("大作业-文件"));
-        IF_NEGATIVE_EXIT(writer.write_h1("查看文件"));
-        IF_NEGATIVE_EXIT(writer.write_p("想要查看文件，直接在地址栏输入即可，不需要加上/file/请求。"));
         IF_NEGATIVE_EXIT(writer.write_end());
     }
     else
@@ -81,5 +77,7 @@ ssize_t file_response::send(int fd)
 
 void *get_instance_response(const char *command)
 {
+    if (strlen(command) > 0 && access(command, 0))
+        return nullptr;
     return new file_response(command);
 }

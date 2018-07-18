@@ -11,5 +11,7 @@ private:
 public:
     virtual ~markdown_response() {}
     markdown_response(std::string filename);
+
+    virtual bool supports(const char *version);
     virtual ssize_t send(int fd);
 };

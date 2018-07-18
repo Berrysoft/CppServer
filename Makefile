@@ -8,7 +8,7 @@ STDFIPC := -std=c++11 -fPIC -O3
 
 # 编译所有
 .PHONY: all
-ALL := $(BIN)server.out $(BIN)file.so $(BIN)cpu.so $(BIN)version.so $(BIN)disk.so $(BIN)markdown.so $(BIN)modules $(BIN)style.css
+ALL := $(BIN)server.out $(BIN)error.so $(BIN)file.so $(BIN)cpu.so $(BIN)version.so $(BIN)disk.so $(BIN)markdown.so $(BIN)modules $(BIN)style.css
 all: $(ALL)
 
 .PHONY: run
@@ -34,6 +34,12 @@ $(OBJ)html_writer.o:$(MODULE)html_writer.cpp $(MODULE)html_writer.h
 # Read module 目标对象
 $(OBJ)read_modules.o: $(SOURCE)read_modules.cpp $(SOURCE)read_modules.h
 	g++ -o $@ -c $(SOURCE)read_modules.cpp $(STDFIPC)
+
+# error模块
+$(BIN)error.so: $(OBJ)error.o
+	g++ -shared -o $@ $^
+$(OBJ)error.o: $(MODULE)error.cpp $(MODULE)response.h
+	g++ -o $@ -c $(MODULE)error.cpp $(STDFIPC)
 
 # file模块
 $(BIN)file.so: $(OBJ)file.o $(OBJ)html_writer.o $(OBJ)read_modules.o
