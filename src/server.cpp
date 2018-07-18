@@ -121,7 +121,9 @@ void server::clean(unsigned long long ostamp)
         {
             if (it->time < ostamp)
             {
+#ifdef DEBUG
                 printf("清理%d。\n", it->fd);
+#endif //DEBUG
                 clients.erase(it);
                 close(it->fd);
             }
@@ -142,6 +144,7 @@ void server::stop()
     close(timer_fd);
     printf("关闭Epoll。\n");
     close(epoll_fd);
+    printf("停止循环。\n");
     loop_thread.join();
 }
 
@@ -157,14 +160,19 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
         }
         else if (ret == 0)
         {
-            //printf("超时。\n");
+#ifdef DEBUG
+            printf("超时。\n");
+#endif //DEBUG
             continue;
         }
-        //printf("接收到%d个事件。\n", ret);
+#ifdef DEBUG
+        printf("接收到%d个事件。\n", ret);
+#endif //DEBUG
         for (int i = 0; i < ret; i++)
         {
             if ((ser->event_list[i].events & EPOLLERR) || (ser->event_list[i].events & EPOLLHUP) || (ser->event_list[i].events & EPOLLRDHUP) || !(ser->event_list[i].events & EPOLLIN))
             {
+#ifdef DEBUG
                 if (ser->event_list[i].events & EPOLLRDHUP)
                 {
                     printf("客户端已关闭Socket %d。\n", ser->event_list[i].data.fd);
@@ -173,6 +181,7 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
                 {
                     printf("Epoll错误，关闭Socket %d。\n", ser->event_list[i].data.fd);
                 }
+#endif //DEBUG
                 epoll_ctl(ser->epoll_fd, EPOLL_CTL_DEL, ser->event_list[i].data.fd, &(ser->event_list[i]));
                 close(ser->event_list[i].data.fd);
                 {
@@ -199,7 +208,9 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
                 int newsock;
                 if ((newsock = accept(ser->sock, (sockaddr *)&paddr, &len)) > 0)
                 {
+#ifdef DEBUG
                     printf("新建Socket：%d.\n", newsock);
+#endif //DEBUG
                     int flags = fcntl(newsock, F_GETFL, 0);
                     fcntl(newsock, F_GETFL, flags | O_NONBLOCK);
                     epoll_event e;
@@ -207,7 +218,9 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
                     e.events = EPOLLIN | EPOLLRDHUP | EPOLLET;
                     if (epoll_ctl(ser->epoll_fd, EPOLL_CTL_ADD, newsock, &e) < 0)
                     {
+#ifdef DEBUG
                         printf("接收%d错误。\n", newsock);
+#endif //DEBUG
                     }
                     else
                     {
@@ -260,7 +273,9 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
 
 void server::process_job(int fd, server *pser)
 {
+#ifdef DEBUG
     printf("正在处理请求%d...\n", fd);
+#endif //DEBUG
     signal(SIGPIPE, SIG_IGN);
     char buffer[4096];
     memset(buffer, 0, sizeof(buffer));
@@ -271,10 +286,16 @@ void server::process_job(int fd, server *pser)
         if (size < sizeof(buffer))
             buffer[size] = '\0';
         html_content content(buffer);
+        if (size >= sizeof(buffer))
+        {
+            while ((size = recv(fd, buffer, sizeof(buffer), 0)) < sizeof(buffer))
+                ;
+        }
         {
             lock_guard<mutex> locker(pser->modules_mutex);
             size = content.send(fd, pser->modules);
         }
+#ifdef DEBUG
         if (size < 0)
         {
             printf("信息发送失败%d。\n", fd);
@@ -283,5 +304,6 @@ void server::process_job(int fd, server *pser)
         {
             printf("信息已发送%d。\n", fd);
         }
+#endif //DEBUG
     }
 }

@@ -11,7 +11,7 @@ using namespace std;
 html_content::html_content(const char *request)
 {
     istringstream iss(request);
-    iss >> method >> url;
+    iss >> method >> url >> version;
     if (url.length() > 0)
     {
         if (url[0] == '/')
@@ -110,16 +110,21 @@ ssize_t html_content::send(int fd, map<string, module> &modules)
     int resp_value;
     response *res = nullptr;
     module m;
-    if (method == "GET")
+    if (method == "GET" && version == "HTTP/1.1")
     {
         res = deal_commands(url, modules, resp_value, m);
+    }
+    else if (version == "HTTP/1.0")
+    {
+        res = nullptr;
+        resp_value = 400;
     }
     else
     {
         res = deal_commands("error", modules, resp_value, m);
     }
 
-    const char head[] = "HTTP/1.1 %d %s\r\nServer: Berrysoft.Linux.Cpp.Server\r\nContent-Type: text/html;charset=UTF-8\r\nTransfer-Encoding: chunked\r\n\r\n";
+    const char head[] = "HTTP/1.1 %d %s\r\nServer: Berrysoft.Linux.Cpp.Server\r\nContent-Type: text/html;charset=UTF-8\r\nConnection: keep-alive\r\nTransfer-Encoding: chunked\r\n\r\n";
     char realhead[256];
     memset(realhead, 0, sizeof(realhead));
     switch (resp_value)

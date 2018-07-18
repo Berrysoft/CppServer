@@ -12,6 +12,7 @@ class html_content
 private:
     std::string method;
     std::string url;
+    std::string version;
 public:
     html_content(const char *request);
 
