@@ -59,7 +59,7 @@ response *get_command_response(string command, string response_command, map<stri
     }
 }
 
-response *deal_commands(string command, map<string, module> &modules, /*int &resp, */ module &m)
+response *deal_commands(string command, map<string, module> &modules, module &m)
 {
     if (command.length() == 0)
         command = "file/";
@@ -85,16 +85,15 @@ response *deal_commands(string command, map<string, module> &modules, /*int &res
 
 ssize_t html_content::send(int fd, map<string, module> &modules)
 {
-    //int resp_value;
     response *res = nullptr;
     module m;
     if (method == "GET")
     {
-        res = deal_commands(url, modules, /*resp_value, */ m);
+        res = deal_commands(url, modules, m);
     }
     else
     {
-        res = deal_commands("error", modules, /*resp_value, */ m);
+        res = deal_commands("error", modules, m);
     }
     if (res && (!res->supports(version.c_str())))
     {
