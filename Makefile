@@ -3,8 +3,8 @@ MODULE := src/mdl/
 BIN := bin/
 OBJ := obj/
 
-STD := -std=c++11 -O3
-STDFIPC := -std=c++11 -fPIC -O3
+STD := -std=c++17 -O3
+STDFIPC := -std=c++17 -fPIC -O3
 
 # 编译所有
 .PHONY: all
