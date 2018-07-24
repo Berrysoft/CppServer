@@ -5,6 +5,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <atomic>
 #include <tuple>
 #include "apply_tuple.h"
 
@@ -20,7 +21,7 @@ class thread_pool
     std::condition_variable cond;
     std::mutex cond_mutex;
 
-    bool stop;
+    std::atomic<bool> stop;
 
   public:
     thread_pool(std::size_t dojob, void (*task)(TArgs...));

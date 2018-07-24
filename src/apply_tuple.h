@@ -2,28 +2,14 @@
 #pragma once
 #include <tuple>
 
-template <size_t N>
-struct Apply
+template <class _Callable, class _Tuple, size_t... _Indices>
+constexpr decltype(auto) _Apply_impl(_Callable &&_Obj, _Tuple &&_Tpl, std::index_sequence<_Indices...>)
 {
-    template <typename TFunc, typename TTuple, typename... TArg>
-    static inline auto apply(TFunc &&f, TTuple &&t, TArg &&... a)
-    {
-        return Apply<N - 1>::apply(std::forward<TFunc>(f), std::forward<TTuple>(t), std::get<N - 1>(std::forward<TTuple>(t)), std::forward<TArg>(a)...);
-    }
-};
+    return std::forward<_Callable>(_Obj)(std::get<_Indices>(std::forward<_Tuple>(_Tpl))...);
+}
 
-template <>
-struct Apply<0>
+template <class _Callable, class _Tuple>
+constexpr decltype(auto) apply(_Callable &&_Obj, _Tuple &&_Tpl)
 {
-    template <typename TFunc, typename TTuple, typename... TArg>
-    static inline auto apply(TFunc &&f, TTuple &&, TArg &&... a)
-    {
-        return std::forward<TFunc>(f)(std::forward<TArg>(a)...);
-    }
-};
-
-template <typename TFunc, typename TTuple>
-inline auto apply(TFunc &&f, TTuple &&t)
-{
-    return Apply<std::tuple_size<typename std::decay<TTuple>::type>::value>::apply(std::forward<TFunc>(f), std::forward<TTuple>(t));
+    return _Apply_impl(std::forward<_Callable>(_Obj), std::forward<_Tuple>(_Tpl), std::make_index_sequence<std::tuple_size<std::decay_t<_Tuple>>::value>());
 }

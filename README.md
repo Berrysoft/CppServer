@@ -71,7 +71,7 @@ WSL没有`/proc/partitions`文件，因此采用VFS文件系统获取根目录�
 这个解释器实现了Markdown的一些基本功能，使得至少本文件能够显示正常。
 ## 压力测试
 下面是用ApacheBench进行并发100、总数1000000的压力测试结果：
-``` shell
+```
 $ ab -k -n 1000000 -c 100 http://127.0.0.1:3342/
 
 ...
@@ -114,7 +114,7 @@ Percentage of the requests served within a certain time (ms)
 
 `html_writer.h`中还定义了3个有用的宏：
 * `INIT_RESULT_AND_TEMP`：初始化两个类型为`ssize_t`的变量，名为`result`和`t`。
-* `IF_NEGATIVE_EXIT(exp)`：判断`exp`是否为负值，如果为负，返回；反之加在`result`上。
+* `IF_NEGATIVE_EXIT(exp)`：计算`exp`并赋值给`t`。判断`t`是否为负值，如果为负，返回；反之加在`result`上。
 * `RETURN_RESULT`：返回`result`。
 
 如果处理`send`或者`write`等函数的返回值不当，可能会阻塞线程，导致服务器无响应。

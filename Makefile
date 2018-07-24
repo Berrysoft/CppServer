@@ -84,7 +84,12 @@ $(BIN)modules: $(MODULE)modules
 $(BIN)style.css: $(MODULE)style.css
 	cp $^ $@
 
-# 清理
+# 清理目标对象
 .PHONY: clean
 clean:
-	rm $(OBJ)/*.o
+	rm $(OBJ)/*.*
+
+# 清理全部文件
+.PHONY: cleanall
+cleanall:
+	rm $(OBJ)/*.* $(BIN)/*.*
