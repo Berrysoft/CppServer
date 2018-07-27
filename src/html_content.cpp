@@ -102,7 +102,6 @@ ssize_t html_content::send(int fd, map<string, module> &modules)
 
     const char head[] = "HTTP/1.1 %d %s\r\nServer: Berrysoft.Linux.Cpp.Server\r\nContent-Type: text/html;charset=UTF-8\r\nConnection: keep-alive\r\n%s\r\n\r\n";
     char realhead[256];
-    //memset(realhead, 0, sizeof(realhead));
     char length[64];
     int res_status;
     if (res)
@@ -147,7 +146,6 @@ ssize_t html_content::send(int fd, map<string, module> &modules)
         else
         {
             result += t;
-            //result += ::send(fd, "0\r\n\r\n", 5, 0);
         }
         delete res;
         m.close();

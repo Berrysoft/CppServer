@@ -76,6 +76,9 @@ void server::start(const sockaddr *addr, socklen_t len, int n, int epoll_timeout
     listen(sock, n);
     printf("监听数：%d\n", n);
     printf("监听Socket：%d.\n", sock);
+    printf("Epoll等待时间：%d(ms)\n", epoll_timeout);
+    printf("时钟间隔：%ld(s)\n", interval.tv_sec);
+    printf("时钟等待循环数：%d（个）\n", clock_timeout);
 
     itimerspec itimer;
     if (clock_gettime(CLOCK_MONOTONIC, &itimer.it_value) < 0)
@@ -144,7 +147,7 @@ void server::stop()
     close(timer_fd);
     printf("关闭Epoll。\n");
     close(epoll_fd);
-    printf("停止循环。\n");
+    printf("停止循环，请耐心等待...\n");
     loop_thread.join();
 }
 
