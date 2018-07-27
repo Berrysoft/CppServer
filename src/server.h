@@ -20,6 +20,7 @@ struct fd_with_time
 class server
 {
 private:
+    bool verbose;
     int sock;
     thread_pool<int, server*> *pool;
     std::thread loop_thread;
@@ -33,7 +34,7 @@ private:
     std::vector<fd_with_time> clients;
     std::mutex clients_mutex;
 public:
-    server(std::size_t amount, std::size_t doj);
+    server(std::size_t amount, std::size_t doj, bool verbose);
     ~server();
 
     void refresh_module();
@@ -44,6 +45,6 @@ public:
 
     unsigned long long get_time_stamp() { return time_stamp; }
 private:
-  static void accept_loop(int epoll_timeout, int clock_timeout, server *ser);
-  static void process_job(int fd, server *pser);
+    static void accept_loop(int epoll_timeout, int clock_timeout, server *ser);
+    static void process_job(int fd, server *pser);
 };

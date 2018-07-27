@@ -2,6 +2,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <cstdio>
 #include <cstring>
 #include <csignal>
 #include <fcntl.h>
@@ -12,9 +13,13 @@
 #include "html_content.h"
 #include "read_modules.h"
 
+#define printf(exp, ...) \
+    if (verbose)             \
+        std::printf(exp, ## __VA_ARGS__);
+
 using namespace std;
 
-server::server(size_t amount, size_t doj) : amount(amount)
+server::server(size_t amount, size_t doj, bool verbose) : amount(amount), verbose(verbose)
 {
     printf("初始化Socket...\n");
     sock = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
@@ -147,9 +152,14 @@ void server::stop()
     close(timer_fd);
     printf("关闭Epoll。\n");
     close(epoll_fd);
-    printf("停止循环，请耐心等待...\n");
+    puts("停止循环，请耐心等待...\n");
     loop_thread.join();
 }
+
+#undef printf
+#define printf(exp, ...) \
+    if (ser->verbose)    \
+    std::printf(exp, ##__VA_ARGS__)
 
 void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
 {
@@ -163,19 +173,14 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
         }
         else if (ret == 0)
         {
-#ifdef DEBUG
             printf("超时。\n");
-#endif //DEBUG
             continue;
         }
-#ifdef DEBUG
         printf("接收到%d个事件。\n", ret);
-#endif //DEBUG
         for (int i = 0; i < ret; i++)
         {
             if ((ser->event_list[i].events & EPOLLERR) || (ser->event_list[i].events & EPOLLHUP) || (ser->event_list[i].events & EPOLLRDHUP) || !(ser->event_list[i].events & EPOLLIN))
             {
-#ifdef DEBUG
                 if (ser->event_list[i].events & EPOLLRDHUP)
                 {
                     printf("客户端已关闭Socket %d。\n", ser->event_list[i].data.fd);
@@ -184,7 +189,6 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
                 {
                     printf("Epoll错误，关闭Socket %d。\n", ser->event_list[i].data.fd);
                 }
-#endif //DEBUG
                 epoll_ctl(ser->epoll_fd, EPOLL_CTL_DEL, ser->event_list[i].data.fd, &(ser->event_list[i]));
                 close(ser->event_list[i].data.fd);
                 {
@@ -211,9 +215,7 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
                 int newsock;
                 if ((newsock = accept(ser->sock, (sockaddr *)&paddr, &len)) > 0)
                 {
-#ifdef DEBUG
                     printf("新建Socket：%d.\n", newsock);
-#endif //DEBUG
                     int flags = fcntl(newsock, F_GETFL, 0);
                     fcntl(newsock, F_GETFL, flags | O_NONBLOCK);
                     epoll_event e;
@@ -221,9 +223,7 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
                     e.events = EPOLLIN | EPOLLRDHUP | EPOLLET;
                     if (epoll_ctl(ser->epoll_fd, EPOLL_CTL_ADD, newsock, &e) < 0)
                     {
-#ifdef DEBUG
                         printf("接收%d错误。\n", newsock);
-#endif //DEBUG
                     }
                     else
                     {
@@ -274,11 +274,9 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
     close(ser->sock);
 }
 
-void server::process_job(int fd, server *pser)
+void server::process_job(int fd, server *ser)
 {
-#ifdef DEBUG
     printf("正在处理请求%d...\n", fd);
-#endif //DEBUG
     signal(SIGPIPE, SIG_IGN);
     char buffer[4096];
     memset(buffer, 0, sizeof(buffer));
@@ -295,10 +293,9 @@ void server::process_job(int fd, server *pser)
                 ;
         }
         {
-            lock_guard<mutex> locker(pser->modules_mutex);
-            size = content.send(fd, pser->modules);
+            lock_guard<mutex> locker(ser->modules_mutex);
+            size = content.send(fd, ser->modules);
         }
-#ifdef DEBUG
         if (size < 0)
         {
             printf("信息发送失败%d。\n", fd);
@@ -307,6 +304,5 @@ void server::process_job(int fd, server *pser)
         {
             printf("信息已发送%d。\n", fd);
         }
-#endif //DEBUG
     }
 }

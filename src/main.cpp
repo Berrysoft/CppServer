@@ -8,6 +8,8 @@ using std::getchar;
 using std::printf;
 
 const char *const help_opt = "help";
+const char *const verbose_opt = "verbose";
+const char *const addr_opt = "address";
 const char *const port_opt = "port";
 const char *const count_opt = "count";
 const char *const threads_opt = "threads";
@@ -21,9 +23,11 @@ int print_help(char* name)
     printf("网站在Edge、IE、Chrome、Safari(iPhone)下测试通过。\n");
     printf("请使用支持chunked的浏览器打开网站。\n");
     printf("用法：%s [-h] [-p %s] [-c %s] [-t %s]\n", name, port_opt, count_opt, threads_opt);
-    printf("\t\t[%s] [%s] [%s]", etime_opt, cinterval_opt, ctime_opt);
+    printf("\t\t[%s] [%s] [%s]\n", etime_opt, cinterval_opt, ctime_opt);
     printf("选项：\n");
     printf("-h --%s\t\t获取帮助\n", help_opt);
+    printf("-v --%s\t\t显示详细信息\n", verbose_opt);
+    printf("-a --%s\t\t设置监听地址，默认为所有IP\n", addr_opt);
     printf("-p --%s\t\t设置监听端口，默认为3342\n", port_opt);
     printf("-c --%s\t\t设置监听数，默认为16384\n", count_opt);
     printf("-t --%s\t\t设置线程数，默认为4\n", threads_opt);
@@ -35,6 +39,8 @@ int print_help(char* name)
 
 int main(int argc, char **argv)
 {
+    bool verbose = false;
+    char *addr_string = nullptr;
     int port = 3342;
     int amount = 16384;
     int n = 4;
@@ -42,10 +48,12 @@ int main(int argc, char **argv)
     timespec interval = {60, 0};
     int clock_timeout = 2;
 
-    const char *const s_opts = "hp:c:t:e:i:o:";
+    const char *const s_opts = "hva:p:c:t:e:i:o:";
     const option l_opts[] =
         {
             {help_opt, no_argument, nullptr, 'h'},
+            {verbose_opt, no_argument, nullptr, 'v'},
+            {addr_opt, required_argument, nullptr, 'a'},
             {port_opt, required_argument, nullptr, 'p'},
             {count_opt, required_argument, nullptr, 'c'},
             {threads_opt, required_argument, nullptr, 't'},
@@ -59,6 +67,12 @@ int main(int argc, char **argv)
     {
         switch (opt)
         {
+        case 'v':
+            verbose = true;
+            break;
+        case 'a':
+            addr_string = optarg;
+            break;
         case 'p':
             port = atoi(optarg);
             break;
@@ -89,18 +103,32 @@ int main(int argc, char **argv)
         }
     }
 
-    server ser(amount, n);
+    in_addr_t listen_addr;
+    if (!addr_string)
+    {
+        listen_addr = htonl(INADDR_ANY);
+    }
+    else
+    {
+        listen_addr = inet_addr(addr_string);
+    }
+
+    server ser(amount, n, verbose);
 
     sockaddr_in address;
     address.sin_family = AF_INET;
     address.sin_port = htons(port);
-    address.sin_addr.s_addr = htonl(INADDR_ANY);
-    printf("正在监听所有IP的%d端口。\n", port);
+    address.sin_addr.s_addr = listen_addr;
+    if (verbose)
+        printf("正在监听所有IP的%d端口。\n", port);
 
     ser.start((const sockaddr *)&address, sizeof(address), amount, epoll_timeout, interval, clock_timeout);
 
-    printf("请在自己的电脑上访问 http://127.0.0.1:%d/\n", port);
-    printf("参数的调整请使用命令 %s -h 查看。\n", argv[0]);
+    if (verbose)
+    {
+        printf("正在通过%d端口监听地址%s\n", port, inet_ntoa(*(in_addr *)&listen_addr));
+        printf("参数的调整请使用命令 %s -h 查看。\n", argv[0]);
+    }
     printf("按r <回车>刷新模块，c <回车>清除超时连接，q <回车>结束服务器。\n");
 
     char c;
