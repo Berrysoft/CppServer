@@ -92,4 +92,4 @@ clean:
 # 清理全部文件
 .PHONY: cleanall
 cleanall:
-	rm $(OBJ)/*.* $(BIN)/*.*
+	rm $(OBJ)/* $(BIN)/*
