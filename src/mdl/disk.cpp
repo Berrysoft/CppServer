@@ -23,7 +23,7 @@ ssize_t disk_response::send(int fd)
     html_writer writer(fd);
     IF_NEGATIVE_EXIT(writer.write_head("大作业-硬盘"));
     IF_NEGATIVE_EXIT(writer.write_h1("硬盘信息"));
-    IF_NEGATIVE_EXIT(writer.write_p("由于WSL中没有/proc/partitions文件，本模块采用VFS文件系统获取根目录信息。"));
+    IF_NEGATIVE_EXIT(writer.write_p("由于WSL中没有<code>/proc/partitions</code>文件，本模块采用VFS文件系统获取根目录信息。"));
     vector<string> texts;
     texts.push_back("扇区大小");
     texts.push_back("总扇区数");
