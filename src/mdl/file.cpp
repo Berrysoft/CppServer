@@ -19,11 +19,7 @@ file_response::file_response(const char *filename)
 bool file_response::supports(const char *version)
 {
     string v(version);
-    if (v == "HTTP/1.0")
-    {
-        return false;
-    }
-    return true;
+    return v != "HTTP/1.0";
 }
 
 ssize_t file_response::send(int fd)

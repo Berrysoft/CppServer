@@ -17,7 +17,7 @@ const char *const etime_opt = "epoll-timeout";
 const char *const cinterval_opt = "clock-interval";
 const char *const ctime_opt = "clock-timeout";
 
-int print_help(char* name)
+int print_help(const char *name)
 {
     printf("Berrysoft.Linux.Cpp.Server\n");
     printf("网站在Edge、IE、Chrome、Safari(iPhone)下测试通过。\n");

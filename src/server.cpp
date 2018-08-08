@@ -14,8 +14,8 @@
 #include "read_modules.h"
 
 #define printf(exp, ...) \
-    if (verbose)             \
-        std::printf(exp, ## __VA_ARGS__);
+    if (verbose)         \
+    std::printf(exp, ##__VA_ARGS__)
 
 using namespace std;
 
@@ -129,9 +129,7 @@ void server::clean(unsigned long long ostamp)
         {
             if (it->time < ostamp)
             {
-#ifdef DEBUG
                 printf("清理%d。\n", it->fd);
-#endif //DEBUG
                 clients.erase(it);
                 close(it->fd);
             }

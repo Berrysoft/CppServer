@@ -23,11 +23,7 @@ void push_linuxcpu(vector<string> &texts, const linuxcpu &cpu)
 bool cpu_response::supports(const char* version)
 {
     string v(version);
-    if (v == "HTTP/1.0")
-    {
-        return false;
-    }
-    return true;
+    return v != "HTTP/1.0";
 }
 
 ssize_t cpu_response::send(int fd)

@@ -22,7 +22,7 @@ class server
 private:
     bool verbose;
     int sock;
-    thread_pool<int, server*> *pool;
+    thread_pool<int, server *> *pool;
     std::thread loop_thread;
     std::map<std::string, module> modules;
     std::mutex modules_mutex;

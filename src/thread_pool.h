@@ -7,13 +7,14 @@
 #include <condition_variable>
 #include <atomic>
 #include <tuple>
+#include <functional>
 #include "apply_tuple.h"
 
 template <typename... TArgs>
 class thread_pool
 {
-  private:
-    void (*task)(TArgs... tpl);
+private:
+    std::function<void(TArgs...)> task;
     std::vector<std::tuple<TArgs...> *> jobs;
     std::valarray<std::thread> do_threads;
 
@@ -22,20 +23,18 @@ class thread_pool
     std::mutex cond_mutex;
 
     std::atomic<bool> stop;
-
-  public:
-    thread_pool(std::size_t dojob, void (*task)(TArgs...));
+public:
+    thread_pool(std::size_t dojob, std::function<void(TArgs...)> task);
     ~thread_pool();
 
     void post(TArgs... args);
     void broadcast();
-
-  private:
+private:
     static void do_job(thread_pool<TArgs...> *pool);
 };
 
 template <typename... TArgs>
-thread_pool<TArgs...>::thread_pool(std::size_t dojob, void (*task)(TArgs...)) : task(task)
+thread_pool<TArgs...>::thread_pool(std::size_t dojob, std::function<void(TArgs...)> task) : task(task)
 {
     stop = false;
     if (dojob < 1)
