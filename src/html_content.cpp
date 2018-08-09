@@ -48,15 +48,8 @@ response *get_command_response(string command, string response_command, map<stri
                 return nullptr;
             }
         }
-        else
-        {
-            return nullptr;
-        }
     }
-    else
-    {
-        return nullptr;
-    }
+    return nullptr;
 }
 
 response *deal_commands(string command, map<string, module> &modules, module &m)
@@ -97,6 +90,7 @@ ssize_t html_content::send(int fd, map<string, module> &modules)
     }
     if (res && (!res->supports(version.c_str())))
     {
+        delete res;
         res = deal_commands("error", modules, m);
     }
 

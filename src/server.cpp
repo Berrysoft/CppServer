@@ -39,17 +39,12 @@ server::server(size_t amount, size_t doj, bool verbose) : amount(amount), verbos
     printf("初始化Epoll...\n");
     event_list = new epoll_event[amount];
     printf("初始化线程池...\n");
-    pool = new thread_pool<int, server *>(doj, process_job);
+    pool = make_unique<thread_pool<int, server *>>(doj, process_job);
     refresh_module();
 }
 
 server::~server()
 {
-    if (pool)
-    {
-        delete pool;
-        pool = nullptr;
-    }
     if (event_list)
     {
         delete[] event_list;

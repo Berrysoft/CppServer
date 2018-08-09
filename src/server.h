@@ -8,6 +8,7 @@
 #include <string>
 #include <mutex>
 #include <vector>
+#include <memory>
 #include "thread_pool.h"
 #include "module.h"
 
@@ -22,7 +23,7 @@ class server
 private:
     bool verbose;
     int sock;
-    thread_pool<int, server *> *pool;
+    std::unique_ptr<thread_pool<int, server *>> pool;
     std::thread loop_thread;
     std::map<std::string, module> modules;
     std::mutex modules_mutex;
