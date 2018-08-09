@@ -66,11 +66,11 @@ ssize_t cpu_response::send(int fd)
     texts.push_back("总CPU");
     push_linuxcpu(texts, ps.total_cpu);
     IF_NEGATIVE_EXIT(writer.write_tr(texts));
-    for (int i = 0; i < ps.cpu_core.size(); i++)
+    for (size_t i = 0; i < ps.cpu_core.size(); i++)
     {
         texts.clear();
         char buffer[8];
-        sprintf(buffer, "CPU %d", i);
+        sprintf(buffer, "CPU %lu", i);
         texts.push_back(buffer);
         push_linuxcpu(texts, ps.cpu_core[i]);
         IF_NEGATIVE_EXIT(writer.write_tr(texts));

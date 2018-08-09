@@ -51,7 +51,7 @@ ssize_t file_response::send(int fd)
             std::size_t len;
             char buffer[4096];
             memset(buffer, 0, sizeof(buffer));
-            while (len = fread(buffer, sizeof(char), sizeof(buffer), furl))
+            while ((len = fread(buffer, sizeof(char), sizeof(buffer), furl)))
             {
                 IF_NEGATIVE_EXIT(send_with_chunk(fd, buffer, len, 0));
             }

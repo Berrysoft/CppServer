@@ -19,7 +19,7 @@
 
 using namespace std;
 
-server::server(size_t amount, size_t doj, bool verbose) : amount(amount), verbose(verbose)
+server::server(size_t amount, size_t doj, bool verbose) : verbose(verbose), amount(amount)
 {
     printf("初始化Socket...\n");
     sock = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
@@ -106,7 +106,7 @@ void server::start(const sockaddr *addr, socklen_t len, int n, int epoll_timeout
     loop_thread = thread(accept_loop, epoll_timeout, clock_timeout, this);
 }
 
-void server::clean(unsigned long long ostamp)
+void server::clean(int ostamp)
 {
     printf("开始清理。\n");
     {
@@ -227,10 +227,11 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
                     continue;
                 }
                 ser->time_stamp += timer_buf;
-                printf("时间戳：%llu\n", ser->time_stamp);
+                printf("时间戳：%d\n", ser->time_stamp);
                 if (ser->time_stamp > clock_timeout)
                 {
                     ser->clean(ser->time_stamp - clock_timeout);
+                    ser->time_stamp = 0;
                 }
             }
             else
@@ -250,7 +251,7 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
             }
         }
     }
-    for (int i = 0; i < ser->amount; i++)
+    for (size_t i = 0; i < ser->amount; i++)
     {
         close(ser->event_list[i].data.fd);
     }
@@ -264,16 +265,15 @@ void server::process_job(int fd, server *ser)
     signal(SIGPIPE, SIG_IGN);
     char buffer[4096];
     memset(buffer, 0, sizeof(buffer));
-    ssize_t size;
-    size = recv(fd, buffer, sizeof(buffer), 0);
+    ssize_t size = recv(fd, buffer, sizeof(buffer), 0);
     if (size > 0)
     {
-        if (size < sizeof(buffer))
+        if ((size_t)size < sizeof(buffer))
             buffer[size] = '\0';
         html_content content(buffer);
-        if (size >= sizeof(buffer))
+        if ((size_t)size >= sizeof(buffer))
         {
-            while ((size = recv(fd, buffer, sizeof(buffer), 0)) < sizeof(buffer))
+            while ((size_t)(size = recv(fd, buffer, sizeof(buffer), 0)) < sizeof(buffer))
                 ;
         }
         {

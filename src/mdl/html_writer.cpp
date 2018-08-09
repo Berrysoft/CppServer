@@ -36,7 +36,7 @@ ssize_t html_writer::write_head(string title)
     FILE *fcss = fopen("style.css", "r");
     if (fcss)
     {
-        while (len = fread(buffer, sizeof(char), sizeof(buffer), fcss))
+        while ((len = fread(buffer, sizeof(char), sizeof(buffer), fcss)))
         {
             IF_NEGATIVE_EXIT(send_with_chunk(fd, buffer, len, 0));
         }

@@ -59,7 +59,7 @@ unique_ptr<response> deal_commands(string command, map<string, module> &modules,
         temp = command.substr(index + 1);
         command = command.substr(0, index);
     }
-    else if (index = 0)
+    else if (index == 0)
     {
         temp = command;
         command = string();

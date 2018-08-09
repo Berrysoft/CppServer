@@ -15,7 +15,7 @@
 struct fd_with_time
 {
     int fd;
-    unsigned long long time;
+    int time;
 };
 
 class server
@@ -31,7 +31,7 @@ private:
     std::size_t amount;
     std::unique_ptr<epoll_event[]> event_list;
     int timer_fd;
-    unsigned long long time_stamp;
+    int time_stamp;
     std::vector<fd_with_time> clients;
     std::mutex clients_mutex;
 public:
@@ -40,10 +40,10 @@ public:
     void refresh_module();
 
     void start(const sockaddr *addr, socklen_t len, int n, int epoll_timeout = 2000, timespec interval = {60, 0}, int clock_timeout = 2);
-    void clean(unsigned long long ostamp);
+    void clean(int ostamp);
     void stop();
 
-    unsigned long long get_time_stamp() { return time_stamp; }
+    int get_time_stamp() { return time_stamp; }
 private:
     static void accept_loop(int epoll_timeout, int clock_timeout, server *ser);
     static void process_job(int fd, server *pser);
