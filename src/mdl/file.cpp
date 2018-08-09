@@ -11,15 +11,8 @@
 
 using namespace std;
 
-file_response::file_response(const char *filename)
+file_response::file_response(string filename) : filename(move(filename))
 {
-    this->filename = string(filename);
-}
-
-bool file_response::supports(const char *version)
-{
-    string v(version);
-    return v != "HTTP/1.0";
 }
 
 ssize_t file_response::send(int fd)

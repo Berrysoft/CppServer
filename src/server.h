@@ -29,14 +29,13 @@ private:
     std::mutex modules_mutex;
     int epoll_fd;
     std::size_t amount;
-    epoll_event *event_list;
+    std::unique_ptr<epoll_event[]> event_list;
     int timer_fd;
     unsigned long long time_stamp;
     std::vector<fd_with_time> clients;
     std::mutex clients_mutex;
 public:
     server(std::size_t amount, std::size_t doj, bool verbose);
-    ~server();
 
     void refresh_module();
 

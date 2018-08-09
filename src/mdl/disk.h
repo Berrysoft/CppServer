@@ -8,6 +8,5 @@ class disk_response : public response
 {
 public:
     virtual ~disk_response() {}
-    virtual bool supports(const char *version);
     virtual ssize_t send(int fd);
 };

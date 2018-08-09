@@ -6,14 +6,13 @@ using namespace std;
 
 typedef void *(*get_handle)(const char *);
 
-module::module(const char *name)
+module::module(string name) : filename(move(name))
 {
-    strcpy(filename, name);
 }
 
 bool module::open()
 {
-    handle = dlopen(filename, RTLD_LAZY);
+    handle = dlopen(filename.c_str(), RTLD_LAZY);
     if (!handle)
     {
         return false;
@@ -22,17 +21,20 @@ bool module::open()
     return true;
 }
 
-response *module::get_response(const char* command)
+unique_ptr<response> module::get_response(string command)
 {
     get_handle f = (get_handle)dlsym(handle, "get_instance_response");
     if (dlerror() != nullptr)
         return nullptr;
-    response *result = (response*)f(command);
-    return result;
+    return unique_ptr<response>((response *)f(command.c_str()));
 }
 
 void module::close()
 {
-    dlclose(handle);
-    dlerror();
+    if (handle)
+    {
+        dlclose(handle);
+        dlerror();
+        handle = nullptr;
+    }
 }

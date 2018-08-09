@@ -5,7 +5,7 @@ class error_response : public response
 {
 public:
     virtual ~error_response() {}
-    virtual bool supports(const char *version) { return true; }
+    virtual bool supports(std::string) { return true; }
 
     virtual int length();
     virtual int status() { return 404; }

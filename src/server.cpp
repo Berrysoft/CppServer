@@ -37,19 +37,10 @@ server::server(size_t amount, size_t doj, bool verbose) : amount(amount), verbos
         return;
     }
     printf("初始化Epoll...\n");
-    event_list = new epoll_event[amount];
+    event_list = unique_ptr<epoll_event[]>(new epoll_event[amount]);
     printf("初始化线程池...\n");
     pool = make_unique<thread_pool<int, server *>>(doj, process_job);
     refresh_module();
-}
-
-server::~server()
-{
-    if (event_list)
-    {
-        delete[] event_list;
-        event_list = nullptr;
-    }
 }
 
 void server::refresh_module()
@@ -64,7 +55,7 @@ void server::refresh_module()
             istringstream iss(line);
             string key, module_name;
             iss >> key >> module_name;
-            modules.insert(map<string, module>::value_type(key, module(module_name.c_str())));
+            modules.insert(map<string, module>::value_type(key, module(module_name)));
             printf("加载模块：%s\n", key.c_str());
         }
     }
@@ -158,7 +149,7 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
 {
     while (true)
     {
-        int ret = epoll_wait(ser->epoll_fd, ser->event_list, ser->amount, epoll_timeout);
+        int ret = epoll_wait(ser->epoll_fd, ser->event_list.get(), ser->amount, epoll_timeout);
         if (ret < 0 && ret != EINTR)
         {
             printf("Epoll已关闭。\n");

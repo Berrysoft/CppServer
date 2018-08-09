@@ -6,6 +6,5 @@ class cpu_response : public response
 {
 public:
     virtual ~cpu_response() {}
-    virtual bool supports(const char *version);
     virtual ssize_t send(int fd);
 };

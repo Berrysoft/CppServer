@@ -32,12 +32,6 @@ string get_time()
     return oss.str();
 }
 
-bool version_response::supports(const char* version)
-{
-    string v(version);
-    return v != "HTTP/1.0";
-}
-
 ssize_t version_response::send(int fd)
 {
     INIT_RESULT_AND_TEMP;

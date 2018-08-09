@@ -13,7 +13,7 @@ markdown_response::markdown_response(string filename)
 {
     if (filename.length() > 0)
     {
-        this->filename = filename;
+        this->filename = move(filename);
     }
     else
     {
@@ -70,12 +70,6 @@ ssize_t deal_with_p(bool &in_p, html_writer &writer)
         return writer.write_p_end();
     }
     return 0;
-}
-
-bool markdown_response::supports(const char *version)
-{
-    string v(version);
-    return v != "HTTP/1.0";
 }
 
 ssize_t markdown_response::send(int fd)

@@ -9,8 +9,7 @@ private:
     std::string filename;
 public:
     virtual ~file_response(){}
-    file_response(const char *filename);
+    file_response(std::string filename);
 
-    virtual bool supports(const char *version);
     virtual ssize_t send(int fd);
 };

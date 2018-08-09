@@ -1,17 +1,20 @@
 //模块类，用于动态加载模块。
 #pragma once
+#include <string>
+#include <memory>
+#include <functional>
 #include "mdl/response.h"
 
 class module
 {
 private:
-    char filename[64];
+    std::string filename;
     void* handle;
 public:
     module(){}
-    module(const char *name);
+    module(std::string name);
 
     bool open();
-    response *get_response(const char *command);
+    std::unique_ptr<response> get_response(std::string command);
     void close();
 };
