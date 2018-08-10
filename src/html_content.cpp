@@ -86,7 +86,7 @@ ssize_t html_content::send(int fd, map<string, module> &modules)
         {
             res = deal_commands("error", modules, m);
         }
-        if (res && (!res->supports(version.c_str())))
+        if (res && (!res->supports(version)))
         {
             res = deal_commands("error", modules, m);
         }
