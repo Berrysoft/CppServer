@@ -137,9 +137,11 @@ int main(int argc, char **argv)
         switch (c)
         {
         case 'r':
+            printf("刷新模块...\n");
             ser.refresh_module();
             break;
         case 'c':
+            printf("正在清理...\n");
             ser.clean(ser.get_time_stamp() + 1);
             break;
         }

@@ -45,7 +45,6 @@ server::server(size_t amount, size_t doj, bool verbose) : verbose(verbose), amou
 
 void server::refresh_module()
 {
-    puts("刷新模块...");
     vector<string> lines = read_modules_file();
     {
         modules.clear();
@@ -108,7 +107,6 @@ void server::start(const sockaddr *addr, socklen_t len, int n, int epoll_timeout
 
 void server::clean(int ostamp)
 {
-    puts("正在清理...");
     {
         lock_guard<mutex> locker(clients_mutex);
         for (vector<fd_with_time>::iterator it = clients.begin(); it != clients.end();)
