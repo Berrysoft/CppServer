@@ -3,8 +3,9 @@ MODULE := src/mdl/
 BIN := bin/
 OBJ := obj/
 
-STD := -std=c++14 -O2 -Wall
-STDFIPC := -std=c++14 -fPIC -O2 -Wall
+LTO := -flto
+STD := -std=c++14 -O2 -Wall $(LTO)
+STDFIPC := $(STD) -fPIC
 
 # 编译所有
 .PHONY: all
@@ -17,7 +18,7 @@ run: $(ALL)
 
 # 主程序
 $(BIN)server.out: $(OBJ)main.o $(OBJ)server.o $(OBJ)html_content.o $(OBJ)module.o $(OBJ)read_modules.o
-	g++ -o $@ $^ -lpthread -ldl
+	g++ -o $@ $^ -lpthread -ldl $(LTO)
 $(OBJ)main.o: $(SOURCE)main.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)module.h $(SOURCE)html_content.h $(MODULE)response.h
 	g++ -o $@ -c $(SOURCE)main.cpp $(STD)
 $(OBJ)server.o: $(SOURCE)server.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)apply_tuple.h $(SOURCE)html_content.h $(SOURCE)module.h $(SOURCE)read_modules.h
@@ -37,19 +38,19 @@ $(OBJ)read_modules.o: $(SOURCE)read_modules.cpp $(SOURCE)read_modules.h
 
 # error模块
 $(BIN)error.so: $(OBJ)error.o
-	g++ -shared -o $@ $^
+	g++ -shared -o $@ $^ $(LTO)
 $(OBJ)error.o: $(MODULE)error.cpp $(MODULE)response.h
 	g++ -o $@ -c $(MODULE)error.cpp $(STDFIPC)
 
 # file模块
 $(BIN)file.so: $(OBJ)file.o $(OBJ)html_writer.o $(OBJ)read_modules.o
-	g++ -shared -o $@ $^
+	g++ -shared -o $@ $^ $(LTO)
 $(OBJ)file.o: $(MODULE)file.cpp $(MODULE)response.h $(MODULE)html_writer.h $(SOURCE)read_modules.h
 	g++ -o $@ -c $(MODULE)file.cpp $(STDFIPC)
 
 # cpu模块
 $(BIN)cpu.so: $(OBJ)cpu.o $(OBJ)proc_cpuinfo.o $(OBJ)proc_stat.o $(OBJ)html_writer.o
-	g++ -shared -o $@ $^
+	g++ -shared -o $@ $^ $(LTO)
 $(OBJ)cpu.o: $(MODULE)cpu.cpp $(MODULE)cpu.h $(MODULE)response.h $(MODULE)id.h $(MODULE)proc_cpuinfo.h $(MODULE)proc_stat.h $(MODULE)html_writer.h
 	g++ -o $@ -c $(MODULE)cpu.cpp $(STDFIPC)
 $(OBJ)proc_cpuinfo.o: $(MODULE)proc_cpuinfo.cpp $(MODULE)proc_cpuinfo.h
@@ -59,7 +60,7 @@ $(OBJ)proc_stat.o: $(MODULE)proc_stat.cpp $(MODULE)proc_stat.h
 
 # version模块
 $(BIN)version.so: $(OBJ)version.o $(OBJ)mem.o $(OBJ)html_writer.o
-	g++ -shared -o $@ $^
+	g++ -shared -o $@ $^ $(LTO)
 $(OBJ)version.o: $(MODULE)version.cpp $(MODULE)version.h $(MODULE)response.h $(MODULE)mem.h $(MODULE)html_writer.h
 	g++ -o $@ -c $(MODULE)version.cpp $(STDFIPC)
 $(OBJ)mem.o: $(MODULE)mem.cpp $(MODULE)mem.h
@@ -67,13 +68,13 @@ $(OBJ)mem.o: $(MODULE)mem.cpp $(MODULE)mem.h
 
 # disk模块
 $(BIN)disk.so: $(OBJ)disk.o $(OBJ)html_writer.o
-	g++ -shared -o $@ $^
+	g++ -shared -o $@ $^ $(LTO)
 $(OBJ)disk.o: $(MODULE)disk.cpp $(MODULE)disk.h $(MODULE)html_writer.h
 	g++ -o $@ -c $(MODULE)disk.cpp $(STDFIPC)
 
 # Markdown模块
 $(BIN)markdown.so: $(OBJ)markdown.o $(OBJ)html_writer.o
-	g++ -shared -o $@ $^
+	g++ -shared -o $@ $^ $(LTO)
 $(OBJ)markdown.o: $(MODULE)markdown.cpp $(MODULE)markdown.h $(MODULE)html_writer.h
 	g++ -o $@ -c $(MODULE)markdown.cpp $(STDFIPC)
 
