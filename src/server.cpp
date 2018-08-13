@@ -47,8 +47,8 @@ void server::refresh_module()
 {
     vector<string> lines = read_modules_file();
     {
-        modules.clear();
         lock_guard<mutex> locker(modules_mutex);
+        modules.clear();
         for (string &line : lines)
         {
             istringstream iss(line);
