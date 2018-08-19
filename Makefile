@@ -4,7 +4,7 @@ BIN := bin/
 OBJ := obj/
 
 LTO := -flto
-STD := -std=c++14 -O2 -Wall $(LTO)
+STD := -std=c++17 -O2 -Wall $(LTO)
 STDFIPC := $(STD) -fPIC
 
 # 编译所有
@@ -16,15 +16,21 @@ all: $(ALL)
 run: $(ALL)
 	cd $(BIN) && ./server.out
 
+.PHONY: runv
+runv: $(ALL)
+	cd $(BIN) && ./server.out -v
+
 # 主程序
-$(BIN)server.out: $(OBJ)main.o $(OBJ)server.o $(OBJ)html_content.o $(OBJ)module.o $(OBJ)read_modules.o
+$(BIN)server.out: $(OBJ)main.o $(OBJ)server.o $(OBJ)http.o $(OBJ)http_get.o $(OBJ)module.o $(OBJ)read_modules.o
 	g++ -o $@ $^ -lpthread -ldl $(LTO)
-$(OBJ)main.o: $(SOURCE)main.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)module.h $(SOURCE)html_content.h $(MODULE)response.h
+$(OBJ)main.o: $(SOURCE)main.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)http.h $(MODULE)response.h
 	g++ -o $@ -c $(SOURCE)main.cpp $(STD)
-$(OBJ)server.o: $(SOURCE)server.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)apply_tuple.h $(SOURCE)html_content.h $(SOURCE)module.h $(SOURCE)read_modules.h
+$(OBJ)server.o: $(SOURCE)server.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)http.h $(SOURCE)read_modules.h
 	g++ -o $@ -c $(SOURCE)server.cpp $(STD)
-$(OBJ)html_content.o: $(SOURCE)html_content.cpp $(SOURCE)html_content.h $(MODULE)response.h $(SOURCE)module.h
-	g++ -o $@ -c $(SOURCE)html_content.cpp $(STD)
+$(OBJ)http.o: $(SOURCE)http.cpp $(SOURCE)http.h $(SOURCE)read_modules.h $(SOURCE)http_get.h
+	g++ -o $@ -c $(SOURCE)http.cpp $(STD)
+$(OBJ)http_get.o: $(SOURCE)http_get.cpp $(SOURCE)http_get.h $(SOURCE)http_response.h $(MODULE)response.h $(MODULE)html_writer.h
+	g++ -o $@ -c $(SOURCE)http_get.cpp $(STD)
 $(OBJ)module.o: $(SOURCE)module.cpp $(SOURCE)module.h
 	g++ -o $@ -c $(SOURCE)module.cpp $(STD)
 

@@ -6,35 +6,35 @@ using namespace std;
 
 typedef void *(*get_handle)(const char *);
 
-module::module(string name) : filename(move(name))
+module::module() : handle(nullptr)
 {
 }
 
-bool module::open()
-{
-    handle = dlopen(filename.c_str(), RTLD_LAZY);
-    if (!handle)
-    {
-        return false;
-    }
-    dlerror();
-    return true;
-}
-
-unique_ptr<response> module::get_response(string command)
-{
-    get_handle f = (get_handle)dlsym(handle, "get_instance_response");
-    if (dlerror() != nullptr)
-        return nullptr;
-    return unique_ptr<response>((response *)f(command.c_str()));
-}
-
-void module::close()
+module::~module()
 {
     if (handle)
     {
         dlclose(handle);
-        dlerror();
         handle = nullptr;
     }
+}
+
+void module::open(string name)
+{
+    handle = dlopen(name.c_str(), RTLD_LAZY);
+}
+
+unique_ptr<response> module::get_response(string command)
+{
+    if (handle)
+    {
+        get_handle f = (get_handle)dlsym(handle, "get_instance_response");
+        char *e;
+        if ((e = dlerror()) == nullptr)
+            return unique_ptr<response>((response *)f(command.c_str()));
+        else
+            puts(e);
+    }
+    puts("Here.");
+    return nullptr;
 }

@@ -10,8 +10,6 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
-#include "html_content.h"
-#include "read_modules.h"
 
 #define printf(exp, ...) \
     if (verbose)         \
@@ -45,7 +43,7 @@ server::server(size_t amount, size_t doj, bool verbose) : verbose(verbose), amou
 
 void server::refresh_module()
 {
-    vector<string> lines = read_modules_file();
+    /*vector<string> lines = read_modules_file();
     {
         lock_guard<mutex> locker(modules_mutex);
         modules.clear();
@@ -57,7 +55,9 @@ void server::refresh_module()
             modules.insert(map<string, module>::value_type(key, module(module_name)));
             printf("加载模块：%s\n", key.c_str());
         }
-    }
+    }*/
+    lock_guard<mutex> locker(http_mutex);
+    http_parser.refresh_modules();
 }
 
 void server::start(const sockaddr *addr, socklen_t len, int n, int epoll_timeout, timespec interval, int clock_timeout)
@@ -265,18 +265,19 @@ void server::process_job(int fd, server *ser)
     ssize_t size = recv(fd, buffer, sizeof(buffer), 0);
     if (size > 0)
     {
-        if ((size_t)size < sizeof(buffer))
-            buffer[size] = '\0';
-        html_content content(buffer);
+        unique_ptr<http_response> response;
+        {
+            lock_guard<mutex> locker(ser->http_mutex);
+            if ((size_t)size < sizeof(buffer))
+                buffer[size] = '\0';
+            response = ser->http_parser.get_response(buffer);
+        }
         if ((size_t)size >= sizeof(buffer))
         {
             while ((size_t)(size = recv(fd, buffer, sizeof(buffer), 0)) < sizeof(buffer))
                 ;
         }
-        {
-            lock_guard<mutex> locker(ser->modules_mutex);
-            size = content.send(fd, ser->modules);
-        }
+        size = response->send(fd);
         if (size < 0)
         {
             printf("信息发送失败%d。\n", fd);

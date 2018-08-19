@@ -10,7 +10,7 @@
 #include <vector>
 #include <memory>
 #include "thread_pool.h"
-#include "module.h"
+#include "http.h"
 
 struct fd_with_time
 {
@@ -25,8 +25,9 @@ private:
     int sock;
     std::unique_ptr<thread_pool<int, server *>> pool;
     std::thread loop_thread;
-    std::map<std::string, module> modules;
-    std::mutex modules_mutex;
+    //std::map<std::string, module> modules;
+    http http_parser;
+    std::mutex http_mutex;
     int epoll_fd;
     std::size_t amount;
     std::unique_ptr<epoll_event[]> event_list;
@@ -46,5 +47,5 @@ public:
     int get_time_stamp() { return time_stamp; }
 private:
     static void accept_loop(int epoll_timeout, int clock_timeout, server *ser);
-    static void process_job(int fd, server *pser);
+    static void process_job(int fd, server *ser);
 };

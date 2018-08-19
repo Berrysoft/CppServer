@@ -7,13 +7,11 @@
 class module
 {
 private:
-    std::string filename;
     void* handle;
 public:
-    module(){}
-    module(std::string name);
+    module();
+    ~module();
 
-    bool open();
+    void open(std::string name);
     std::unique_ptr<response> get_response(std::string command);
-    void close();
 };

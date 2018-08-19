@@ -1,17 +1,18 @@
-#include "html_content.h"
+#include "http_get.h"
 #include <cstring>
 #include <sstream>
 #include <sys/socket.h>
 #include <unistd.h>
+#include "module.h"
 #include "mdl/response.h"
 #include "mdl/html_writer.h"
 
 using namespace std;
 
-html_content::html_content(const char *request)
+http_get::http_get(string request, map<string, string> &modules) : modules(modules)
 {
     istringstream iss(request);
-    iss >> method >> url >> version;
+    iss >> url >> version;
     if (url.length() > 0)
     {
         if (url[0] == '/')
@@ -28,27 +29,19 @@ html_content::html_content(const char *request)
     }
 }
 
-unique_ptr<response> get_command_response(string command, string response_command, map<string, module> &modules, module &m)
+unique_ptr<response> get_command_response(string command, string response_command, map<string, string> &modules, module &m)
 {
-    map<string, module>::iterator it;
+    map<string, string>::iterator it;
     it = modules.find(command);
     if (it != modules.end())
     {
-        m = it->second;
-        if (m.open())
-        {
-            unique_ptr<response> res = m.get_response(response_command);
-            if (res)
-            {
-                return res;
-            }
-        }
+        m.open(it->second);
+        return m.get_response(response_command);
     }
-    m.close();
     return nullptr;
 }
 
-unique_ptr<response> deal_commands(string command, map<string, module> &modules, module &m)
+unique_ptr<response> deal_commands(string command, map<string, string> &modules, module &m)
 {
     if (command.length() == 0)
         command = "file/";
@@ -72,20 +65,13 @@ unique_ptr<response> deal_commands(string command, map<string, module> &modules,
     return result;
 }
 
-ssize_t html_content::send(int fd, map<string, module> &modules)
+ssize_t http_get::send(int fd)
 {
     module m;
     INIT_RESULT_AND_TEMP;
     {
         unique_ptr<response> res = nullptr;
-        if (method == "GET")
-        {
-            res = deal_commands(url, modules, m);
-        }
-        else
-        {
-            res = deal_commands("error", modules, m);
-        }
+        res = deal_commands(url, modules, m);
         if (res && (!res->supports(version)))
         {
             res = deal_commands("error", modules, m);
@@ -139,6 +125,5 @@ ssize_t html_content::send(int fd, map<string, module> &modules)
             }
         }
     }
-    m.close();
     RETURN_RESULT;
 }

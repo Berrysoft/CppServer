@@ -7,15 +7,15 @@
 #include <condition_variable>
 #include <atomic>
 #include <tuple>
+#include <memory>
 #include <functional>
-#include "apply_tuple.h"
 
 template <typename... TArgs>
 class thread_pool
 {
 private:
     std::function<void(TArgs...)> task;
-    std::vector<std::tuple<TArgs...> *> jobs;
+    std::vector<std::unique_ptr<std::tuple<TArgs...>>> jobs;
     std::valarray<std::thread> do_threads;
 
     std::mutex m_mutex;
@@ -68,8 +68,7 @@ void thread_pool<TArgs...>::post(TArgs... args)
 {
     {
         std::lock_guard<std::mutex> locker(m_mutex);
-        std::tuple<TArgs...> *tpl = new std::tuple<TArgs...>(args...);
-        jobs.push_back(tpl);
+        jobs.push_back(std::make_unique<std::tuple<TArgs...>>(args...));
     }
     cond.notify_one();
 }
@@ -92,20 +91,19 @@ void thread_pool<TArgs...>::do_job(thread_pool<TArgs...> *pool)
         }
         if (pool->stop)
             break;
-        std::tuple<TArgs...> *j = nullptr;
+        std::unique_ptr<std::tuple<TArgs...>> j;
         {
             std::lock_guard<std::mutex> locker(pool->m_mutex);
             if (!pool->jobs.empty())
             {
-                typename std::vector<std::tuple<TArgs...> *>::iterator it = pool->jobs.begin();
-                j = *it;
+                typename std::vector<std::unique_ptr<std::tuple<TArgs...>>>::iterator it = pool->jobs.begin();
+                j = std::move(*it);
                 pool->jobs.erase(it);
             }
         }
         if (j)
         {
             apply(pool->task, *j);
-            delete j;
         }
     }
 }
