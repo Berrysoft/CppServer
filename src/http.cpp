@@ -24,15 +24,12 @@ void http::refresh_modules()
     }
 }
 
-unique_ptr<http_response> http::get_response(const char *request)
+unique_ptr<http_response> http::get_response(const http_request &request)
 {
-    istringstream iss(request);
-    string method, req;
-    iss >> method;
-    getline(iss, req);
+    const string &method = request.method();
     if (method == "GET")
     {
-        return make_unique<http_get>(req, modules);
+        return make_unique<http_get>(request, modules);
     }
     else if (method == "HEAD")
     {

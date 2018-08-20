@@ -21,15 +21,17 @@ runv: $(ALL)
 	cd $(BIN) && ./server.out -v
 
 # 主程序
-$(BIN)server.out: $(OBJ)main.o $(OBJ)server.o $(OBJ)http.o $(OBJ)http_get.o $(OBJ)http_head.o $(OBJ)module.o $(OBJ)read_modules.o
+$(BIN)server.out: $(OBJ)main.o $(OBJ)server.o $(OBJ)http.o $(OBJ)http_request.o $(OBJ)http_get.o $(OBJ)http_head.o $(OBJ)module.o $(OBJ)read_modules.o
 	g++ -o $@ $^ -lpthread -ldl $(LTO)
 $(OBJ)main.o: $(SOURCE)main.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)http.h $(MODULE)response.h
 	g++ -o $@ -c $(SOURCE)main.cpp $(STD)
-$(OBJ)server.o: $(SOURCE)server.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)http.h $(SOURCE)read_modules.h
+$(OBJ)server.o: $(SOURCE)server.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)http.h $(SOURCE)read_modules.h $(SOURCE)http_request.h
 	g++ -o $@ -c $(SOURCE)server.cpp $(STD)
-$(OBJ)http.o: $(SOURCE)http.cpp $(SOURCE)http.h $(SOURCE)read_modules.h $(SOURCE)http_get.h $(SOURCE)http_head.h
+$(OBJ)http.o: $(SOURCE)http.cpp $(SOURCE)http.h $(SOURCE)read_modules.h $(SOURCE)http_request.h $(SOURCE)http_get.h $(SOURCE)http_head.h
 	g++ -o $@ -c $(SOURCE)http.cpp $(STD)
-$(OBJ)http_get.o: $(SOURCE)http_get.cpp $(SOURCE)http_get.h $(SOURCE)http_response.h $(MODULE)response.h $(MODULE)html_writer.h
+$(OBJ)http_request.o: $(SOURCE)http_request.cpp $(SOURCE)http_request.h
+	g++ -o $@ -c $(SOURCE)http_request.cpp $(STD)
+$(OBJ)http_get.o: $(SOURCE)http_get.cpp $(SOURCE)http_get.h $(SOURCE)http_response.h $(MODULE)response.h $(SOURCE)http_request.h
 	g++ -o $@ -c $(SOURCE)http_get.cpp $(STD)
 $(OBJ)http_head.o: $(SOURCE)http_head.cpp $(SOURCE)http_head.h $(SOURCE)http_response.h
 	g++ -o $@ -c $(SOURCE)http_head.cpp $(STD)

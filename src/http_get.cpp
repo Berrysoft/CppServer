@@ -5,33 +5,32 @@
 #include <unistd.h>
 #include "module.h"
 #include "mdl/response.h"
-#include "mdl/html_writer.h"
 
 using namespace std;
 
-http_get::http_get(string request, map<string, string> &modules) : modules(modules)
+http_get::http_get(const http_request &request, const map<string, string> &modules) : modules(modules)
 {
-    istringstream iss(request);
-    iss >> url >> version;
+    url = request.url();
+    version = request.version();
     if (url.length() > 0)
     {
         if (url[0] == '/')
         {
             url.erase(url.begin());
         }
-        if (url.length() > 0)
+    }
+    if (url.length() > 0)
+    {
+        if (url.back() == '/')
         {
-            if (url.back() == '/')
-            {
-                url.erase(--url.end());
-            }
+            url.erase(--url.end());
         }
     }
 }
 
-unique_ptr<response> get_command_response(string command, string response_command, map<string, string> &modules, module &m)
+unique_ptr<response> get_command_response(string command, string response_command, const map<string, string> &modules, module &m)
 {
-    map<string, string>::iterator it;
+    map<string, string>::const_iterator it;
     it = modules.find(command);
     if (it != modules.end())
     {
@@ -41,23 +40,22 @@ unique_ptr<response> get_command_response(string command, string response_comman
     return nullptr;
 }
 
-unique_ptr<response> deal_commands(string command, map<string, string> &modules, module &m)
+unique_ptr<response> deal_commands(string command, const map<string, string> &modules, module &m)
 {
+    unique_ptr<response> result;
     if (command.length() == 0)
-        command = "file/";
+        command = "file";
+    size_t index = command.find_first_of('/');
     string temp;
-    int index = command.find_first_of('/');
-    if (index > 0)
+    if (index != string::npos)
     {
         temp = command.substr(index + 1);
         command = command.substr(0, index);
     }
-    else if (index == 0)
+    if (command.length() > 0)
     {
-        temp = command;
-        command = string();
+        result = get_command_response(command, temp, modules, m);
     }
-    unique_ptr<response> result = get_command_response(command, temp, modules, m);
     if (!result)
     {
         result = get_command_response("error", string(), modules, m);
@@ -68,7 +66,7 @@ unique_ptr<response> deal_commands(string command, map<string, string> &modules,
 ssize_t http_get::send(int fd)
 {
     module m;
-    INIT_RESULT_AND_TEMP;
+    ssize_t result = 0, t;
     {
         unique_ptr<response> res = deal_commands(url, modules, m);
         if (res && (!res->supports(version)))
@@ -110,7 +108,15 @@ ssize_t http_get::send(int fd)
             sprintf(realhead, head, 404, "Not Found", length);
             break;
         }
-        IF_NEGATIVE_EXIT(::send(fd, realhead, strlen(realhead), 0));
+        t = ::send(fd, realhead, strlen(realhead), 0);
+        if (t < 0)
+        {
+            result = -1;
+        }
+        else
+        {
+            result += t;
+        }
         if (res)
         {
             t = res->send(fd);
@@ -124,5 +130,5 @@ ssize_t http_get::send(int fd)
             }
         }
     }
-    RETURN_RESULT;
+    return result;
 }

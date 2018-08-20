@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 #include "http_response.h"
+#include "http_request.h"
 
 class http
 {
@@ -13,5 +14,5 @@ private:
 public:
     http();
     void refresh_modules();
-    std::unique_ptr<http_response> get_response(const char *request);
+    std::unique_ptr<http_response> get_response(const http_request &request);
 };

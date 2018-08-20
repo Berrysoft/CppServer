@@ -10,6 +10,7 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include "http_request.h"
 
 #define printf(exp, ...) \
     if (verbose)         \
@@ -244,31 +245,15 @@ void server::process_job(int fd)
 {
     printf("正在处理请求%d...\n", fd);
     signal(SIGPIPE, SIG_IGN);
-    char buffer[4096];
-    memset(buffer, 0, sizeof(buffer));
-    ssize_t size = recv(fd, buffer, sizeof(buffer), 0);
-    if (size > 0)
+    http_request request = http_request::parse(fd);
+    unique_ptr<http_response> response = http_parser.get_response(request);
+    ssize_t size = response->send(fd);
+    if (size < 0)
     {
-        unique_ptr<http_response> response;
-        {
-            lock_guard<mutex> locker(http_mutex);
-            if ((size_t)size < sizeof(buffer))
-                buffer[size] = '\0';
-            response = http_parser.get_response(buffer);
-        }
-        if ((size_t)size >= sizeof(buffer))
-        {
-            while ((size_t)(size = recv(fd, buffer, sizeof(buffer), 0)) < sizeof(buffer))
-                ;
-        }
-        size = response->send(fd);
-        if (size < 0)
-        {
-            printf("信息发送失败%d。\n", fd);
-        }
-        else
-        {
-            printf("信息已发送%d。\n", fd);
-        }
+        printf("信息发送失败%d。\n", fd);
+    }
+    else
+    {
+        printf("信息已发送%d。\n", fd);
     }
 }
