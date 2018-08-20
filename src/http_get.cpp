@@ -17,13 +17,13 @@ http_get::http_get(string request, map<string, string> &modules) : modules(modul
     {
         if (url[0] == '/')
         {
-            url = url.substr(1);
+            url.erase(url.begin());
         }
         if (url.length() > 0)
         {
             if (url.back() == '/')
             {
-                url = url.substr(0, url.length() - 1);
+                url.erase(--url.end());
             }
         }
     }
@@ -70,8 +70,7 @@ ssize_t http_get::send(int fd)
     module m;
     INIT_RESULT_AND_TEMP;
     {
-        unique_ptr<response> res = nullptr;
-        res = deal_commands(url, modules, m);
+        unique_ptr<response> res = deal_commands(url, modules, m);
         if (res && (!res->supports(version)))
         {
             res = deal_commands("error", modules, m);

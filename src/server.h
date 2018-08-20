@@ -25,7 +25,6 @@ private:
     int sock;
     std::unique_ptr<thread_pool<int, server *>> pool;
     std::thread loop_thread;
-    //std::map<std::string, module> modules;
     http http_parser;
     std::mutex http_mutex;
     int epoll_fd;

@@ -43,19 +43,6 @@ server::server(size_t amount, size_t doj, bool verbose) : verbose(verbose), amou
 
 void server::refresh_module()
 {
-    /*vector<string> lines = read_modules_file();
-    {
-        lock_guard<mutex> locker(modules_mutex);
-        modules.clear();
-        for (string &line : lines)
-        {
-            istringstream iss(line);
-            string key, module_name;
-            iss >> key >> module_name;
-            modules.insert(map<string, module>::value_type(key, module(module_name)));
-            printf("加载模块：%s\n", key.c_str());
-        }
-    }*/
     lock_guard<mutex> locker(http_mutex);
     http_parser.refresh_modules();
 }
@@ -115,6 +102,7 @@ void server::clean(int ostamp)
             {
                 printf("清理%d。\n", it->fd);
                 clients.erase(it);
+                shutdown(it->fd, SHUT_RDWR);
                 close(it->fd);
             }
             else
@@ -160,26 +148,27 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
         printf("接收到%d个事件。\n", ret);
         for (int i = 0; i < ret; i++)
         {
+            int fd = ser->event_list[i].data.fd;
             if ((ser->event_list[i].events & EPOLLERR) || (ser->event_list[i].events & EPOLLHUP) || (ser->event_list[i].events & EPOLLRDHUP) || !(ser->event_list[i].events & EPOLLIN))
             {
                 if (ser->event_list[i].events & EPOLLRDHUP)
                 {
-                    printf("客户端已关闭Socket %d。\n", ser->event_list[i].data.fd);
+                    printf("客户端已关闭Socket %d。\n", fd);
                 }
                 else
                 {
-                    printf("Epoll错误，关闭Socket %d。\n", ser->event_list[i].data.fd);
+                    printf("Epoll错误，关闭Socket %d。\n", fd);
                 }
-                epoll_ctl(ser->epoll_fd, EPOLL_CTL_DEL, ser->event_list[i].data.fd, &(ser->event_list[i]));
-                close(ser->event_list[i].data.fd);
+                epoll_ctl(ser->epoll_fd, EPOLL_CTL_DEL, fd, &(ser->event_list[i]));
+                shutdown(fd, SHUT_RDWR);
+                close(fd);
                 {
                     lock_guard<mutex> locker(ser->clients_mutex);
                     for (vector<fd_with_time>::iterator it = ser->clients.begin(); it != ser->clients.end();)
                     {
-                        if (it->fd == ser->event_list[i].data.fd)
+                        if (it->fd == fd)
                         {
                             ser->clients.erase(it);
-                            close(it->fd);
                         }
                         else
                         {
@@ -189,7 +178,7 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
                 }
                 continue;
             }
-            if (ser->event_list[i].data.fd == ser->sock)
+            if (fd == ser->sock)
             {
                 sockaddr_in paddr;
                 socklen_t len = sizeof(sockaddr_in);
@@ -215,7 +204,7 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
                     }
                 }
             }
-            else if (ser->event_list[i].data.fd == ser->timer_fd)
+            else if (fd == ser->timer_fd)
             {
                 unsigned long long timer_buf;
                 ssize_t len = read(ser->timer_fd, &timer_buf, sizeof(timer_buf));
@@ -233,7 +222,6 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
             }
             else
             {
-                int fd = (int)(ser->event_list[i].data.fd);
                 {
                     lock_guard<mutex> locker(ser->clients_mutex);
                     for (vector<fd_with_time>::iterator it = ser->clients.begin(); it != ser->clients.end(); it++)
