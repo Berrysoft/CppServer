@@ -16,6 +16,8 @@
     std::printf(exp, ##__VA_ARGS__)
 
 using namespace std;
+using std::placeholders::_1;
+using std::placeholders::_2;
 
 server::server(size_t amount, size_t doj, bool verbose) : verbose(verbose), amount(amount)
 {
@@ -37,7 +39,8 @@ server::server(size_t amount, size_t doj, bool verbose) : verbose(verbose), amou
     printf("初始化Epoll...\n");
     event_list = unique_ptr<epoll_event[]>(new epoll_event[amount]);
     printf("初始化线程池...\n");
-    pool = make_unique<thread_pool<int, server *>>(doj, process_job);
+    pool = make_unique<thread_pool<int>>(doj, bind(&server::process_job, this, _1));
+    printf("刷新模块...\n");
     refresh_module();
 }
 
@@ -89,26 +92,24 @@ void server::start(const sockaddr *addr, socklen_t len, int n, int epoll_timeout
         return;
     }
 
-    loop_thread = thread(accept_loop, epoll_timeout, clock_timeout, this);
+    loop_thread = thread(bind(&server::accept_loop, this, _1, _2), epoll_timeout, clock_timeout);
 }
 
 void server::clean(int ostamp)
 {
+    lock_guard<mutex> locker(clients_mutex);
+    for (vector<fd_with_time>::iterator it = clients.begin(); it != clients.end();)
     {
-        lock_guard<mutex> locker(clients_mutex);
-        for (vector<fd_with_time>::iterator it = clients.begin(); it != clients.end();)
+        if (it->time < ostamp)
         {
-            if (it->time < ostamp)
-            {
-                printf("清理%d。\n", it->fd);
-                clients.erase(it);
-                shutdown(it->fd, SHUT_RDWR);
-                close(it->fd);
-            }
-            else
-            {
-                it++;
-            }
+            printf("清理%d。\n", it->fd);
+            clients.erase(it);
+            shutdown(it->fd, SHUT_RDWR);
+            close(it->fd);
+        }
+        else
+        {
+            it++;
         }
     }
 }
@@ -125,16 +126,11 @@ void server::stop()
     loop_thread.join();
 }
 
-#undef printf
-#define printf(exp, ...) \
-    if (ser->verbose)    \
-    std::printf(exp, ##__VA_ARGS__)
-
-void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
+void server::accept_loop(int epoll_timeout, int clock_timeout)
 {
     while (true)
     {
-        int ret = epoll_wait(ser->epoll_fd, ser->event_list.get(), ser->amount, epoll_timeout);
+        int ret = epoll_wait(epoll_fd, event_list.get(), amount, epoll_timeout);
         if (ret < 0 && ret != EINTR)
         {
             printf("Epoll已关闭。\n");
@@ -148,10 +144,10 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
         printf("接收到%d个事件。\n", ret);
         for (int i = 0; i < ret; i++)
         {
-            int fd = ser->event_list[i].data.fd;
-            if ((ser->event_list[i].events & EPOLLERR) || (ser->event_list[i].events & EPOLLHUP) || (ser->event_list[i].events & EPOLLRDHUP) || !(ser->event_list[i].events & EPOLLIN))
+            int fd = event_list[i].data.fd;
+            if ((event_list[i].events & EPOLLERR) || (event_list[i].events & EPOLLHUP) || (event_list[i].events & EPOLLRDHUP) || !(event_list[i].events & EPOLLIN))
             {
-                if (ser->event_list[i].events & EPOLLRDHUP)
+                if (event_list[i].events & EPOLLRDHUP)
                 {
                     printf("客户端已关闭Socket %d。\n", fd);
                 }
@@ -159,16 +155,16 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
                 {
                     printf("Epoll错误，关闭Socket %d。\n", fd);
                 }
-                epoll_ctl(ser->epoll_fd, EPOLL_CTL_DEL, fd, &(ser->event_list[i]));
+                epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, &(event_list[i]));
                 shutdown(fd, SHUT_RDWR);
                 close(fd);
                 {
-                    lock_guard<mutex> locker(ser->clients_mutex);
-                    for (vector<fd_with_time>::iterator it = ser->clients.begin(); it != ser->clients.end();)
+                    lock_guard<mutex> locker(clients_mutex);
+                    for (vector<fd_with_time>::iterator it = clients.begin(); it != clients.end();)
                     {
                         if (it->fd == fd)
                         {
-                            ser->clients.erase(it);
+                            clients.erase(it);
                         }
                         else
                         {
@@ -178,12 +174,12 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
                 }
                 continue;
             }
-            if (fd == ser->sock)
+            if (fd == sock)
             {
                 sockaddr_in paddr;
                 socklen_t len = sizeof(sockaddr_in);
                 int newsock;
-                if ((newsock = accept(ser->sock, (sockaddr *)&paddr, &len)) > 0)
+                if ((newsock = accept(sock, (sockaddr *)&paddr, &len)) > 0)
                 {
                     printf("新建Socket：%d.\n", newsock);
                     int flags = fcntl(newsock, F_GETFL, 0);
@@ -191,60 +187,60 @@ void server::accept_loop(int epoll_timeout, int clock_timeout, server *ser)
                     epoll_event e;
                     e.data.fd = newsock;
                     e.events = EPOLLIN | EPOLLRDHUP | EPOLLET;
-                    if (epoll_ctl(ser->epoll_fd, EPOLL_CTL_ADD, newsock, &e) < 0)
+                    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, newsock, &e) < 0)
                     {
                         printf("接收%d错误。\n", newsock);
                     }
                     else
                     {
                         {
-                            lock_guard<mutex> locker(ser->clients_mutex);
-                            ser->clients.push_back({newsock, ser->time_stamp});
+                            lock_guard<mutex> locker(clients_mutex);
+                            clients.push_back({newsock, time_stamp});
                         }
                     }
                 }
             }
-            else if (fd == ser->timer_fd)
+            else if (fd == timer_fd)
             {
                 unsigned long long timer_buf;
-                ssize_t len = read(ser->timer_fd, &timer_buf, sizeof(timer_buf));
+                ssize_t len = read(timer_fd, &timer_buf, sizeof(timer_buf));
                 if (len < 0)
                 {
                     continue;
                 }
-                ser->time_stamp += timer_buf;
-                printf("时间戳：%d\n", ser->time_stamp);
-                if (ser->time_stamp > clock_timeout)
+                time_stamp += timer_buf;
+                printf("时间戳：%d\n", time_stamp);
+                if (time_stamp > clock_timeout)
                 {
-                    ser->clean(ser->time_stamp - clock_timeout);
-                    ser->time_stamp = 0;
+                    clean(time_stamp - clock_timeout);
+                    time_stamp = 0;
                 }
             }
             else
             {
                 {
-                    lock_guard<mutex> locker(ser->clients_mutex);
-                    for (vector<fd_with_time>::iterator it = ser->clients.begin(); it != ser->clients.end(); it++)
+                    lock_guard<mutex> locker(clients_mutex);
+                    for (vector<fd_with_time>::iterator it = clients.begin(); it != clients.end(); it++)
                     {
                         if (it->fd == fd)
                         {
-                            it->time = ser->time_stamp;
+                            it->time = time_stamp;
                         }
                     }
                 }
-                ser->pool->post(fd, ser);
+                pool->post(fd);
             }
         }
     }
-    for (size_t i = 0; i < ser->amount; i++)
+    for (size_t i = 0; i < amount; i++)
     {
-        close(ser->event_list[i].data.fd);
+        close(event_list[i].data.fd);
     }
-    close(ser->epoll_fd);
-    close(ser->sock);
+    close(epoll_fd);
+    close(sock);
 }
 
-void server::process_job(int fd, server *ser)
+void server::process_job(int fd)
 {
     printf("正在处理请求%d...\n", fd);
     signal(SIGPIPE, SIG_IGN);
@@ -255,10 +251,10 @@ void server::process_job(int fd, server *ser)
     {
         unique_ptr<http_response> response;
         {
-            lock_guard<mutex> locker(ser->http_mutex);
+            lock_guard<mutex> locker(http_mutex);
             if ((size_t)size < sizeof(buffer))
                 buffer[size] = '\0';
-            response = ser->http_parser.get_response(buffer);
+            response = http_parser.get_response(buffer);
         }
         if ((size_t)size >= sizeof(buffer))
         {

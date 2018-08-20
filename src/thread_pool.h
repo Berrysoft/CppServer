@@ -28,9 +28,8 @@ public:
     ~thread_pool();
 
     void post(TArgs... args);
-    void broadcast();
 private:
-    static void do_job(thread_pool<TArgs...> *pool);
+    void do_job();
 };
 
 template <typename... TArgs>
@@ -42,7 +41,7 @@ thread_pool<TArgs...>::thread_pool(std::size_t dojob, std::function<void(TArgs..
     do_threads = std::valarray<std::thread>(dojob);
     for (std::size_t i = 0; i < dojob; i++)
     {
-        do_threads[i] = std::thread(do_job, this);
+        do_threads[i] = std::thread(std::bind(&thread_pool<TArgs...>::do_job, this));
     }
 }
 
@@ -74,36 +73,30 @@ void thread_pool<TArgs...>::post(TArgs... args)
 }
 
 template <typename... TArgs>
-void thread_pool<TArgs...>::broadcast()
-{
-    cond.notify_all();
-}
-
-template <typename... TArgs>
-void thread_pool<TArgs...>::do_job(thread_pool<TArgs...> *pool)
+void thread_pool<TArgs...>::do_job()
 {
     while (true)
     {
-        if (pool->jobs.empty())
+        if (jobs.empty())
         {
-            std::unique_lock<std::mutex> locker(pool->cond_mutex);
-            pool->cond.wait(locker);
+            std::unique_lock<std::mutex> locker(cond_mutex);
+            cond.wait(locker);
         }
-        if (pool->stop)
+        if (stop)
             break;
         std::unique_ptr<std::tuple<TArgs...>> j;
         {
-            std::lock_guard<std::mutex> locker(pool->m_mutex);
-            if (!pool->jobs.empty())
+            std::lock_guard<std::mutex> locker(m_mutex);
+            if (!jobs.empty())
             {
-                typename std::vector<std::unique_ptr<std::tuple<TArgs...>>>::iterator it = pool->jobs.begin();
+                typename std::vector<std::unique_ptr<std::tuple<TArgs...>>>::iterator it = jobs.begin();
                 j = std::move(*it);
-                pool->jobs.erase(it);
+                jobs.erase(it);
             }
         }
         if (j)
         {
-            apply(pool->task, *j);
+            apply(task, *j);
         }
     }
 }

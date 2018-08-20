@@ -23,7 +23,7 @@ class server
 private:
     bool verbose;
     int sock;
-    std::unique_ptr<thread_pool<int, server *>> pool;
+    std::unique_ptr<thread_pool<int>> pool;
     std::thread loop_thread;
     http http_parser;
     std::mutex http_mutex;
@@ -45,6 +45,6 @@ public:
 
     int get_time_stamp() { return time_stamp; }
 private:
-    static void accept_loop(int epoll_timeout, int clock_timeout, server *ser);
-    static void process_job(int fd, server *ser);
+    void accept_loop(int epoll_timeout, int clock_timeout);
+    void process_job(int fd);
 };
