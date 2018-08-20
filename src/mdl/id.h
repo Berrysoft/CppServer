@@ -13,6 +13,5 @@ struct id
 
 id get_id()
 {
-    id result = {getuid(), geteuid(), getgid(), getegid(), getpid()};
-    return result;
+    return {getuid(), geteuid(), getgid(), getegid(), getpid()};
 }

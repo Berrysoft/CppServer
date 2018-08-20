@@ -3,17 +3,17 @@
 #include <fstream>
 #include <string>
 
-using std::istream;
-using std::ifstream;
-using std::string;
 using std::getline;
+using std::ifstream;
+using std::istream;
+using std::string;
 
-void read_linuxcpu(istream& is, linuxcpu& lcpu)
+void read_linuxcpu(istream &is, linuxcpu &lcpu)
 {
     is >> lcpu.user >> lcpu.nice >> lcpu.system >> lcpu.idle >> lcpu.iowait >> lcpu.irq >> lcpu.softirq >> lcpu.steal >> lcpu.guest >> lcpu.guest_nice;
 }
 
-bool read_with_head(istream& is, const char* head, int& value)
+bool read_with_head(istream &is, const char *head, int &value)
 {
     string t;
     is >> t;
@@ -49,14 +49,11 @@ proc_stat read_proc_stat()
             }
         }
         getline(ifs, head);
-        if (read_with_head(ifs, "ctxt", result.ctxt) &&
-            read_with_head(ifs, "btime", result.btime) &&
-            read_with_head(ifs, "processes", result.processes) &&
-            read_with_head(ifs, "procs_running", result.procs_running) &&
-            read_with_head(ifs, "procs_blocked", result.procs_blocked))
-        {
-            ;
-        }
+        read_with_head(ifs, "ctxt", result.ctxt);
+        read_with_head(ifs, "btime", result.btime);
+        read_with_head(ifs, "processes", result.processes);
+        read_with_head(ifs, "procs_running", result.procs_running);
+        read_with_head(ifs, "procs_blocked", result.procs_blocked);
     }
     ifs.close();
     return result;

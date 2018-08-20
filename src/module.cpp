@@ -35,6 +35,5 @@ unique_ptr<response> module::get_response(string command)
         else
             puts(e);
     }
-    puts("Here.");
     return nullptr;
 }

@@ -16,8 +16,8 @@ vector<string> read_modules_file()
     {
         string line;
         getline(ifs, line);
-        long long i = line.find_first_not_of(' ');
-        if (i > 0)
+        size_t i = line.find_first_not_of(' ');
+        if (i != string::npos && i > 0)
             line = line.substr(i);
         if (line.length() == 0)
             continue;

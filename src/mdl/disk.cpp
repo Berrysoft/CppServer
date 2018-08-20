@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 #include <sys/statfs.h>
-#include <cstdio>
 
 using namespace std;
 
@@ -28,18 +27,12 @@ ssize_t disk_response::send(int fd)
     unsigned long long bss = bs * b;
     unsigned long long fbs = disk.f_bfree;
     unsigned long long fbss = fbs * b;
-    char buffer[16];
     texts.clear();
-    sprintf(buffer, "%llu B", b);
-    texts.push_back(buffer);
-    sprintf(buffer, "%llu", bs);
-    texts.push_back(buffer);
-    sprintf(buffer, "%llu GB", bss >> 30);
-    texts.push_back(buffer);
-    sprintf(buffer, "%llu", fbs);
-    texts.push_back(buffer);
-    sprintf(buffer, "%llu GB", fbss >> 30);
-    texts.push_back(buffer);
+    texts.push_back(to_string(b) + " B");
+    texts.push_back(to_string(bs));
+    texts.push_back(to_string(bss >> 30) + " GB");
+    texts.push_back(to_string(fbs));
+    texts.push_back(to_string(fbss >> 30) + " GB");
     IF_NEGATIVE_EXIT(writer.write_tr(texts));
     IF_NEGATIVE_EXIT(writer.write_table_end());
     IF_NEGATIVE_EXIT(writer.write_end());

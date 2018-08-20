@@ -3,13 +3,11 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <cstdio>
-#include <cstring>
 #include <csignal>
 #include <fcntl.h>
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <algorithm>
 #include "http_request.h"
 
 #define printf(exp, ...) \

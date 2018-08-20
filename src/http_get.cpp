@@ -26,6 +26,10 @@ http_get::http_get(const http_request &request, const map<string, string> &modul
             url.erase(--url.end());
         }
     }
+    else
+    {
+        url = "file";
+    }
 }
 
 unique_ptr<response> get_command_response(string command, string response_command, const map<string, string> &modules, module &m)
@@ -43,8 +47,6 @@ unique_ptr<response> get_command_response(string command, string response_comman
 unique_ptr<response> deal_commands(string command, const map<string, string> &modules, module &m)
 {
     unique_ptr<response> result;
-    if (command.length() == 0)
-        command = "file";
     size_t index = command.find_first_of('/');
     string temp;
     if (index != string::npos)
@@ -63,6 +65,21 @@ unique_ptr<response> deal_commands(string command, const map<string, string> &mo
     return result;
 }
 
+string status_des(int status)
+{
+    switch(status)
+    {
+    case 200:
+        return "OK";
+    case 400:
+        return "Bad Request";
+    case 404:
+        return "Not Found";
+    default:
+        return string();
+    }
+}
+
 ssize_t http_get::send(int fd)
 {
     module m;
@@ -73,42 +90,31 @@ ssize_t http_get::send(int fd)
         {
             res = deal_commands("error", modules, m);
         }
-
-        const char head[] = "HTTP/1.1 %d %s\r\nServer: Berrysoft.Linux.Cpp.Server\r\nContent-Type: text/html;charset=UTF-8\r\nConnection: keep-alive\r\n%s\r\n\r\n";
-        char realhead[256];
-        char length[64];
         int res_status;
         if (res)
         {
-            int res_length = res->length();
-            if (res_length < 0)
-            {
-                strcpy(length, "Transfer-Encoding: chunked");
-            }
-            else
-            {
-                sprintf(length, "Content-Length: %d", res_length);
-            }
             res_status = res->status();
         }
         else
         {
-            length[0] = '\0';
             res_status = 400;
         }
-        switch (res_status)
+        ostringstream head;
+        head << "HTTP/1.1 " << res_status << ' ' << status_des(res_status) << "\r\nServer: Berrysoft.Linux.Cpp.Server\r\nContent-Type: text/html;charset=UTF-8\r\nConnection: keep-alive\r\n";
+        if(res)
         {
-        case 200:
-            sprintf(realhead, head, 200, "OK", length);
-            break;
-        case 400:
-            sprintf(realhead, head, 400, "Bad Request", length);
-            break;
-        case 404:
-            sprintf(realhead, head, 404, "Not Found", length);
-            break;
+            int res_length = res->length();
+            if (res_length < 0)
+            {
+                head << "Transfer-Encoding: chunked\r\n\r\n";
+            }
+            else
+            {
+                head << "Content-Length: " << res_length << "\r\n\r\n";
+            }
         }
-        t = ::send(fd, realhead, strlen(realhead), 0);
+        string realhead = head.str();
+        t = ::send(fd, realhead.c_str(), realhead.length(), 0);
         if (t < 0)
         {
             result = -1;

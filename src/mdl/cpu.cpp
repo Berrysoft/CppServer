@@ -3,7 +3,7 @@
 #include "proc_stat.h"
 #include "id.h"
 #include <sys/socket.h>
-#include <stdlib.h>
+#include <string>
 #include <sstream>
 #include "html_writer.h"
 
@@ -11,12 +11,10 @@ using namespace std;
 
 void push_linuxcpu(vector<string> &texts, const linuxcpu &cpu)
 {
-    char buffer[16];
     int *p = (int *)(&cpu);
-    for (int i = 0; i < 10;i++)
+    for (int i = 0; i < 10; i++)
     {
-        sprintf(buffer, "%d", p[i]);
-        texts.push_back(buffer);
+        texts.push_back(to_string(p[i]));
     }
 }
 
@@ -38,11 +36,8 @@ ssize_t cpu_response::send(int fd)
     {
         texts.clear();
         texts.push_back(cpu.model_name);
-        char buffer[4];
-        sprintf(buffer, "%d", cpu.cpu_cores);
-        texts.push_back(buffer);
-        sprintf(buffer, "%d", cpu.siblings);
-        texts.push_back(buffer);
+        texts.push_back(to_string(cpu.cpu_cores));
+        texts.push_back(to_string(cpu.siblings));
         IF_NEGATIVE_EXIT(writer.write_tr(texts));
     }
     IF_NEGATIVE_EXIT(writer.write_table_end());
@@ -69,9 +64,7 @@ ssize_t cpu_response::send(int fd)
     for (size_t i = 0; i < ps.cpu_core.size(); i++)
     {
         texts.clear();
-        char buffer[8];
-        sprintf(buffer, "CPU %lu", i);
-        texts.push_back(buffer);
+        texts.push_back("CPU " + to_string(i));
         push_linuxcpu(texts, ps.cpu_core[i]);
         IF_NEGATIVE_EXIT(writer.write_tr(texts));
     }

@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 #include <sstream>
-#include <cstdio>
 #include <ctime>
 
 using namespace std;
@@ -57,9 +56,7 @@ ssize_t version_response::send(int fd)
     int *p = (int *)(&info);
     for (int i = 0; i < 6; i++)
     {
-        char buffer[16];
-        sprintf(buffer, "%d kB", p[i]);
-        texts.push_back(buffer);
+        texts.push_back(to_string(p[i]) + " kB");
     }
     IF_NEGATIVE_EXIT(writer.write_tr(texts));
     IF_NEGATIVE_EXIT(writer.write_table_end());
