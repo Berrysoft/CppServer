@@ -2,6 +2,7 @@
 #include <sstream>
 #include "read_modules.h"
 #include "http_get.h"
+#include "http_head.h"
 
 using namespace std;
 
@@ -32,6 +33,10 @@ unique_ptr<http_response> http::get_response(const char *request)
     if (method == "GET")
     {
         return make_unique<http_get>(req, modules);
+    }
+    else if (method == "HEAD")
+    {
+        return make_unique<http_head>();
     }
     else
     {
