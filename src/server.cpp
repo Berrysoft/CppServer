@@ -10,9 +10,18 @@
 #include <sstream>
 #include "http_request.h"
 
-#define printf(exp, ...) \
-    if (verbose)         \
-    std::printf(exp, ##__VA_ARGS__)
+#define printf(exp, ...)                 \
+    if (verbose)                         \
+    {                                    \
+        std::printf(exp, ##__VA_ARGS__); \
+    }
+
+#define NEGATIVE_RETURN(exp, msg) \
+    if ((exp) < 0)                \
+    {                             \
+        printf(msg);              \
+        return;                   \
+    }
 
 using namespace std;
 using std::placeholders::_1;
@@ -22,19 +31,11 @@ server::server(size_t amount, size_t doj, bool verbose) : verbose(verbose), amou
 {
     printf("初始化Socket...\n");
     sock = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
-    if (sock < 0)
-    {
-        printf("Socket初始化失败。\n");
-        return;
-    }
+    NEGATIVE_RETURN(sock, "Socket初始化失败。\n");
     printf("初始化时钟...\n");
     time_stamp = 0;
     timer_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
-    if (timer_fd < 0)
-    {
-        printf("时钟初始化失败。\n");
-        return;
-    }
+    NEGATIVE_RETURN(timer_fd, "时钟初始化失败。\n");
     printf("初始化Epoll...\n");
     event_list = unique_ptr<epoll_event[]>(new epoll_event[amount]);
     printf("初始化线程池...\n");
@@ -51,8 +52,8 @@ void server::refresh_module()
 
 void server::start(const sockaddr *addr, socklen_t len, int n, int epoll_timeout, timespec interval, int clock_timeout)
 {
-    bind(sock, addr, len);
-    listen(sock, n);
+    NEGATIVE_RETURN(bind(sock, addr, len), "Socket命名失败。\n");
+    NEGATIVE_RETURN(listen(sock, n), "监听失败。\n");
     printf("监听数：%d\n", n);
     printf("监听Socket：%d.\n", sock);
     printf("Epoll等待时间：%d(ms)\n", epoll_timeout);
@@ -60,36 +61,22 @@ void server::start(const sockaddr *addr, socklen_t len, int n, int epoll_timeout
     printf("时钟等待循环数：%d（个）\n", clock_timeout);
 
     itimerspec itimer;
-    if (clock_gettime(CLOCK_MONOTONIC, &itimer.it_value) < 0)
-    {
-        printf("时钟获取失败。\n");
-        return;
-    }
+    NEGATIVE_RETURN(clock_gettime(CLOCK_MONOTONIC, &itimer.it_value), "时钟获取失败。\n");
     itimer.it_value = interval;
     itimer.it_interval = interval;
-    if (timerfd_settime(timer_fd, 0, &itimer, nullptr) < 0)
-    {
-        printf("时钟设置失败。\n");
-        return;
-    }
+    NEGATIVE_RETURN(timerfd_settime(timer_fd, 0, &itimer, nullptr), "时钟设置失败。\n");
 
     epoll_fd = epoll_create(amount);
+    NEGATIVE_RETURN(epoll_fd, "Epoll启动失败。\n");
+
     epoll_event event;
     event.events = EPOLLIN;
     event.data.fd = sock;
-    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, sock, &event) < 0)
-    {
-        printf("Socket启动失败。\n");
-        return;
-    }
+    NEGATIVE_RETURN(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, sock, &event), "Socket启动失败。\n");
 
     event.events = EPOLLIN | EPOLLET;
     event.data.fd = timer_fd;
-    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, timer_fd, &event) < 0)
-    {
-        printf("时钟启动失败。\n");
-        return;
-    }
+    NEGATIVE_RETURN(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, timer_fd, &event), "时钟启动失败。\n");
 
     loop_thread = thread(bind(&server::accept_loop, this, _1, _2), epoll_timeout, clock_timeout);
 }
@@ -192,10 +179,8 @@ void server::accept_loop(int epoll_timeout, int clock_timeout)
                     }
                     else
                     {
-                        {
-                            lock_guard<mutex> locker(clients_mutex);
-                            clients.push_back({newsock, time_stamp});
-                        }
+                        lock_guard<mutex> locker(clients_mutex);
+                        clients.push_back({newsock, time_stamp});
                     }
                 }
             }
