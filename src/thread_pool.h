@@ -1,6 +1,6 @@
 //线程池模板类。
 #pragma once
-#include <vector>
+#include <queue>
 #include <valarray>
 #include <thread>
 #include <mutex>
@@ -15,7 +15,7 @@ class thread_pool
 {
 private:
     std::function<void(TArgs...)> task;
-    std::vector<std::unique_ptr<std::tuple<TArgs...>>> jobs;
+    std::queue<std::unique_ptr<std::tuple<TArgs...>>> jobs;
     std::valarray<std::thread> do_threads;
 
     std::mutex m_mutex;
@@ -52,13 +52,7 @@ thread_pool<TArgs...>::~thread_pool()
     cond.notify_all();
     for (std::thread &t : do_threads)
     {
-        try
-        {
-            t.join();
-        }
-        catch (const std::system_error &)
-        {
-        }
+        t.join();
     }
 }
 
@@ -67,7 +61,7 @@ void thread_pool<TArgs...>::post(TArgs... args)
 {
     {
         std::lock_guard<std::mutex> locker(m_mutex);
-        jobs.push_back(std::make_unique<std::tuple<TArgs...>>(args...));
+        jobs.push(std::make_unique<std::tuple<TArgs...>>(args...));
     }
     cond.notify_one();
 }
@@ -89,9 +83,8 @@ void thread_pool<TArgs...>::do_job()
             std::lock_guard<std::mutex> locker(m_mutex);
             if (!jobs.empty())
             {
-                typename std::vector<std::unique_ptr<std::tuple<TArgs...>>>::iterator it = jobs.begin();
-                j = std::move(*it);
-                jobs.erase(it);
+                j = std::move(jobs.front());
+                jobs.pop();
             }
         }
         if (j)

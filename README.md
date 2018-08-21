@@ -107,35 +107,35 @@ Document Path:          /
 Document Length:        245 bytes
 
 Concurrency Level:      100
-Time taken for tests:   557.261 seconds
+Time taken for tests:   135.735 seconds
 Complete requests:      1000000
 Failed requests:        0
 Non-2xx responses:      1000000
 Keep-Alive requests:    1000000
 Total transferred:      391000000 bytes
 HTML transferred:       245000000 bytes
-Requests per second:    1794.49 [#/sec] (mean)
-Time per request:       55.726 [ms] (mean)
-Time per request:       0.557 [ms] (mean, across all concurrent requests)
-Transfer rate:          685.20 [Kbytes/sec] received
+Requests per second:    7367.32 [#/sec] (mean)
+Time per request:       13.573 [ms] (mean)
+Time per request:       0.136 [ms] (mean, across all concurrent requests)
+Transfer rate:          2813.11 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    0   0.3      0      38
-Processing:     9   56   9.2     52     198
-Waiting:        9   56   9.2     52     197
-Total:         46   56   9.2     52     198
+Connect:        0    0   0.2      0      28
+Processing:     2   14   4.5     12      54
+Waiting:        2   13   4.5     12      54
+Total:          2   14   4.5     12      54
 
 Percentage of the requests served within a certain time (ms)
-  50%     52
-  66%     56
-  75%     59
-  80%     62
-  90%     68
-  95%     75
-  98%     83
-  99%     88
- 100%    198 (longest request)
+  50%     12
+  66%     15
+  75%     17
+  80%     18
+  90%     20
+  95%     22
+  98%     24
+  99%     26
+ 100%     54 (longest request)
 ```
 ## 为本程序开发模块
 想要为本程序开发模块，需要引入`mdl`文件夹下的头文件`response.h`，并实现`void *get_instance_response(const char *command)`方法。这个方法应当返回一个指向继承`response`的类的指针，并可以被`delete`。
