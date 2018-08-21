@@ -15,9 +15,9 @@ class thread_pool
 {
 private:
     std::function<void(TArgs...)> task;
-    std::queue<std::unique_ptr<std::tuple<TArgs...>>> jobs;
     std::valarray<std::thread> do_threads;
 
+    std::queue<std::tuple<TArgs...>> jobs;
     std::mutex m_mutex;
     std::condition_variable cond;
     std::mutex cond_mutex;
@@ -61,7 +61,7 @@ void thread_pool<TArgs...>::post(TArgs... args)
 {
     {
         std::lock_guard<std::mutex> locker(m_mutex);
-        jobs.push(std::make_unique<std::tuple<TArgs...>>(args...));
+        jobs.push(std::make_tuple(args...));
     }
     cond.notify_one();
 }
@@ -78,18 +78,17 @@ void thread_pool<TArgs...>::do_job()
         }
         if (stop)
             break;
-        std::unique_ptr<std::tuple<TArgs...>> j;
+        m_mutex.lock();
+        if (!jobs.empty())
         {
-            std::lock_guard<std::mutex> locker(m_mutex);
-            if (!jobs.empty())
-            {
-                j = std::move(jobs.front());
-                jobs.pop();
-            }
+            std::tuple<TArgs...> j = std::move(jobs.front());
+            jobs.pop();
+            m_mutex.unlock();
+            apply(task, j);
         }
-        if (j)
+        else
         {
-            apply(task, *j);
+            m_mutex.unlock();
         }
     }
 }
