@@ -23,9 +23,9 @@ runv: $(ALL)
 # 主程序
 $(BIN)server.out: $(OBJ)main.o $(OBJ)server.o $(OBJ)http.o $(OBJ)http_request.o $(OBJ)http_get.o $(OBJ)http_head.o $(OBJ)module.o $(OBJ)read_modules.o
 	g++ -o $@ $^ -lpthread -ldl -lstdc++fs $(LTO)
-$(OBJ)main.o: $(SOURCE)main.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)http.h $(MODULE)response.h
+$(OBJ)main.o: $(SOURCE)main.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)safe_queue.h $(SOURCE)http.h $(MODULE)response.h
 	g++ -o $@ -c $(SOURCE)main.cpp $(STD)
-$(OBJ)server.o: $(SOURCE)server.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)http.h $(SOURCE)read_modules.h $(SOURCE)http_request.h
+$(OBJ)server.o: $(SOURCE)server.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)safe_queue.h $(SOURCE)http.h $(SOURCE)read_modules.h $(SOURCE)http_request.h
 	g++ -o $@ -c $(SOURCE)server.cpp $(STD)
 $(OBJ)http.o: $(SOURCE)http.cpp $(SOURCE)http.h $(SOURCE)read_modules.h $(SOURCE)http_request.h $(SOURCE)http_get.h $(SOURCE)http_head.h
 	g++ -o $@ -c $(SOURCE)http.cpp $(STD)

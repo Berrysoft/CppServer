@@ -1,6 +1,5 @@
 //线程池模板类。
 #pragma once
-#include <queue>
 #include <valarray>
 #include <thread>
 #include <mutex>
@@ -9,6 +8,7 @@
 #include <tuple>
 #include <memory>
 #include <functional>
+#include "safe_queue.h"
 
 template <typename... TArgs>
 class thread_pool
@@ -17,8 +17,7 @@ private:
     std::function<void(TArgs...)> task;
     std::valarray<std::thread> do_threads;
 
-    std::queue<std::tuple<TArgs...>> jobs;
-    std::mutex m_mutex;
+    safe_queue<std::tuple<TArgs...>> jobs;
     std::condition_variable cond;
     std::mutex cond_mutex;
 
@@ -59,10 +58,7 @@ thread_pool<TArgs...>::~thread_pool()
 template <typename... TArgs>
 void thread_pool<TArgs...>::post(TArgs... args)
 {
-    {
-        std::lock_guard<std::mutex> locker(m_mutex);
-        jobs.push(std::make_tuple(args...));
-    }
+    jobs.emplace(args...);
     cond.notify_one();
 }
 
@@ -78,17 +74,10 @@ void thread_pool<TArgs...>::do_job()
         }
         if (stop)
             break;
-        m_mutex.lock();
-        if (!jobs.empty())
+        std::tuple<TArgs...> j;
+        if (jobs.try_pop(j))
         {
-            std::tuple<TArgs...> j = std::move(jobs.front());
-            jobs.pop();
-            m_mutex.unlock();
             apply(task, j);
-        }
-        else
-        {
-            m_mutex.unlock();
         }
     }
 }

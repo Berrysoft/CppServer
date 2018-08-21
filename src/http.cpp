@@ -20,7 +20,7 @@ void http::refresh_modules()
         istringstream iss(line);
         string key, module_name;
         iss >> key >> module_name;
-        modules.insert(map<string, string>::value_type(key, module_name));
+        modules.emplace(key, module_name);
     }
 }
 

@@ -229,7 +229,11 @@ void server::process_job(int fd)
     printf("正在处理请求%d...\n", fd);
     signal(SIGPIPE, SIG_IGN);
     http_request request = http_request::parse(fd);
-    unique_ptr<http_response> response = http_parser.get_response(request);
+    unique_ptr<http_response> response;
+    {
+        lock_guard<mutex> locker(http_mutex);
+        response = http_parser.get_response(request);
+    }
     ssize_t size = response->send(fd);
     if (size < 0)
     {
