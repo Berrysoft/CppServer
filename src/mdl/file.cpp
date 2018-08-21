@@ -1,15 +1,14 @@
 #include "file.h"
-#include <cstdio>
-#include <cstring>
 #include <sys/socket.h>
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <unistd.h>
+#include <filesystem>
 #include "html_writer.h"
 #include "../read_modules.h"
 
 using namespace std;
+using std::filesystem::exists;
 
 file_response::file_response(string filename) : filename(move(filename))
 {
@@ -45,17 +44,16 @@ ssize_t file_response::send(int fd)
         IF_NEGATIVE_EXIT(writer.write_h1(filename));
         IF_NEGATIVE_EXIT(writer.write_pre_code_start());
         IF_NEGATIVE_EXIT(writer.write_xmp_start());
-        FILE *furl = fopen(filename.c_str(), "r");
-        if (furl)
+        ifstream furl(filename);
+        if(furl.is_open())
         {
-            std::size_t len;
             char buffer[4096];
-            memset(buffer, 0, sizeof(buffer));
-            while ((len = fread(buffer, sizeof(char), sizeof(buffer), furl)))
+            while(!furl.eof())
             {
-                IF_NEGATIVE_EXIT(send_with_chunk(fd, buffer, len, 0));
+                furl.read(buffer, sizeof(buffer));
+                IF_NEGATIVE_EXIT(send_with_chunk(fd, buffer, furl.gcount(), 0));
             }
-            fclose(furl);
+            furl.close();
         }
         IF_NEGATIVE_EXIT(writer.write_xmp_end());
         IF_NEGATIVE_EXIT(writer.write_pre_code_end());
@@ -66,7 +64,9 @@ ssize_t file_response::send(int fd)
 
 void *get_instance_response(const char *command)
 {
-    if (strlen(command) > 0 && access(command, 0))
-        return nullptr;
-    return new file_response(command);
+    if (command && (command[0] == '\0' || exists(command)))
+    {
+        return new file_response(command);
+    }
+    return nullptr;
 }

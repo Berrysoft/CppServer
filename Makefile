@@ -22,7 +22,7 @@ runv: $(ALL)
 
 # 主程序
 $(BIN)server.out: $(OBJ)main.o $(OBJ)server.o $(OBJ)http.o $(OBJ)http_request.o $(OBJ)http_get.o $(OBJ)http_head.o $(OBJ)module.o $(OBJ)read_modules.o
-	g++ -o $@ $^ -lpthread -ldl $(LTO)
+	g++ -o $@ $^ -lpthread -ldl -lstdc++fs $(LTO)
 $(OBJ)main.o: $(SOURCE)main.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)http.h $(MODULE)response.h
 	g++ -o $@ -c $(SOURCE)main.cpp $(STD)
 $(OBJ)server.o: $(SOURCE)server.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)http.h $(SOURCE)read_modules.h $(SOURCE)http_request.h
@@ -54,7 +54,7 @@ $(OBJ)error.o: $(MODULE)error.cpp $(MODULE)response.h
 
 # file模块
 $(BIN)file.so: $(OBJ)file.o $(OBJ)html_writer.o $(OBJ)read_modules.o
-	g++ -shared -o $@ $^ $(LTO)
+	g++ -shared -o $@ $^ -lstdc++fs $(LTO)
 $(OBJ)file.o: $(MODULE)file.cpp $(MODULE)response.h $(MODULE)html_writer.h $(SOURCE)read_modules.h
 	g++ -o $@ -c $(MODULE)file.cpp $(STDFIPC)
 
@@ -84,7 +84,7 @@ $(OBJ)disk.o: $(MODULE)disk.cpp $(MODULE)disk.h $(MODULE)html_writer.h
 
 # Markdown模块
 $(BIN)markdown.so: $(OBJ)markdown.o $(OBJ)html_writer.o
-	g++ -shared -o $@ $^ $(LTO)
+	g++ -shared -o $@ $^ -lstdc++fs $(LTO)
 $(OBJ)markdown.o: $(MODULE)markdown.cpp $(MODULE)markdown.h $(MODULE)html_writer.h
 	g++ -o $@ -c $(MODULE)markdown.cpp $(STDFIPC)
 

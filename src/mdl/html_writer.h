@@ -14,6 +14,18 @@
 #define RETURN_RESULT return result
 
 ssize_t send_with_chunk(int fd, const void *buffer, size_t length, int flag);
+
+template <size_t size>
+inline ssize_t send_with_chunk(int fd, const char (&buffer)[size], int flag)
+{
+    return send_with_chunk(fd, buffer, size - 1, flag);
+}
+
+inline ssize_t send_with_chunk(int fd, const std::string &buffer, int flag)
+{
+    return send_with_chunk(fd, buffer.c_str(), buffer.length(), flag);
+}
+
 ssize_t send_chunk_end(int fd, int flag);
 
 class html_writer
