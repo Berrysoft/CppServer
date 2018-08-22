@@ -3,8 +3,8 @@
 #include <sstream>
 #include <sys/socket.h>
 #include <unistd.h>
-#include "module.h"
-#include "mdl/response.h"
+#include "../module/module.h"
+#include "../module/response.h"
 
 using namespace std;
 

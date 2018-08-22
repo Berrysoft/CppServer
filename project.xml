@@ -1,0 +1,282 @@
+<Project Compiler="g++" Linker="g++">
+  <SourcePath>src</SourcePath>
+  <ObjectPath>obj</ObjectPath>
+  <BinaryPath>bin</BinaryPath>
+  <WarningAll>True</WarningAll>
+  <LTOEnabled>True</LTOEnabled>
+  <Optimize>O2</Optimize>
+  <CppStandard>17</CppStandard>
+
+  <!--/-->
+  <Header Name="server.h">
+    <Include>thread_pool.h</Include>
+    <Include>http/http.h</Include>
+  </Header>
+  <Header Name="thread_pool.h">
+    <Include>safe_queue.h</Include>
+  </Header>
+  <Header Name="safe_queue.h"/>
+
+  <Source Name="server.cpp">
+    <Include>http/http_request.h</Include>
+  </Source>
+  <Source Name="main.cpp">
+    <Include>server.h</Include>
+  </Source>
+
+  <Compile Target="server.o">
+    <Source>server.cpp</Source>
+  </Compile>
+  <Compile Target="main.o">
+    <Source>main.cpp</Source>
+  </Compile>
+
+  <!--html/-->
+  <Header Name="html/html_writer.h"/>
+  
+  <Source Name="html/html_writer.cpp">
+    <Include>html/html_writer.h</Include>
+  </Source>
+
+  <Compile Target="html_writer.o">
+    <PICEnabled>True</PICEnabled>
+    <Source>html/html_writer.cpp</Source>
+  </Compile>
+
+  <!--http/-->
+  <Header Name="http/http.h">
+    <Include>http/http_response.h</Include>
+    <Include>http/http_request.h</Include>
+  </Header>
+  <Header Name="http/http_get.h">
+    <Include>http/http_response.h</Include>
+    <Include>http/http_request.h</Include>
+  </Header>
+  <Header Name="http/http_head.h">
+    <Include>http/http_response.h</Include>
+  </Header>
+  <Header Name="http/http_request.h"/>
+  <Header Name="http/http_response.h"/>
+
+  <Source Name="http/http.cpp">
+    <Include>module/read_modules.h</Include>
+    <Include>http/http.h</Include>
+    <Include>http/http_get.h</Include>
+    <Include>http/http_head.h</Include>
+  </Source>
+  <Source Name="http/http_get.cpp">
+    <Include>module/module.h</Include>
+    <Include>module/response.h</Include>
+    <Include>http/http_get.h</Include>
+  </Source>
+  <Source Name="http/http_head.cpp">
+    <Include>http/http_head.h</Include>
+  </Source>
+  <Source Name="http/http_request.cpp">
+    <Include>http/http_request.h</Include>
+  </Source>
+
+  <Compile Target="http.o">
+    <Source>http/http.cpp</Source>
+  </Compile>
+  <Compile Target="http_get.o">
+    <Source>http/http_get.cpp</Source>
+  </Compile>
+  <Compile Target="http_head.o">
+    <Source>http/http_head.cpp</Source>
+  </Compile>
+  <Compile Target="http_request.o">
+    <Source>http/http_request.cpp</Source>
+  </Compile>
+
+  <!--module/-->
+  <Header Name="module/module.h">
+    <Include>module/response.h</Include>
+  </Header>
+  <Header Name="module/read_modules.h"/>
+  <Header Name="module/response.h"/>
+
+  <Source Name="module/module.cpp">
+    <Include>module/module.h</Include>
+  </Source>
+  <Source Name="module/read_modules.cpp">
+    <Include>module/read_modules.h</Include>
+  </Source>
+
+  <Compile Target="module.o">
+    <Source>module/module.cpp</Source>
+  </Compile>
+  <Compile Target="read_modules.o">
+    <PICEnabled>True</PICEnabled>
+    <Source>module/read_modules.cpp</Source>
+  </Compile>
+
+  <!--module/cpu/-->
+  <Header Name="module/cpu/cpu.h">
+    <Include>module/response.h</Include>
+  </Header>
+  <Header Name="module/cpu/id.h"/>
+  <Header Name="module/cpu/proc_cpuinfo.h"/>
+  <Header Name="module/cpu/proc_stat.h"/>
+
+  <Source Name="module/cpu/cpu.cpp">
+    <Include>html/html_writer.h</Include>
+    <Include>module/cpu/cpu.h</Include>
+    <Include>module/cpu/id.h</Include>
+    <Include>module/cpu/proc_cpuinfo.h</Include>
+    <Include>module/cpu/proc_stat.h</Include>
+  </Source>
+  <Source Name="module/cpu/proc_cpuinfo.cpp">
+    <Include>module/cpu/proc_cpuinfo.h</Include>
+  </Source>
+  <Source Name="module/cpu/proc_stat.cpp">
+    <Include>module/cpu/proc_stat.h</Include>
+  </Source>
+
+  <Compile Target="cpu.o">
+    <PICEnabled>True</PICEnabled>
+    <Source>module/cpu/cpu.cpp</Source>
+  </Compile>
+  <Compile Target="proc_cpuinfo.o">
+    <PICEnabled>True</PICEnabled>
+    <Source>module/cpu/proc_cpuinfo.cpp</Source>
+  </Compile>
+  <Compile Target="proc_stat.o">
+    <PICEnabled>True</PICEnabled>
+    <Source>module/cpu/proc_stat.cpp</Source>
+  </Compile>
+
+  <!--module/disk/-->
+  <Header Name="module/disk/disk.h">
+    <Include>module/response.h</Include>
+  </Header>
+
+  <Source Name="module/disk/disk.cpp">
+    <Include>html/html_writer.h</Include>
+    <Include>module/disk/disk.h</Include>
+  </Source>
+
+  <Compile Target="disk.o">
+    <PICEnabled>True</PICEnabled>
+    <Source>module/disk/disk.cpp</Source>
+  </Compile>
+
+  <!--module/error/-->
+  <Header Name="module/error/error.h">
+    <Include>module/response.h</Include>
+  </Header>
+
+  <Source Name="module/error/error.cpp">
+    <Include>module/error/error.h</Include>
+  </Source>
+
+  <Compile Target="error.o">
+    <PICEnabled>True</PICEnabled>
+    <Source>module/error/error.cpp</Source>
+  </Compile>
+
+  <!--module/file/-->
+  <Header Name="module/file/file.h">
+    <Include>module/response.h</Include>
+  </Header>
+
+  <Source Name="module/file/file.cpp">
+    <Include>html/html_writer.h</Include>
+    <Include>module/file/file.h</Include>
+  </Source>
+
+  <Compile Target="file.o">
+    <PICEnabled>True</PICEnabled>
+    <Source>module/file/file.cpp</Source>
+  </Compile>
+
+  <!--module/markdown/-->
+  <Header Name="module/markdown/markdown.h">
+    <Include>module/response.h</Include>
+  </Header>
+
+  <Source Name="module/markdown/markdown.cpp">
+    <Include>html/html_writer.h</Include>
+    <Include>module/markdown/markdown.h</Include>
+  </Source>
+
+  <Compile Target="markdown.o">
+    <PICEnabled>True</PICEnabled>
+    <Source>module/markdown/markdown.cpp</Source>
+  </Compile>
+
+  <!--module/version/-->
+  <Header Name="module/version/version.h">
+    <Include>module/response.h</Include>
+  </Header>
+  <Header Name="module/version/mem.h"/>
+
+  <Source Name="module/version/version.cpp">
+    <Include>html/html_writer.h</Include>
+    <Include>module/version/version.h</Include>
+    <Include>module/version/mem.h</Include>
+  </Source>
+  <Source Name="module/version/mem.cpp">
+    <Include>module/version/mem.h</Include>
+  </Source>
+
+  <Compile Target="version.o">
+    <PICEnabled>True</PICEnabled>
+    <Source>module/version/version.cpp</Source>
+  </Compile>
+  <Compile Target="mem.o">
+    <PICEnabled>True</PICEnabled>
+    <Source>module/version/mem.cpp</Source>
+  </Compile>
+
+  <!--link-->
+  <Link Target="server.out" Type="Exe">
+    <Library>pthread</Library>
+    <Library>dl</Library>
+    <Library>stdc++fs</Library>
+    <Object>main.o</Object>
+    <Object>server.o</Object>
+    <Object>http.o</Object>
+    <Object>http_request.o</Object>
+    <Object>http_get.o</Object>
+    <Object>http_head.o</Object>
+    <Object>module.o</Object>
+    <Object>read_modules.o</Object>
+  </Link>
+  <Link Target="error.so" Type="Shared">
+    <Object>error.o</Object>
+  </Link>
+  <Link Target="file.so" Type="Shared">
+    <Library>stdc++fs</Library>
+    <Object>file.o</Object>
+    <Object>html_writer.o</Object>
+    <Object>read_modules.o</Object>
+  </Link>
+  <Link Target="cpu.so" Type="Shared">
+    <Object>cpu.o</Object>
+    <Object>proc_cpuinfo.o</Object>
+    <Object>proc_stat.o</Object>
+    <Object>html_writer.o</Object>
+  </Link>
+  <Link Target="version.so" Type="Shared">
+    <Object>version.o</Object>
+    <Object>mem.o</Object>
+    <Object>html_writer.o</Object>
+  </Link>
+  <Link Target="disk.so" Type="Shared">
+    <Object>disk.o</Object>
+    <Object>html_writer.o</Object>
+  </Link>
+  <Link Target="markdown.so" Type="Shared">
+    <Library>stdc++fs</Library>
+    <Object>markdown.o</Object>
+    <Object>html_writer.o</Object>
+  </Link>
+
+  <Copy Target="modules">
+    <Source>module/modules</Source>
+  </Copy>
+  <Copy Target="style.css">
+    <Source>html/style.css</Source>
+  </Copy>
+</Project>

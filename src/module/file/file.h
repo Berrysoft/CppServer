@@ -1,7 +1,7 @@
 //读取并输出文件内容，或者动态生成主页。
 #pragma once
 #include <string>
-#include "response.h"
+#include "../response.h"
 
 class file_response : public response
 {
