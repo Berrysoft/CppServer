@@ -1,106 +1,66 @@
-SOURCE := src/
-MODULE := src/mdl/
-BIN := bin/
-OBJ := obj/
-
-LTO := -flto
-STD := -std=c++17 -O2 -Wall $(LTO)
-STDFIPC := $(STD) -fPIC
-
-# 编译所有
 .PHONY: all
-ALL := $(BIN)server.out $(BIN)error.so $(BIN)file.so $(BIN)cpu.so $(BIN)version.so $(BIN)disk.so $(BIN)markdown.so $(BIN)modules $(BIN)style.css
+ALL:= bin/server.out bin/error.so bin/file.so bin/cpu.so bin/version.so bin/disk.so bin/markdown.so bin/modules bin/style.css 
 all: $(ALL)
-
 .PHONY: run
 run: $(ALL)
-	cd $(BIN) && ./server.out
-
+	cd bin/ && ./server.out
 .PHONY: runv
 runv: $(ALL)
-	cd $(BIN) && ./server.out -v
-
-# 主程序
-$(BIN)server.out: $(OBJ)main.o $(OBJ)server.o $(OBJ)http.o $(OBJ)http_request.o $(OBJ)http_get.o $(OBJ)http_head.o $(OBJ)module.o $(OBJ)read_modules.o
-	g++ -o $@ $^ -lpthread -ldl -lstdc++fs $(LTO)
-$(OBJ)main.o: $(SOURCE)main.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)safe_queue.h $(SOURCE)http.h $(MODULE)response.h
-	g++ -o $@ -c $(SOURCE)main.cpp $(STD)
-$(OBJ)server.o: $(SOURCE)server.cpp $(SOURCE)server.h $(SOURCE)thread_pool.h $(SOURCE)safe_queue.h $(SOURCE)http.h $(SOURCE)read_modules.h $(SOURCE)http_request.h
-	g++ -o $@ -c $(SOURCE)server.cpp $(STD)
-$(OBJ)http.o: $(SOURCE)http.cpp $(SOURCE)http.h $(SOURCE)read_modules.h $(SOURCE)http_request.h $(SOURCE)http_get.h $(SOURCE)http_head.h
-	g++ -o $@ -c $(SOURCE)http.cpp $(STD)
-$(OBJ)http_request.o: $(SOURCE)http_request.cpp $(SOURCE)http_request.h
-	g++ -o $@ -c $(SOURCE)http_request.cpp $(STD)
-$(OBJ)http_get.o: $(SOURCE)http_get.cpp $(SOURCE)http_get.h $(SOURCE)http_response.h $(MODULE)response.h $(SOURCE)http_request.h
-	g++ -o $@ -c $(SOURCE)http_get.cpp $(STD)
-$(OBJ)http_head.o: $(SOURCE)http_head.cpp $(SOURCE)http_head.h $(SOURCE)http_response.h
-	g++ -o $@ -c $(SOURCE)http_head.cpp $(STD)
-$(OBJ)module.o: $(SOURCE)module.cpp $(SOURCE)module.h
-	g++ -o $@ -c $(SOURCE)module.cpp $(STD)
-
-# HTML Writer 目标对象
-$(OBJ)html_writer.o:$(MODULE)html_writer.cpp $(MODULE)html_writer.h
-	g++ -o $@ -c $(MODULE)html_writer.cpp $(STDFIPC)
-
-# Read module 目标对象
-$(OBJ)read_modules.o: $(SOURCE)read_modules.cpp $(SOURCE)read_modules.h
-	g++ -o $@ -c $(SOURCE)read_modules.cpp $(STDFIPC)
-
-# error模块
-$(BIN)error.so: $(OBJ)error.o
-	g++ -shared -o $@ $^ $(LTO)
-$(OBJ)error.o: $(MODULE)error.cpp $(MODULE)response.h
-	g++ -o $@ -c $(MODULE)error.cpp $(STDFIPC)
-
-# file模块
-$(BIN)file.so: $(OBJ)file.o $(OBJ)html_writer.o $(OBJ)read_modules.o
-	g++ -shared -o $@ $^ -lstdc++fs $(LTO)
-$(OBJ)file.o: $(MODULE)file.cpp $(MODULE)response.h $(MODULE)html_writer.h $(SOURCE)read_modules.h
-	g++ -o $@ -c $(MODULE)file.cpp $(STDFIPC)
-
-# cpu模块
-$(BIN)cpu.so: $(OBJ)cpu.o $(OBJ)proc_cpuinfo.o $(OBJ)proc_stat.o $(OBJ)html_writer.o
-	g++ -shared -o $@ $^ $(LTO)
-$(OBJ)cpu.o: $(MODULE)cpu.cpp $(MODULE)cpu.h $(MODULE)response.h $(MODULE)id.h $(MODULE)proc_cpuinfo.h $(MODULE)proc_stat.h $(MODULE)html_writer.h
-	g++ -o $@ -c $(MODULE)cpu.cpp $(STDFIPC)
-$(OBJ)proc_cpuinfo.o: $(MODULE)proc_cpuinfo.cpp $(MODULE)proc_cpuinfo.h
-	g++ -o $@ -c $(MODULE)proc_cpuinfo.cpp $(STDFIPC)
-$(OBJ)proc_stat.o: $(MODULE)proc_stat.cpp $(MODULE)proc_stat.h
-	g++ -o $@ -c $(MODULE)proc_stat.cpp $(STDFIPC)
-
-# version模块
-$(BIN)version.so: $(OBJ)version.o $(OBJ)mem.o $(OBJ)html_writer.o
-	g++ -shared -o $@ $^ $(LTO)
-$(OBJ)version.o: $(MODULE)version.cpp $(MODULE)version.h $(MODULE)response.h $(MODULE)mem.h $(MODULE)html_writer.h
-	g++ -o $@ -c $(MODULE)version.cpp $(STDFIPC)
-$(OBJ)mem.o: $(MODULE)mem.cpp $(MODULE)mem.h
-	g++ -o $@ -c $(MODULE)mem.cpp $(STDFIPC)
-
-# disk模块
-$(BIN)disk.so: $(OBJ)disk.o $(OBJ)html_writer.o
-	g++ -shared -o $@ $^ $(LTO)
-$(OBJ)disk.o: $(MODULE)disk.cpp $(MODULE)disk.h $(MODULE)html_writer.h
-	g++ -o $@ -c $(MODULE)disk.cpp $(STDFIPC)
-
-# Markdown模块
-$(BIN)markdown.so: $(OBJ)markdown.o $(OBJ)html_writer.o
-	g++ -shared -o $@ $^ -lstdc++fs $(LTO)
-$(OBJ)markdown.o: $(MODULE)markdown.cpp $(MODULE)markdown.h $(MODULE)html_writer.h
-	g++ -o $@ -c $(MODULE)markdown.cpp $(STDFIPC)
-
-# 特殊文件
-$(BIN)modules: $(MODULE)modules
-	cp $^ $@
-
-$(BIN)style.css: $(MODULE)style.css
-	cp $^ $@
-
-# 清理目标对象
+	cd bin/ && ./server.out -v
 .PHONY: clean
-clean:
-	rm $(OBJ)/*.*
-
-# 清理全部文件
-.PHONY: cleanall
-cleanall:
-	rm $(OBJ)/* $(BIN)/*
+clean: 
+	rm obj//* bin//*
+obj/server.o: src/server.cpp src/server.h src/http/http_request.h src/thread_pool.h src/http/http.h src/safe_queue.h src/http/http_response.h 
+	g++ -o $@ -c src/server.cpp -std=c++17 -O2 -Wall -flto 
+obj/main.o: src/main.cpp src/server.h src/thread_pool.h src/http/http.h src/safe_queue.h src/http/http_response.h src/http/http_request.h 
+	g++ -o $@ -c src/main.cpp -std=c++17 -O2 -Wall -flto 
+obj/html_writer.o: src/html/html_writer.cpp src/html/html_writer.h 
+	g++ -o $@ -c src/html/html_writer.cpp -std=c++17 -O2 -Wall -flto -fPIC
+obj/http.o: src/http/http.cpp src/module/read_modules.h src/http/http.h src/http/http_get.h src/http/http_head.h src/http/http_response.h src/http/http_request.h 
+	g++ -o $@ -c src/http/http.cpp -std=c++17 -O2 -Wall -flto 
+obj/http_get.o: src/http/http_get.cpp src/module/module.h src/module/response.h src/http/http_get.h src/http/http_response.h src/http/http_request.h 
+	g++ -o $@ -c src/http/http_get.cpp -std=c++17 -O2 -Wall -flto 
+obj/http_head.o: src/http/http_head.cpp src/http/http_head.h src/http/http_response.h 
+	g++ -o $@ -c src/http/http_head.cpp -std=c++17 -O2 -Wall -flto 
+obj/http_request.o: src/http/http_request.cpp src/http/http_request.h 
+	g++ -o $@ -c src/http/http_request.cpp -std=c++17 -O2 -Wall -flto 
+obj/module.o: src/module/module.cpp src/module/module.h src/module/response.h 
+	g++ -o $@ -c src/module/module.cpp -std=c++17 -O2 -Wall -flto 
+obj/read_modules.o: src/module/read_modules.cpp src/module/read_modules.h 
+	g++ -o $@ -c src/module/read_modules.cpp -std=c++17 -O2 -Wall -flto -fPIC
+obj/cpu.o: src/module/cpu/cpu.cpp src/html/html_writer.h src/module/cpu/cpu.h src/module/cpu/id.h src/module/cpu/proc_cpuinfo.h src/module/cpu/proc_stat.h src/module/response.h 
+	g++ -o $@ -c src/module/cpu/cpu.cpp -std=c++17 -O2 -Wall -flto -fPIC
+obj/proc_cpuinfo.o: src/module/cpu/proc_cpuinfo.cpp src/module/cpu/proc_cpuinfo.h 
+	g++ -o $@ -c src/module/cpu/proc_cpuinfo.cpp -std=c++17 -O2 -Wall -flto -fPIC
+obj/proc_stat.o: src/module/cpu/proc_stat.cpp src/module/cpu/proc_stat.h 
+	g++ -o $@ -c src/module/cpu/proc_stat.cpp -std=c++17 -O2 -Wall -flto -fPIC
+obj/disk.o: src/module/disk/disk.cpp src/html/html_writer.h src/module/disk/disk.h src/module/response.h 
+	g++ -o $@ -c src/module/disk/disk.cpp -std=c++17 -O2 -Wall -flto -fPIC
+obj/error.o: src/module/error/error.cpp src/module/error/error.h src/module/response.h 
+	g++ -o $@ -c src/module/error/error.cpp -std=c++17 -O2 -Wall -flto -fPIC
+obj/file.o: src/module/file/file.cpp src/html/html_writer.h src/module/file/file.h src/module/response.h 
+	g++ -o $@ -c src/module/file/file.cpp -std=c++17 -O2 -Wall -flto -fPIC
+obj/markdown.o: src/module/markdown/markdown.cpp src/html/html_writer.h src/module/markdown/markdown.h src/module/response.h 
+	g++ -o $@ -c src/module/markdown/markdown.cpp -std=c++17 -O2 -Wall -flto -fPIC
+obj/version.o: src/module/version/version.cpp src/html/html_writer.h src/module/version/version.h src/module/version/mem.h src/module/response.h 
+	g++ -o $@ -c src/module/version/version.cpp -std=c++17 -O2 -Wall -flto -fPIC
+obj/mem.o: src/module/version/mem.cpp src/module/version/mem.h 
+	g++ -o $@ -c src/module/version/mem.cpp -std=c++17 -O2 -Wall -flto -fPIC
+bin/server.out: obj/main.o obj/server.o obj/http.o obj/http_request.o obj/http_get.o obj/http_head.o obj/module.o obj/read_modules.o 
+	g++ -o $@ $^ -lpthread -ldl -lstdc++fs -flto
+bin/error.so: obj/error.o 
+	g++ -o $@ $^ -shared -fPIC -flto
+bin/file.so: obj/file.o obj/html_writer.o obj/read_modules.o 
+	g++ -o $@ $^ -lstdc++fs -shared -fPIC -flto
+bin/cpu.so: obj/cpu.o obj/proc_cpuinfo.o obj/proc_stat.o obj/html_writer.o 
+	g++ -o $@ $^ -shared -fPIC -flto
+bin/version.so: obj/version.o obj/mem.o obj/html_writer.o 
+	g++ -o $@ $^ -shared -fPIC -flto
+bin/disk.so: obj/disk.o obj/html_writer.o 
+	g++ -o $@ $^ -shared -fPIC -flto
+bin/markdown.so: obj/markdown.o obj/html_writer.o 
+	g++ -o $@ $^ -lstdc++fs -shared -fPIC -flto
+bin/modules: src/module/modules
+	cp $^ $@
+bin/style.css: src/html/style.css
+	cp $^ $@
