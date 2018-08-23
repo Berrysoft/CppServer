@@ -7,6 +7,7 @@
 #include <map>
 #include <string>
 #include <mutex>
+#include <shared_mutex>
 #include <vector>
 #include <memory>
 #include "thread_pool.h"
@@ -26,7 +27,7 @@ private:
     std::unique_ptr<thread_pool<int>> pool;
     std::thread loop_thread;
     http http_parser;
-    std::mutex http_mutex;
+    std::shared_mutex http_mutex;
     int epoll_fd;
     std::size_t amount;
     std::unique_ptr<epoll_event[]> event_list;

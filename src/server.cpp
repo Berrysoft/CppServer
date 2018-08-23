@@ -46,7 +46,7 @@ server::server(size_t amount, size_t doj, bool verbose) : verbose(verbose), amou
 
 void server::refresh_module()
 {
-    lock_guard<mutex> locker(http_mutex);
+    unique_lock<shared_mutex> locker(http_mutex);
     http_parser.refresh_modules();
 }
 
@@ -231,7 +231,7 @@ void server::process_job(int fd)
     http_request request = http_request::parse(fd);
     unique_ptr<http_response> response;
     {
-        lock_guard<mutex> locker(http_mutex);
+        shared_lock<shared_mutex> locker(http_mutex);
         response = http_parser.get_response(request);
     }
     ssize_t size = response->send(fd);
