@@ -24,8 +24,6 @@
     }
 
 using namespace std;
-using std::placeholders::_1;
-using std::placeholders::_2;
 
 server::server(size_t amount, size_t doj, bool verbose) : verbose(verbose), amount(amount)
 {
@@ -39,7 +37,7 @@ server::server(size_t amount, size_t doj, bool verbose) : verbose(verbose), amou
     printf("初始化Epoll...\n");
     event_list = unique_ptr<epoll_event[]>(new epoll_event[amount]);
     printf("初始化线程池...\n");
-    pool = make_unique<thread_pool<int>>(doj, bind(&server::process_job, this, _1));
+    pool = make_unique<thread_pool<server *, int>>(doj, mem_fn(&server::process_job));
     printf("刷新模块...\n");
     refresh_module();
 }
@@ -78,7 +76,7 @@ void server::start(const sockaddr *addr, socklen_t len, int n, int epoll_timeout
     event.data.fd = timer_fd;
     NEGATIVE_RETURN(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, timer_fd, &event), "时钟启动失败。\n");
 
-    loop_thread = thread(bind(&server::accept_loop, this, _1, _2), epoll_timeout, clock_timeout);
+    loop_thread = thread(mem_fn(&server::accept_loop), this, epoll_timeout, clock_timeout);
 }
 
 void server::clean(int ostamp)
@@ -212,7 +210,7 @@ void server::accept_loop(int epoll_timeout, int clock_timeout)
                         }
                     }
                 }
-                pool->post(fd);
+                pool->post(this, fd);
             }
         }
     }

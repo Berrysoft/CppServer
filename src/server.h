@@ -24,7 +24,7 @@ class server
 private:
     bool verbose;
     int sock;
-    std::unique_ptr<thread_pool<int>> pool;
+    std::unique_ptr<thread_pool<server *, int>> pool;
     std::thread loop_thread;
     http http_parser;
     std::shared_mutex http_mutex;

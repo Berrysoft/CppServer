@@ -3,6 +3,7 @@
 #include <deque>
 #include <mutex>
 #include <shared_mutex>
+#include <optional>
 
 template <typename T, typename Container = std::deque<T>>
 class safe_queue
@@ -29,6 +30,7 @@ public:
     {
         container = std::move(queue.container);
         mutex = std::move(queue.mutex);
+        return *this;
     }
 
     reference front()
@@ -71,15 +73,15 @@ public:
         container.emplace_back(args...);
     }
 
-    bool try_pop(value_type &value)
+    std::optional<value_type> try_pop()
     {
         unique_lock_type locker(mutex);
-        if(!container.empty())
+        if (!container.empty())
         {
-            value = std::move(container.front());
+            std::optional<value_type> result = std::make_optional(std::move(container.front()));
             container.pop_front();
-            return true;
+            return result;
         }
-        return false;
+        return std::nullopt;
     }
 };

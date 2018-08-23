@@ -24,7 +24,12 @@ private:
     std::atomic<bool> stop;
 public:
     thread_pool(std::size_t dojob, std::function<void(TArgs...)> task);
+    thread_pool(const thread_pool<TArgs...> &pool) = delete;
+    thread_pool(thread_pool<TArgs...> &&pool);
     ~thread_pool();
+
+    thread_pool<TArgs...> &operator=(const thread_pool<TArgs...> &pool) = delete;
+    thread_pool<TArgs...> &operator=(thread_pool<TArgs...> &&pool);
 
     void post(TArgs... args);
 private:
@@ -32,7 +37,7 @@ private:
 };
 
 template <typename... TArgs>
-thread_pool<TArgs...>::thread_pool(std::size_t dojob, std::function<void(TArgs...)> task) : task(task)
+thread_pool<TArgs...>::thread_pool(std::size_t dojob, std::function<void(TArgs...)> task) : task(std::move(task))
 {
     stop = false;
     if (dojob < 1)
@@ -40,8 +45,14 @@ thread_pool<TArgs...>::thread_pool(std::size_t dojob, std::function<void(TArgs..
     do_threads = std::valarray<std::thread>(dojob);
     for (std::size_t i = 0; i < dojob; i++)
     {
-        do_threads[i] = std::thread(std::bind(&thread_pool<TArgs...>::do_job, this));
+        do_threads[i] = std::thread(std::mem_fn(&thread_pool<TArgs...>::do_job), this);
     }
+}
+
+template <typename... TArgs>
+thread_pool<TArgs...>::thread_pool(thread_pool<TArgs...> &&pool)
+    : task(std::move(pool.task)), do_threads(std::move(pool.do_threads)), jobs(std::move(pool.jobs)), cond(std::move(pool.cond)), cond_mutex(std::move(pool.cond_mutex)), stop(std::move(pool.stop))
+{
 }
 
 template <typename... TArgs>
@@ -53,6 +64,17 @@ thread_pool<TArgs...>::~thread_pool()
     {
         t.join();
     }
+}
+
+template <typename... TArgs>
+thread_pool<TArgs...> &thread_pool<TArgs...>::operator=(thread_pool<TArgs...> &&pool)
+{
+    task = std::move(pool.task);
+    do_threads = std::move(pool.do_threads);
+    jobs = std::move(pool.jobs);
+    cond = std::move(pool.cond);
+    cond_mutex = std::move(pool.cond_mutex);
+    stop = std::move(pool.stop);
 }
 
 template <typename... TArgs>
@@ -74,10 +96,10 @@ void thread_pool<TArgs...>::do_job()
         }
         if (stop)
             break;
-        std::tuple<TArgs...> j;
-        if (jobs.try_pop(j))
+        std::optional<std::tuple<TArgs...>> j = jobs.try_pop();
+        if (j.has_value())
         {
-            apply(task, j);
+            apply(task, j.value());
         }
     }
 }
