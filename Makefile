@@ -1,15 +1,19 @@
+ALL:= obj/ bin/ bin/server.out bin/error.so bin/file.so bin/cpu.so bin/version.so bin/disk.so bin/markdown.so bin/modules bin/style.css 
 .PHONY: all
-ALL:= bin/server.out bin/error.so bin/file.so bin/cpu.so bin/version.so bin/disk.so bin/markdown.so bin/modules bin/style.css 
 all: $(ALL)
+.PHONY: clean
+clean:
+	rm -rf obj/ bin/
 .PHONY: run
 run: $(ALL)
 	cd bin/ && ./server.out
 .PHONY: runv
 runv: $(ALL)
 	cd bin/ && ./server.out -v
-.PHONY: clean
-clean: 
-	rm obj//* bin//*
+obj/:
+	mkdir obj
+bin/:
+	mkdir bin
 obj/server.o: src/server.cpp src/server.h src/http/http_request.h src/thread_pool.h src/http/http.h src/safe_queue.h src/http/http_response.h 
 	g++ -o $@ -c src/server.cpp -std=c++17 -O2 -Wall -flto 
 obj/main.o: src/main.cpp src/server.h src/thread_pool.h src/http/http.h src/safe_queue.h src/http/http_response.h src/http/http_request.h 

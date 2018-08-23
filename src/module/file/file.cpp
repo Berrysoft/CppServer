@@ -22,7 +22,7 @@ ssize_t file_response::send(int fd)
     {
         IF_NEGATIVE_EXIT(writer.write_head("大作业-主页"));
         IF_NEGATIVE_EXIT(writer.write_h1("大作业-主页"));
-        IF_NEGATIVE_EXIT(writer.write_p("欢迎光临！想要查看文件，在请求/file/后面加上文件路径。"));
+        IF_NEGATIVE_EXIT(writer.write_p("欢迎光临！想要查看文件，在请求<code>/file/</code>后面加上文件路径。"));
         IF_NEGATIVE_EXIT(writer.write_h2("动态加载功能"));
         vector<string> lines = read_modules_file();
         vector<string> texts;

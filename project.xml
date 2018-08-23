@@ -295,7 +295,4 @@
     <NeedAll>True</NeedAll>
     <Command>cd bin/ &amp;&amp; ./server.out -v</Command>
   </Run>
-  <Run Name="clean">
-    <Command>rm obj//* bin//*</Command>
-  </Run>
 </Project>
