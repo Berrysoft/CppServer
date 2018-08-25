@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include "../module/module.h"
 #include "../module/response.h"
+#include "../html/html_writer.h"
 
 using namespace std;
 
@@ -67,7 +68,7 @@ unique_ptr<response> deal_commands(string command, const map<string, string> &mo
 
 string status_des(int status)
 {
-    switch(status)
+    switch (status)
     {
     case 200:
         return "OK";
@@ -83,7 +84,7 @@ string status_des(int status)
 ssize_t http_get::send(int fd)
 {
     module m;
-    ssize_t result = 0, t;
+    INIT_RESULT_AND_TEMP;
     {
         unique_ptr<response> res = deal_commands(url, modules, m);
         if (res && (!res->supports(version)))
@@ -91,17 +92,23 @@ ssize_t http_get::send(int fd)
             res = deal_commands("error", modules, m);
         }
         int res_status;
+        string content_type;
         if (res)
         {
             res_status = res->status();
+            content_type = res->type();
         }
         else
         {
             res_status = 400;
         }
         ostringstream head;
-        head << "HTTP/1.1 " << res_status << ' ' << status_des(res_status) << "\r\nServer: Berrysoft.Linux.Cpp.Server\r\nContent-Type: text/html;charset=UTF-8\r\nConnection: keep-alive\r\n";
-        if(res)
+        head << "HTTP/1.1 " << res_status << ' ' << status_des(res_status) << "\r\nServer: Berrysoft.Linux.Cpp.Server\r\nContent-Charset=UTF-8\r\nConnection: keep-alive\r\n";
+        if (content_type.length() > 0)
+        {
+            head << "Content-Type: " << content_type << "\r\n";
+        }
+        if (res)
         {
             int res_length = res->length();
             if (res_length < 0)
@@ -114,27 +121,11 @@ ssize_t http_get::send(int fd)
             }
         }
         string realhead = head.str();
-        t = ::send(fd, realhead.c_str(), realhead.length(), 0);
-        if (t < 0)
-        {
-            result = -1;
-        }
-        else
-        {
-            result += t;
-        }
+        IF_NEGATIVE_EXIT(::send(fd, realhead.c_str(), realhead.length(), 0));
         if (res)
         {
-            t = res->send(fd);
-            if (t < 0)
-            {
-                result = -1;
-            }
-            else
-            {
-                result += t;
-            }
+            IF_NEGATIVE_EXIT(res->send(fd));
         }
     }
-    return result;
+    RETURN_RESULT;
 }

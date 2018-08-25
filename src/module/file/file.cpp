@@ -18,7 +18,7 @@ ssize_t file_response::send(int fd)
 {
     INIT_RESULT_AND_TEMP;
     html_writer writer(fd);
-    if (filename.length() == 0)
+    if (filename.empty())
     {
         IF_NEGATIVE_EXIT(writer.write_head("大作业-主页"));
         IF_NEGATIVE_EXIT(writer.write_h1("大作业-主页"));

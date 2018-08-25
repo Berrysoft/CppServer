@@ -9,7 +9,8 @@ public:
     virtual ~response() {}
     virtual bool supports(std::string version) { return version != "HTTP/1.0"; }
     virtual int status() { return 200; }
-    virtual int length() { return -1; }
+    virtual long long length() { return -1; }
+    virtual std::string type() { return "text/html"; }
     virtual ssize_t send(int fd) = 0;
 };
 
