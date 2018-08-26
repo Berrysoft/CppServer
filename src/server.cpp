@@ -39,25 +39,37 @@ server::server(size_t amount, size_t doj, bool verbose) : verbose(verbose), amou
     printf("初始化线程池...\n");
     pool = make_unique<thread_pool<server *, int>>(doj, mem_fn(&server::process_job));
     printf("刷新模块...\n");
-    refresh_module();
+    refresh_modules();
 }
 
-void server::refresh_module()
+server::~server()
 {
-    unique_lock<shared_mutex> locker(http_mutex);
-    http_parser.refresh_modules();
+    printf("关闭Socket。\n");
+    close(sock);
+    printf("关闭时钟。\n");
+    close(timer_fd);
 }
 
-void server::start(const sockaddr *addr, socklen_t len, int n, int epoll_timeout, timespec interval, int clock_timeout)
+void server::bind(const sockaddr_in &addr, int n)
 {
-    NEGATIVE_RETURN(bind(sock, addr, len), "Socket命名失败。\n");
+    bind((const sockaddr *)&addr, sizeof(addr), n);
+}
+
+void server::bind(const sockaddr_in6 &addr, int n)
+{
+    bind((const sockaddr *)&addr, sizeof(addr), n);
+}
+
+void server::bind(const sockaddr *addr, socklen_t len, int n)
+{
+    NEGATIVE_RETURN(::bind(sock, addr, len), "Socket命名失败。\n");
     NEGATIVE_RETURN(listen(sock, n), "监听失败。\n");
     printf("监听数：%d\n", n);
     printf("监听Socket：%d.\n", sock);
-    printf("Epoll等待时间：%d(ms)\n", epoll_timeout);
-    printf("时钟间隔：%ld(s)\n", interval.tv_sec);
-    printf("时钟等待循环数：%d（个）\n", clock_timeout);
+}
 
+void server::start(int epoll_timeout, timespec &interval, int clock_timeout)
+{
     itimerspec itimer;
     NEGATIVE_RETURN(clock_gettime(CLOCK_MONOTONIC, &itimer.it_value), "时钟获取失败。\n");
     itimer.it_value = interval;
@@ -66,6 +78,10 @@ void server::start(const sockaddr *addr, socklen_t len, int n, int epoll_timeout
 
     epoll_fd = epoll_create(amount);
     NEGATIVE_RETURN(epoll_fd, "Epoll启动失败。\n");
+
+    printf("Epoll等待时间：%d(ms)\n", epoll_timeout);
+    printf("时钟间隔：%ld(s)\n", interval.tv_sec);
+    printf("时钟等待循环数：%d（个）\n", clock_timeout);
 
     epoll_event event;
     event.events = EPOLLIN;
@@ -100,14 +116,16 @@ void server::clean(int ostamp)
 
 void server::stop()
 {
-    printf("关闭Socket。\n");
-    close(sock);
-    printf("关闭时钟。\n");
-    close(timer_fd);
     printf("关闭Epoll。\n");
     close(epoll_fd);
     puts("停止循环，请耐心等待...");
     loop_thread.join();
+}
+
+void server::refresh_modules()
+{
+    unique_lock<shared_mutex> locker(http_mutex);
+    http_parser.refresh_modules();
 }
 
 void server::accept_loop(int epoll_timeout, int clock_timeout)

@@ -37,13 +37,18 @@ private:
     std::mutex clients_mutex;
 public:
     server(std::size_t amount, std::size_t doj, bool verbose);
+    ~server();
 
-    void refresh_module();
-
-    void start(const sockaddr *addr, socklen_t len, int n, int epoll_timeout = 2000, timespec interval = {60, 0}, int clock_timeout = 2);
+    void bind(const sockaddr_in &addr, int n);
+    void bind(const sockaddr_in6 &addr, int n);
+private:
+    void bind(const sockaddr *addr, socklen_t len, int n);
+public:
+    void start(int epoll_timeout, timespec &interval, int clock_timeout);
     void clean(int ostamp);
     void stop();
 
+    void refresh_modules();
     int get_time_stamp() { return time_stamp; }
 private:
     void accept_loop(int epoll_timeout, int clock_timeout);

@@ -1,21 +1,20 @@
 ﻿#include <cstdio>
-#include <cstring>
+#include <string>
 #include <arpa/inet.h>
 #include <getopt.h>
 #include "server.h"
 
-using std::getchar;
-using std::printf;
+using namespace std;
 
-const char *const help_opt = "help";
-const char *const verbose_opt = "verbose";
-const char *const addr_opt = "address";
-const char *const port_opt = "port";
-const char *const count_opt = "count";
-const char *const threads_opt = "threads";
-const char *const etime_opt = "epoll-timeout";
-const char *const cinterval_opt = "clock-interval";
-const char *const ctime_opt = "clock-timeout";
+const char help_opt[] = "help";
+const char verbose_opt[] = "verbose";
+const char addr_opt[] = "address";
+const char port_opt[] = "port";
+const char count_opt[] = "count";
+const char threads_opt[] = "threads";
+const char etime_opt[] = "epoll-timeout";
+const char cinterval_opt[] = "clock-interval";
+const char ctime_opt[] = "clock-timeout";
 
 int print_help(const char *name)
 {
@@ -43,25 +42,23 @@ int main(int argc, char **argv)
     char *addr_string = nullptr;
     int port = 3342;
     int amount = 16384;
-    int n = 4;
+    size_t n = 4;
     int epoll_timeout = 2000;
     timespec interval = {60, 0};
     int clock_timeout = 2;
 
-    const char *const s_opts = "hva:p:c:t:e:i:o:";
-    const option l_opts[] =
-        {
-            {help_opt, no_argument, nullptr, 'h'},
-            {verbose_opt, no_argument, nullptr, 'v'},
-            {addr_opt, required_argument, nullptr, 'a'},
-            {port_opt, required_argument, nullptr, 'p'},
-            {count_opt, required_argument, nullptr, 'c'},
-            {threads_opt, required_argument, nullptr, 't'},
-            {etime_opt, required_argument, nullptr, 'e'},
-            {cinterval_opt, required_argument, nullptr, 'i'},
-            {ctime_opt, required_argument, nullptr, 'o'},
-            {nullptr, 0, nullptr, 0}
-        };
+    const char s_opts[] = "hva:p:c:t:e:i:o:";
+    const option l_opts[] = {
+        {help_opt, no_argument, nullptr, 'h'},
+        {verbose_opt, no_argument, nullptr, 'v'},
+        {addr_opt, required_argument, nullptr, 'a'},
+        {port_opt, required_argument, nullptr, 'p'},
+        {count_opt, required_argument, nullptr, 'c'},
+        {threads_opt, required_argument, nullptr, 't'},
+        {etime_opt, required_argument, nullptr, 'e'},
+        {cinterval_opt, required_argument, nullptr, 'i'},
+        {ctime_opt, required_argument, nullptr, 'o'},
+        {nullptr, 0, nullptr, 0}};
     int opt;
     while ((opt = getopt_long(argc, argv, s_opts, l_opts, nullptr)) >= 0)
     {
@@ -74,28 +71,26 @@ int main(int argc, char **argv)
             addr_string = optarg;
             break;
         case 'p':
-            port = atoi(optarg);
+            port = stoi(optarg);
             break;
         case 'c':
-            amount = atoi(optarg);
+            amount = stoi(optarg);
             break;
         case 't':
-            n = atoi(optarg);
+            n = stoul(optarg);
             break;
         case 'e':
-            epoll_timeout = atoi(optarg);
+            epoll_timeout = stoi(optarg);
             break;
         case 'i':
-            interval.tv_sec = atoi(optarg);
+            interval.tv_sec = stol(optarg);
             break;
         case 'o':
-            clock_timeout = atoi(optarg);
+            clock_timeout = stoi(optarg);
             break;
         case 'h':
         case '?':
             return print_help(argv[0]);
-        case -1:
-            break;
         default:
             printf("未知错误。\n");
             print_help(argv[0]);
@@ -119,14 +114,20 @@ int main(int argc, char **argv)
     address.sin_family = AF_INET;
     address.sin_port = htons(port);
     address.sin_addr.s_addr = listen_addr;
-    if (verbose)
-        printf("正在监听所有IP的%d端口。\n", port);
 
-    ser.start((const sockaddr *)&address, sizeof(address), amount, epoll_timeout, interval, clock_timeout);
+    ser.bind(address, amount);
+    ser.start(epoll_timeout, interval, clock_timeout);
 
     if (verbose)
     {
-        printf("正在通过%d端口监听地址%s\n", port, inet_ntoa(*(in_addr *)&listen_addr));
+        if (addr_string)
+        {
+            printf("正在通过%d端口监听地址%s\n", port, addr_string);
+        }
+        else
+        {
+            printf("正在通过%d端口监听所有IP地址。\n", port);
+        }
         printf("参数的调整请使用命令 %s -h 查看。\n", argv[0]);
     }
     printf("按r <回车>刷新模块，c <回车>清除超时连接，q <回车>结束服务器。\n");
@@ -138,7 +139,7 @@ int main(int argc, char **argv)
         {
         case 'r':
             printf("刷新模块...\n");
-            ser.refresh_module();
+            ser.refresh_modules();
             break;
         case 'c':
             printf("正在清理...\n");
