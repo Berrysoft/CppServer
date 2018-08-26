@@ -27,7 +27,7 @@ ssize_t html_writer::write_head(string title)
 {
     INIT_RESULT_AND_TEMP;
     const char head_start[] = "<!DOCTYPE html><html><head><meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\"><title>";
-    const char head_mid[] = "</title><link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.10.0-alpha/dist/katex.min.css\" integrity=\"sha384-BTL0nVi8DnMrNdMQZG1Ww6yasK9ZGnUxL1ZWukXQ7fygA1py52yPp9W4wrR00VML\" crossorigin=\"anonymous\"><style>";
+    const char head_mid[] = "</title><style>";
     const char head_end[] = "</style></head><body>";
     IF_NEGATIVE_EXIT(send_with_chunk(fd, head_start, 0));
     IF_NEGATIVE_EXIT(send_with_chunk(fd, title, 0));

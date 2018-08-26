@@ -28,6 +28,8 @@ obj/http_head.o: src/http/http_head.cpp src/http/http_head.h src/http/http_respo
 	g++ -o $@ -c src/http/http_head.cpp -std=c++17 -O2 -Wall -flto 
 obj/http_request.o: src/http/http_request.cpp src/http/http_request.h 
 	g++ -o $@ -c src/http/http_request.cpp -std=c++17 -O2 -Wall -flto 
+obj/http_response.o: src/http/http_response.cpp src/http/http_response.h 
+	g++ -o $@ -c src/http/http_response.cpp -std=c++17 -O2 -Wall -flto 
 obj/module.o: src/module/module.cpp src/module/module.h src/module/response.h 
 	g++ -o $@ -c src/module/module.cpp -std=c++17 -O2 -Wall -flto 
 obj/read_modules.o: src/module/read_modules.cpp src/module/read_modules.h 
@@ -52,7 +54,7 @@ obj/version.o: src/module/version/version.cpp src/html/html_writer.h src/module/
 	g++ -o $@ -c src/module/version/version.cpp -std=c++17 -O2 -Wall -flto -fPIC
 obj/mem.o: src/module/version/mem.cpp src/module/version/mem.h 
 	g++ -o $@ -c src/module/version/mem.cpp -std=c++17 -O2 -Wall -flto -fPIC
-bin/server.out: obj/main.o obj/server.o obj/http.o obj/http_request.o obj/http_get.o obj/http_head.o obj/module.o obj/read_modules.o 
+bin/server.out: obj/main.o obj/server.o obj/http.o obj/http_request.o obj/http_get.o obj/http_head.o obj/http_response.o obj/module.o obj/read_modules.o 
 	g++ -o $@ $^ -lpthread -ldl -lstdc++fs -flto
 bin/error.so: obj/error.o 
 	g++ -o $@ $^ -shared -fPIC -flto

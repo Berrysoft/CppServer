@@ -76,6 +76,9 @@
   <Source Name="http/http_request.cpp">
     <Include>http/http_request.h</Include>
   </Source>
+  <Source Name="http/http_response.cpp">
+    <Include>http/http_response.h</Include>
+  </Source>
 
   <Compile Target="http.o">
     <Source>http/http.cpp</Source>
@@ -88,6 +91,9 @@
   </Compile>
   <Compile Target="http_request.o">
     <Source>http/http_request.cpp</Source>
+  </Compile>
+  <Compile Target="http_response.o">
+    <Source>http/http_response.cpp</Source>
   </Compile>
 
   <!--module/-->
@@ -256,6 +262,7 @@
     <Object>http_request.o</Object>
     <Object>http_get.o</Object>
     <Object>http_head.o</Object>
+    <Object>http_response.o</Object>
     <Object>module.o</Object>
     <Object>read_modules.o</Object>
   </Link>

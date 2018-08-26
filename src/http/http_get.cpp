@@ -66,21 +66,6 @@ unique_ptr<response> deal_commands(string command, const map<string, string> &mo
     return result;
 }
 
-string status_des(int status)
-{
-    switch (status)
-    {
-    case 200:
-        return "OK";
-    case 400:
-        return "Bad Request";
-    case 404:
-        return "Not Found";
-    default:
-        return string();
-    }
-}
-
 ssize_t http_get::send(int fd)
 {
     module m;
@@ -93,35 +78,19 @@ ssize_t http_get::send(int fd)
         }
         int res_status;
         string content_type;
+        long long res_length;
         if (res)
         {
             res_status = res->status();
+            res_length = res->length();
             content_type = res->type();
         }
         else
         {
             res_status = 400;
         }
-        ostringstream head;
-        head << "HTTP/1.1 " << res_status << ' ' << status_des(res_status) << "\r\nServer: Berrysoft.Linux.Cpp.Server\r\nContent-Charset=UTF-8\r\nConnection: keep-alive\r\n";
-        if (content_type.length() > 0)
-        {
-            head << "Content-Type: " << content_type << "\r\n";
-        }
-        if (res)
-        {
-            long long res_length = res->length();
-            if (res_length < 0)
-            {
-                head << "Transfer-Encoding: chunked\r\n\r\n";
-            }
-            else
-            {
-                head << "Content-Length: " << res_length << "\r\n\r\n";
-            }
-        }
-        string realhead = head.str();
-        IF_NEGATIVE_EXIT(::send(fd, realhead.c_str(), realhead.length(), 0));
+        http_response_head head(res_status, res_length, content_type);
+        IF_NEGATIVE_EXIT(head.send(fd));
         if (res)
         {
             IF_NEGATIVE_EXIT(res->send(fd));
