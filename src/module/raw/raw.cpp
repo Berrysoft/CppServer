@@ -6,9 +6,38 @@
 
 using namespace std;
 using std::filesystem::exists;
+using std::filesystem::path;
 
 raw_response::raw_response(string filename) : filename(move(filename))
 {
+}
+
+string get_content_type(const string &ex)
+{
+    if (ex == "htm" || ex == "html")
+    {
+        return "text/html";
+    }
+    else if (ex == "css")
+    {
+        return "text/css";
+    }
+    else if (ex == "xml")
+    {
+        return "application/xml";
+    }
+    else if (ex == "pdf")
+    {
+        return "application/pdf";
+    }
+    else if (ex == "txt")
+    {
+        return "text/plain";
+    }
+    else
+    {
+        return "application/octet-stream";
+    }
 }
 
 string raw_response::type()
@@ -19,7 +48,16 @@ string raw_response::type()
     }
     else
     {
-        return "text/plain";
+        string ex = path(filename).extension();
+        if (!ex.empty() && ex.front() == '.')
+        {
+            ex.erase(ex.begin());
+        }
+        if (ex.empty())
+        {
+            return "text/plain";
+        }
+        return get_content_type(ex);
     }
 }
 

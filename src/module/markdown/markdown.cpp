@@ -90,8 +90,15 @@ ssize_t markdown_response::send(int fd)
             }
             if (line.length() == 0)
             {
-                IF_NEGATIVE_EXIT(deal_with_ul(in_ul, writer, ul_texts));
-                IF_NEGATIVE_EXIT(deal_with_p(in_p, writer));
+                if (in_code)
+                {
+                    IF_NEGATIVE_EXIT(send_with_chunk(fd, "\n", 0));
+                }
+                else
+                {
+                    IF_NEGATIVE_EXIT(deal_with_ul(in_ul, writer, ul_texts));
+                    IF_NEGATIVE_EXIT(deal_with_p(in_p, writer));
+                }
             }
             else if (!in_code && line.length() > 4 && line.substr(0, 4) == "### ")
             {
@@ -147,7 +154,7 @@ ssize_t markdown_response::send(int fd)
                     if (!in_p)
                     {
                         in_p = true;
-                        IF_NEGATIVE_EXIT(send_with_chunk(fd, "<p>", 0));
+                        IF_NEGATIVE_EXIT(writer.write_p_start());
                     }
                     line = deal_with_code(line);
                     IF_NEGATIVE_EXIT(send_with_chunk(fd, line, 0));

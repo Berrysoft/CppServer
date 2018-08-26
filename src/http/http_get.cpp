@@ -110,7 +110,7 @@ ssize_t http_get::send(int fd)
         }
         if (res)
         {
-            int res_length = res->length();
+            long long res_length = res->length();
             if (res_length < 0)
             {
                 head << "Transfer-Encoding: chunked\r\n\r\n";
