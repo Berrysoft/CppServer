@@ -65,7 +65,11 @@ void ioepoll::close()
 {
     for (int i = 0; i < amount; i++)
     {
-        ::close(event_list[i].data.fd);
+        int fd = event_list[i].data.fd;
+        if (fd != STDIN_FILENO && fd != STDOUT_FILENO && fd != STDERR_FILENO)
+        {
+            ::close(fd);
+        }
     }
     ::close(epoll_fd);
 }
