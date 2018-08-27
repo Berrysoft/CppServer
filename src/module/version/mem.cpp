@@ -1,7 +1,7 @@
 #include "mem.h"
 #include <fstream>
-#include <string>
 #include <sstream>
+#include <string>
 
 using std::ifstream;
 using std::istringstream;

@@ -1,8 +1,8 @@
-﻿#include <cstdio>
-#include <string>
+﻿#include "server.h"
 #include <arpa/inet.h>
+#include <cstdio>
 #include <getopt.h>
-#include "server.h"
+#include <string>
 
 using namespace std;
 
@@ -16,7 +16,7 @@ const char etime_opt[] = "epoll-timeout";
 const char cinterval_opt[] = "clock-interval";
 const char ctime_opt[] = "clock-timeout";
 
-int print_help(const char *name)
+int print_help(const char* name)
 {
     printf("Berrysoft.Linux.Cpp.Server\n");
     printf("网站在Edge、IE、Chrome、Safari(iPhone)下测试通过。\n");
@@ -36,10 +36,10 @@ int print_help(const char *name)
     return 0;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     bool verbose = false;
-    char *addr_string = nullptr;
+    char* addr_string = nullptr;
     int port = 3342;
     int amount = 16384;
     size_t n = 4;

@@ -1,8 +1,8 @@
 #include "http.h"
-#include <sstream>
 #include "../module/read_modules.h"
 #include "http_get.h"
 #include "http_head.h"
+#include <sstream>
 
 using namespace std;
 
@@ -15,7 +15,7 @@ void http::refresh_modules()
 {
     vector<string> lines = read_modules_file();
     modules.clear();
-    for (string &line : lines)
+    for (string& line : lines)
     {
         istringstream iss(line);
         string key, module_name;
@@ -24,9 +24,9 @@ void http::refresh_modules()
     }
 }
 
-unique_ptr<http_response> http::get_response(const http_request &request)
+unique_ptr<http_response> http::get_response(const http_request& request)
 {
-    const string &method = request.method();
+    const string& method = request.method();
     if (method == "GET")
     {
         return make_unique<http_get>(request, modules);

@@ -15,6 +15,7 @@ private:
     int status;
     long long length;
     std::string type;
+
 public:
     http_response_head(int status, long long length, std::string type);
     ssize_t send(int fd);

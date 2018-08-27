@@ -1,6 +1,6 @@
 #include "proc_stat.h"
-#include <ios>
 #include <fstream>
+#include <ios>
 #include <string>
 
 using std::getline;
@@ -8,12 +8,12 @@ using std::ifstream;
 using std::istream;
 using std::string;
 
-void read_linuxcpu(istream &is, linuxcpu &lcpu)
+void read_linuxcpu(istream& is, linuxcpu& lcpu)
 {
     is >> lcpu.user >> lcpu.nice >> lcpu.system >> lcpu.idle >> lcpu.iowait >> lcpu.irq >> lcpu.softirq >> lcpu.steal >> lcpu.guest >> lcpu.guest_nice;
 }
 
-bool read_with_head(istream &is, const char *head, int &value)
+bool read_with_head(istream& is, const char* head, int& value)
 {
     string t;
     is >> t;

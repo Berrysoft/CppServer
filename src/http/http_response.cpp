@@ -1,6 +1,6 @@
 #include "http_response.h"
-#include <sys/socket.h>
 #include <sstream>
+#include <sys/socket.h>
 
 using namespace std;
 

@@ -1,15 +1,9 @@
 #include "proc_cpuinfo.h"
-#include <ios>
-#include <fstream>
 #include <cstdlib>
+#include <fstream>
+#include <ios>
 
-using std::size_t;
-using std::vector;
-using std::string;
-using std::istream;
-using std::ifstream;
-using std::getline;
-using std::atoi;
+using namespace std;
 
 string get_first_info(istream& is, string head)
 {
@@ -43,12 +37,12 @@ vector<physical_cpu> read_proc_cpuinfo()
         if (p.length() == 0)
             break;
         mname = get_first_info(ifs, "model name");
-        int tpid = atoi(get_first_info(ifs, "physical id").c_str());
-        int sibs = atoi(get_first_info(ifs, "siblings").c_str());
-        int cores = atoi(get_first_info(ifs, "cpu cores").c_str());
+        int tpid = stoi(get_first_info(ifs, "physical id"));
+        int sibs = stoi(get_first_info(ifs, "siblings"));
+        int cores = stoi(get_first_info(ifs, "cpu cores"));
         if (tpid > pid)
         {
-            physical_cpu pcpu = { mname,cores,sibs };
+            physical_cpu pcpu = {mname, cores, sibs};
             result.push_back(pcpu);
             pid++;
         }

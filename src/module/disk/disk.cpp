@@ -1,8 +1,8 @@
 #include "disk.h"
 #include "../../html/html_writer.h"
-#include <vector>
 #include <string>
 #include <sys/statfs.h>
+#include <vector>
 
 using namespace std;
 
@@ -39,7 +39,7 @@ ssize_t disk_response::send(int fd)
     RETURN_RESULT;
 }
 
-void *get_instance_response(const char *command)
+void* get_instance_response(const char* command)
 {
     return new disk_response();
 }

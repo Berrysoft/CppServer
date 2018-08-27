@@ -1,11 +1,11 @@
 #include "file.h"
-#include <sys/socket.h>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <filesystem>
 #include "../../html/html_writer.h"
 #include "../read_modules.h"
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+#include <sys/socket.h>
+#include <vector>
 
 using namespace std;
 using std::filesystem::exists;
@@ -26,7 +26,7 @@ ssize_t file_response::send(int fd)
         IF_NEGATIVE_EXIT(writer.write_h2("动态加载功能"));
         vector<string> lines = read_modules_file();
         vector<string> texts;
-        for (string &line : lines)
+        for (string& line : lines)
         {
             istringstream iss(line);
             string key, module_name, text;
@@ -45,10 +45,10 @@ ssize_t file_response::send(int fd)
         IF_NEGATIVE_EXIT(writer.write_pre_code_start());
         IF_NEGATIVE_EXIT(writer.write_xmp_start());
         ifstream furl(filename);
-        if(furl.is_open())
+        if (furl.is_open())
         {
             char buffer[4096];
-            while(!furl.eof())
+            while (!furl.eof())
             {
                 furl.read(buffer, sizeof(buffer));
                 IF_NEGATIVE_EXIT(send_with_chunk(fd, buffer, furl.gcount(), 0));
@@ -62,7 +62,7 @@ ssize_t file_response::send(int fd)
     RETURN_RESULT;
 }
 
-void *get_instance_response(const char *command)
+void* get_instance_response(const char* command)
 {
     if (command && (command[0] == '\0' || exists(command)))
     {

@@ -1,8 +1,8 @@
 #include "raw.h"
-#include <sys/socket.h>
-#include <fstream>
-#include <filesystem>
 #include "../../html/html_writer.h"
+#include <filesystem>
+#include <fstream>
+#include <sys/socket.h>
 
 using namespace std;
 using std::filesystem::exists;
@@ -12,7 +12,7 @@ raw_response::raw_response(string filename) : filename(move(filename))
 {
 }
 
-string get_content_type(const string &ex)
+string get_content_type(const string& ex)
 {
     if (ex == "htm" || ex == "html")
     {
@@ -90,7 +90,7 @@ ssize_t raw_response::send(int fd)
     RETURN_RESULT;
 }
 
-void *get_instance_response(const char *command)
+void* get_instance_response(const char* command)
 {
     if (command && (command[0] == '\0' || exists(command)))
     {

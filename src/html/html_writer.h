@@ -2,8 +2,8 @@
 //需要用到程序运行目录下的`style.css`样式表。
 //由于文档是动态生成的，所以采用Chunked编码方式传输。
 #pragma once
-#include <unistd.h>
 #include <string>
+#include <unistd.h>
 #include <vector>
 
 #define INIT_RESULT_AND_TEMP ssize_t result = 0, t
@@ -13,7 +13,7 @@
     result += t
 #define RETURN_RESULT return result
 
-ssize_t send_with_chunk(int fd, const void *buffer, size_t length, int flag);
+ssize_t send_with_chunk(int fd, const void* buffer, size_t length, int flag);
 
 template <size_t size>
 inline ssize_t send_with_chunk(int fd, const char (&buffer)[size], int flag)
@@ -21,7 +21,7 @@ inline ssize_t send_with_chunk(int fd, const char (&buffer)[size], int flag)
     return send_with_chunk(fd, buffer, size - 1, flag);
 }
 
-inline ssize_t send_with_chunk(int fd, const std::string &buffer, int flag)
+inline ssize_t send_with_chunk(int fd, const std::string& buffer, int flag)
 {
     return send_with_chunk(fd, buffer.c_str(), buffer.length(), flag);
 }
@@ -36,6 +36,7 @@ private:
     ssize_t write_spe(std::string spe, std::string text);
     ssize_t write_spe_start(std::string spe);
     ssize_t write_spe_end(std::string spe);
+
 public:
     html_writer(int fd) : fd(fd) {}
 

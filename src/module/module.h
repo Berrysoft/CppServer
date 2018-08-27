@@ -1,13 +1,14 @@
 //模块类，用于动态加载模块。
 #pragma once
-#include <string>
-#include <memory>
 #include "response.h"
+#include <memory>
+#include <string>
 
 class module
 {
 private:
     void* handle;
+
 public:
     module();
     ~module();

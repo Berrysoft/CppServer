@@ -1,15 +1,15 @@
 #include "http_get.h"
+#include "../html/html_writer.h"
+#include "../module/module.h"
+#include "../module/response.h"
 #include <cstring>
 #include <sstream>
 #include <sys/socket.h>
 #include <unistd.h>
-#include "../module/module.h"
-#include "../module/response.h"
-#include "../html/html_writer.h"
 
 using namespace std;
 
-http_get::http_get(const http_request &request, const map<string, string> &modules) : modules(modules)
+http_get::http_get(const http_request& request, const map<string, string>& modules) : modules(modules)
 {
     url = request.url();
     version = request.version();
@@ -33,7 +33,7 @@ http_get::http_get(const http_request &request, const map<string, string> &modul
     }
 }
 
-unique_ptr<response> get_command_response(string command, string response_command, const map<string, string> &modules, module &m)
+unique_ptr<response> get_command_response(string command, string response_command, const map<string, string>& modules, module& m)
 {
     map<string, string>::const_iterator it;
     it = modules.find(command);
@@ -45,7 +45,7 @@ unique_ptr<response> get_command_response(string command, string response_comman
     return nullptr;
 }
 
-unique_ptr<response> deal_commands(string command, const map<string, string> &modules, module &m)
+unique_ptr<response> deal_commands(string command, const map<string, string>& modules, module& m)
 {
     unique_ptr<response> result;
     size_t index = command.find_first_of('/');

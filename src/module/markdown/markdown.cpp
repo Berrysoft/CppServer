@@ -1,10 +1,10 @@
 #include "markdown.h"
 #include "../../html/html_writer.h"
+#include <filesystem>
 #include <fstream>
 #include <sstream>
-#include <vector>
-#include <filesystem>
 #include <sys/socket.h>
+#include <vector>
 
 using namespace std;
 using std::filesystem::exists;
@@ -44,7 +44,7 @@ string deal_with_code(string line)
     return oss.str();
 }
 
-ssize_t deal_with_ul(bool &in_ul, html_writer &writer, vector<string> &texts)
+ssize_t deal_with_ul(bool& in_ul, html_writer& writer, vector<string>& texts)
 {
     if (in_ul)
     {
@@ -54,7 +54,7 @@ ssize_t deal_with_ul(bool &in_ul, html_writer &writer, vector<string> &texts)
     return 0;
 }
 
-ssize_t deal_with_p(bool &in_p, html_writer &writer)
+ssize_t deal_with_p(bool& in_p, html_writer& writer)
 {
     if (in_p)
     {
@@ -168,7 +168,7 @@ ssize_t markdown_response::send(int fd)
     RETURN_RESULT;
 }
 
-void *get_instance_response(const char *command)
+void* get_instance_response(const char* command)
 {
     if (!command || command[0] == '\0')
     {

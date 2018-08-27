@@ -8,6 +8,7 @@ class markdown_response : public response
 {
 private:
     std::string filename;
+
 public:
     virtual ~markdown_response() {}
     markdown_response(std::string filename);

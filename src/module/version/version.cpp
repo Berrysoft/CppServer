@@ -1,11 +1,11 @@
 #include "version.h"
 #include "../../html/html_writer.h"
 #include "mem.h"
-#include <fstream>
-#include <vector>
-#include <string>
-#include <sstream>
 #include <ctime>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -17,12 +17,12 @@ string get_version()
     return result;
 }
 
-const char *weekdays[] = {"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
+const char* const weekdays[] = {"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
 
 string get_time()
 {
     time_t timep;
-    tm *p;
+    tm* p;
     time(&timep);
     p = localtime(&timep);
     ostringstream oss;
@@ -53,7 +53,7 @@ ssize_t version_response::send(int fd)
     texts.push_back("Inactive");
     IF_NEGATIVE_EXIT(writer.write_table_start(texts));
     texts.clear();
-    int *p = (int *)(&info);
+    int* p = (int*)(&info);
     for (int i = 0; i < 6; i++)
     {
         texts.push_back(to_string(p[i]) + " kB");
@@ -64,7 +64,7 @@ ssize_t version_response::send(int fd)
     RETURN_RESULT;
 }
 
-void *get_instance_response(const char *command)
+void* get_instance_response(const char* command)
 {
     return new version_response();
 }

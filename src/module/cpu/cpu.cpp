@@ -1,17 +1,17 @@
 #include "cpu.h"
+#include "../../html/html_writer.h"
+#include "id.h"
 #include "proc_cpuinfo.h"
 #include "proc_stat.h"
-#include "id.h"
-#include <sys/socket.h>
-#include <string>
 #include <sstream>
-#include "../../html/html_writer.h"
+#include <string>
+#include <sys/socket.h>
 
 using namespace std;
 
-void push_linuxcpu(vector<string> &texts, const linuxcpu &cpu)
+void push_linuxcpu(vector<string>& texts, const linuxcpu& cpu)
 {
-    int *p = (int *)(&cpu);
+    int* p = (int*)(&cpu);
     for (int i = 0; i < 10; i++)
     {
         texts.push_back(to_string(p[i]));
@@ -32,7 +32,7 @@ ssize_t cpu_response::send(int fd)
     texts.push_back("线程数");
     IF_NEGATIVE_EXIT(writer.write_table_start(texts));
     vector<physical_cpu> cpus = read_proc_cpuinfo();
-    for (physical_cpu &cpu : cpus)
+    for (physical_cpu& cpu : cpus)
     {
         texts.clear();
         texts.push_back(cpu.model_name);
@@ -93,7 +93,7 @@ ssize_t cpu_response::send(int fd)
     RETURN_RESULT;
 }
 
-void *get_instance_response(const char *command)
+void* get_instance_response(const char* command)
 {
     return new cpu_response();
 }

@@ -1,12 +1,12 @@
 #include "html_writer.h"
-#include <fstream>
 #include <cstring>
+#include <fstream>
 #include <sstream>
 #include <sys/socket.h>
 
 using namespace std;
 
-ssize_t send_with_chunk(int fd, const void *buffer, size_t length, int flag)
+ssize_t send_with_chunk(int fd, const void* buffer, size_t length, int flag)
 {
     INIT_RESULT_AND_TEMP;
     ostringstream oss;
@@ -91,7 +91,7 @@ ssize_t html_writer::write_ul(vector<string> texts)
 {
     INIT_RESULT_AND_TEMP;
     IF_NEGATIVE_EXIT(write_spe_start("ul"));
-    for (string &text : texts)
+    for (string& text : texts)
     {
         IF_NEGATIVE_EXIT(write_spe("li", text));
     }
@@ -115,7 +115,7 @@ ssize_t html_writer::write_table_start(vector<string> texts)
     const char table_start[] = "<table><thead><tr>";
     const char thead_end[] = "</tr></thead><tbody>";
     IF_NEGATIVE_EXIT(send_with_chunk(fd, table_start, 0));
-    for (string &text : texts)
+    for (string& text : texts)
     {
         IF_NEGATIVE_EXIT(write_spe("th", text));
     }
@@ -127,7 +127,7 @@ ssize_t html_writer::write_tr(vector<string> texts)
 {
     INIT_RESULT_AND_TEMP;
     IF_NEGATIVE_EXIT(write_spe_start("tr"));
-    for (string &text : texts)
+    for (string& text : texts)
     {
         IF_NEGATIVE_EXIT(write_spe("td", text));
     }
