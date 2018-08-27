@@ -8,6 +8,8 @@
   <CppStandard>Cpp17</CppStandard>
 
   <!--/-->
+  <Header Name="options.h"/>
+  <Header Name="safe_queue.h"/>
   <Header Name="server.h">
     <Include>thread_pool.h</Include>
     <Include>http/http.h</Include>
@@ -15,21 +17,26 @@
   <Header Name="thread_pool.h">
     <Include>safe_queue.h</Include>
   </Header>
-  <Header Name="safe_queue.h"/>
 
+  <Source Name="main.cpp">
+    <Include>server.h</Include>
+  </Source>
+  <Source Name="options.cpp">
+    <Include>options.h</Include>
+  </Source>
   <Source Name="server.cpp">
     <Include>server.h</Include>
     <Include>http/http_request.h</Include>
   </Source>
-  <Source Name="main.cpp">
-    <Include>server.h</Include>
-  </Source>
 
-  <Compile Target="server.o">
-    <Source>server.cpp</Source>
-  </Compile>
   <Compile Target="main.o">
     <Source>main.cpp</Source>
+  </Compile>
+  <Compile Target="options.o">
+    <Source>options.cpp</Source>
+  </Compile>
+  <Compile Target="server.o">
+    <Source>server.cpp</Source>
   </Compile>
 
   <!--html/-->
@@ -257,6 +264,7 @@
     <Library>dl</Library>
     <Library>stdc++fs</Library>
     <Object>main.o</Object>
+    <Object>options.o</Object>
     <Object>server.o</Object>
     <Object>http.o</Object>
     <Object>http_request.o</Object>

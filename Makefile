@@ -14,10 +14,12 @@ obj/:
 	mkdir obj
 bin/:
 	mkdir bin
-obj/server.o: src/server.cpp src/server.h src/http/http_request.h src/thread_pool.h src/http/http.h src/safe_queue.h src/http/http_response.h 
-	g++ -o $@ -c src/server.cpp -std=c++17 -O2 -Wall -flto 
 obj/main.o: src/main.cpp src/server.h src/thread_pool.h src/http/http.h src/safe_queue.h src/http/http_response.h src/http/http_request.h 
 	g++ -o $@ -c src/main.cpp -std=c++17 -O2 -Wall -flto 
+obj/options.o: src/options.cpp src/options.h 
+	g++ -o $@ -c src/options.cpp -std=c++17 -O2 -Wall -flto 
+obj/server.o: src/server.cpp src/server.h src/http/http_request.h src/thread_pool.h src/http/http.h src/safe_queue.h src/http/http_response.h 
+	g++ -o $@ -c src/server.cpp -std=c++17 -O2 -Wall -flto 
 obj/html_writer.o: src/html/html_writer.cpp src/html/html_writer.h 
 	g++ -o $@ -c src/html/html_writer.cpp -std=c++17 -O2 -Wall -flto -fPIC
 obj/http.o: src/http/http.cpp src/module/read_modules.h src/http/http.h src/http/http_get.h src/http/http_head.h src/http/http_response.h src/http/http_request.h 
@@ -54,7 +56,7 @@ obj/version.o: src/module/version/version.cpp src/html/html_writer.h src/module/
 	g++ -o $@ -c src/module/version/version.cpp -std=c++17 -O2 -Wall -flto -fPIC
 obj/mem.o: src/module/version/mem.cpp src/module/version/mem.h 
 	g++ -o $@ -c src/module/version/mem.cpp -std=c++17 -O2 -Wall -flto -fPIC
-bin/server.out: obj/main.o obj/server.o obj/http.o obj/http_request.o obj/http_get.o obj/http_head.o obj/http_response.o obj/module.o obj/read_modules.o 
+bin/server.out: obj/main.o obj/options.o obj/server.o obj/http.o obj/http_request.o obj/http_get.o obj/http_head.o obj/http_response.o obj/module.o obj/read_modules.o 
 	g++ -o $@ $^ -lpthread -ldl -lstdc++fs -flto
 bin/error.so: obj/error.o 
 	g++ -o $@ $^ -shared -fPIC -flto

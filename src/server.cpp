@@ -8,22 +8,24 @@
 #include <sstream>
 #include <string>
 #include <sys/socket.h>
+#include <sys/timerfd.h>
 #include <unistd.h>
 
-#define printf(exp, ...)                                                       \
-    if (verbose)                                                               \
-    {                                                                          \
-        std::printf(exp, ##__VA_ARGS__);                                       \
+#define printf(exp, ...)                 \
+    if (verbose)                         \
+    {                                    \
+        std::printf(exp, ##__VA_ARGS__); \
     }
 
-#define NEGATIVE_RETURN(exp, msg)                                              \
-    if ((exp) < 0)                                                             \
-    {                                                                          \
-        printf(msg);                                                           \
-        return;                                                                \
+#define NEGATIVE_RETURN(exp, msg) \
+    if ((exp) < 0)                \
+    {                             \
+        printf(msg);              \
+        return;                   \
     }
 
 using namespace std;
+using std::placeholders::_1;
 
 server::server(size_t amount, size_t doj, bool verbose)
     : verbose(verbose), amount(amount)
@@ -38,7 +40,7 @@ server::server(size_t amount, size_t doj, bool verbose)
     printf("初始化Epoll...\n");
     event_list = unique_ptr<epoll_event[]>(new epoll_event[amount]);
     printf("初始化线程池...\n");
-    pool.start(doj, mem_fn(&server::process_job));
+    pool.start(doj, std::bind(&server::process_job, this, _1));
     printf("刷新模块...\n");
     refresh_modules();
 }
@@ -69,13 +71,13 @@ void server::bind(const sockaddr* addr, socklen_t len, int n)
     printf("监听Socket：%d.\n", sock);
 }
 
-void server::start(int epoll_timeout, timespec& interval, int clock_timeout)
+void server::start(int epoll_timeout, long interval, int clock_timeout)
 {
     itimerspec itimer;
     NEGATIVE_RETURN(clock_gettime(CLOCK_MONOTONIC, &itimer.it_value),
                     "时钟获取失败。\n");
-    itimer.it_value = interval;
-    itimer.it_interval = interval;
+    itimer.it_value = { interval, 0 };
+    itimer.it_interval = { interval, 0 };
     NEGATIVE_RETURN(timerfd_settime(timer_fd, 0, &itimer, nullptr),
                     "时钟设置失败。\n");
 
@@ -83,7 +85,7 @@ void server::start(int epoll_timeout, timespec& interval, int clock_timeout)
     NEGATIVE_RETURN(epoll_fd, "Epoll启动失败。\n");
 
     printf("Epoll等待时间：%d(ms)\n", epoll_timeout);
-    printf("时钟间隔：%ld(s)\n", interval.tv_sec);
+    printf("时钟间隔：%ld(s)\n", interval);
     printf("时钟等待循环数：%d（个）\n", clock_timeout);
 
     epoll_event event;
@@ -209,7 +211,7 @@ void server::accept_loop(int epoll_timeout, int clock_timeout)
                     else
                     {
                         lock_guard<mutex> locker(clients_mutex);
-                        clients.push_back({newsock, time_stamp});
+                        clients.push_back({ newsock, time_stamp });
                     }
                 }
             }
@@ -242,7 +244,7 @@ void server::accept_loop(int epoll_timeout, int clock_timeout)
                         }
                     }
                 }
-                pool.post(this, fd);
+                pool.post(fd);
             }
         }
     }

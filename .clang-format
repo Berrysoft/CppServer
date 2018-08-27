@@ -7,6 +7,7 @@ AllowShortLoopsOnASingleLine: false
 AlwaysBreakTemplateDeclarations: true
 BreakBeforeBraces: Allman
 ColumnLimit: 0
+Cpp11BracedListStyle: false
 IndentWidth: 4
 PointerBindsToType: true
 TabWidth: 4

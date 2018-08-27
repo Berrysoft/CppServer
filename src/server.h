@@ -9,7 +9,6 @@
 #include <shared_mutex>
 #include <string>
 #include <sys/epoll.h>
-#include <sys/timerfd.h>
 #include <thread>
 #include <vector>
 
@@ -24,7 +23,7 @@ class server
 private:
     bool verbose;
     int sock;
-    thread_pool<server*, int> pool;
+    thread_pool<int> pool;
     std::thread loop_thread;
     http http_parser;
     std::shared_mutex http_mutex;
@@ -47,7 +46,7 @@ private:
     void bind(const sockaddr* addr, socklen_t len, int n);
 
 public:
-    void start(int epoll_timeout, timespec& interval, int clock_timeout);
+    void start(int epoll_timeout, long interval, int clock_timeout);
     void clean(int ostamp);
     void stop();
 
