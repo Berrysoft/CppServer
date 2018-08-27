@@ -31,8 +31,7 @@ public:
     thread_pool<TArgs...>& operator=(const thread_pool<TArgs...>& pool) = delete;
     thread_pool<TArgs...>& operator=(thread_pool<TArgs...>&& pool) = delete;
 
-    template <typename Callable>
-    void start(std::size_t dojob, Callable task);
+    void start(std::size_t dojob, std::function<void(TArgs...)>&& task);
     void post(TArgs... args);
     void stop();
 
@@ -41,13 +40,12 @@ private:
 };
 
 template <typename... TArgs>
-template <typename Callable>
-void thread_pool<TArgs...>::start(std::size_t dojob, Callable task)
+void thread_pool<TArgs...>::start(std::size_t dojob, std::function<void(TArgs...)>&& task)
 {
     if (stopped)
     {
         stopped = false;
-        this->task = std::function<void(TArgs...)>(std::move(task));
+        this->task = std::move(task);
         if (dojob < 1)
             dojob = 1;
         do_threads = std::valarray<std::thread>(dojob);

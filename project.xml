@@ -8,16 +8,21 @@
   <CppStandard>Cpp17</CppStandard>
 
   <!--/-->
+  <Header Name="ioepoll.h"/>
   <Header Name="options.h"/>
   <Header Name="safe_queue.h"/>
   <Header Name="server.h">
     <Include>thread_pool.h</Include>
     <Include>http/http.h</Include>
+    <Include>ioepoll.h</Include>
   </Header>
   <Header Name="thread_pool.h">
     <Include>safe_queue.h</Include>
   </Header>
 
+  <Source Name="ioepoll.cpp">
+    <Include>ioepoll.h</Include>
+  </Source>
   <Source Name="main.cpp">
     <Include>server.h</Include>
   </Source>
@@ -29,6 +34,9 @@
     <Include>http/http_request.h</Include>
   </Source>
 
+  <Compile Target="ioepoll.o">
+    <Source>ioepoll.cpp</Source>
+  </Compile>
   <Compile Target="main.o">
     <Source>main.cpp</Source>
   </Compile>
@@ -266,6 +274,7 @@
     <Object>main.o</Object>
     <Object>options.o</Object>
     <Object>server.o</Object>
+    <Object>ioepoll.o</Object>
     <Object>http.o</Object>
     <Object>http_request.o</Object>
     <Object>http_get.o</Object>

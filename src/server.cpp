@@ -26,8 +26,9 @@
 
 using namespace std;
 using std::placeholders::_1;
+using std::placeholders::_2;
 
-server::server(size_t amount, size_t doj, bool verbose)
+server::server(int amount, size_t doj, bool verbose)
     : verbose(verbose), amount(amount)
 {
     printf("初始化Socket...\n");
@@ -38,7 +39,7 @@ server::server(size_t amount, size_t doj, bool verbose)
     timer_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
     NEGATIVE_RETURN(timer_fd, "时钟初始化失败。\n");
     printf("初始化Epoll...\n");
-    event_list = unique_ptr<epoll_event[]>(new epoll_event[amount]);
+    NEGATIVE_RETURN(epoll.create(amount), "Epoll启动失败。\n");
     printf("初始化线程池...\n");
     pool.start(doj, std::bind(&server::process_job, this, _1));
     printf("刷新模块...\n");
@@ -74,40 +75,32 @@ void server::bind(const sockaddr* addr, socklen_t len, int n)
 void server::start(int epoll_timeout, long interval, int clock_timeout)
 {
     itimerspec itimer;
-    NEGATIVE_RETURN(clock_gettime(CLOCK_MONOTONIC, &itimer.it_value),
-                    "时钟获取失败。\n");
+    NEGATIVE_RETURN(clock_gettime(CLOCK_MONOTONIC, &itimer.it_value), "时钟获取失败。\n");
     itimer.it_value = { interval, 0 };
     itimer.it_interval = { interval, 0 };
-    NEGATIVE_RETURN(timerfd_settime(timer_fd, 0, &itimer, nullptr),
-                    "时钟设置失败。\n");
-
-    epoll_fd = epoll_create(amount);
-    NEGATIVE_RETURN(epoll_fd, "Epoll启动失败。\n");
+    NEGATIVE_RETURN(timerfd_settime(timer_fd, 0, &itimer, nullptr), "时钟设置失败。\n");
+    this->clock_timeout = clock_timeout;
 
     printf("Epoll等待时间：%d(ms)\n", epoll_timeout);
     printf("时钟间隔：%ld(s)\n", interval);
     printf("时钟等待循环数：%d（个）\n", clock_timeout);
 
-    epoll_event event;
-    event.events = EPOLLIN;
-    event.data.fd = sock;
-    NEGATIVE_RETURN(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, sock, &event),
-                    "Socket启动失败。\n");
+    NEGATIVE_RETURN(epoll.add(sock, EPOLLIN), "Socket启动失败。\n");
 
-    event.events = EPOLLIN | EPOLLET;
-    event.data.fd = timer_fd;
-    NEGATIVE_RETURN(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, timer_fd, &event),
-                    "时钟启动失败。\n");
+    NEGATIVE_RETURN(epoll.add(timer_fd, EPOLLIN | EPOLLET), "时钟启动失败。\n");
 
-    loop_thread = thread(mem_fn(&server::accept_loop), this, epoll_timeout,
-                         clock_timeout);
+    epoll.set_error_handler(std::bind(&server::epoll_error, this, _1, _2));
+    epoll.set_default_handler(std::bind(&server::epoll_default, this, _1, _2));
+    epoll.set_handler(sock, std::bind(&server::epoll_sock, this, _1, _2));
+    epoll.set_handler(timer_fd, std::bind(&server::epoll_timer, this, _1, _2));
+
+    loop_thread = thread(&ioepoll::start, &epoll, epoll_timeout);
 }
 
 void server::clean(int ostamp)
 {
     lock_guard<mutex> locker(clients_mutex);
-    for (vector<fd_with_time>::iterator it = clients.begin();
-         it != clients.end();)
+    for (auto it = clients.begin(); it != clients.end();)
     {
         if (it->time < ostamp)
         {
@@ -126,7 +119,7 @@ void server::clean(int ostamp)
 void server::stop()
 {
     printf("关闭Epoll。\n");
-    close(epoll_fd);
+    epoll.close();
     puts("停止循环，请耐心等待...");
     loop_thread.join();
     printf("停止线程池。\n");
@@ -139,121 +132,86 @@ void server::refresh_modules()
     http_parser.refresh_modules();
 }
 
-void server::accept_loop(int epoll_timeout, int clock_timeout)
+void server::epoll_error(int fd, uint32_t events)
 {
-    while (true)
+    if (events & EPOLLRDHUP)
     {
-        int ret = epoll_wait(epoll_fd, event_list.get(), amount, epoll_timeout);
-        if (ret < 0 && ret != EINTR)
+        printf("客户端已关闭Socket %d。\n", fd);
+    }
+    else
+    {
+        printf("Epoll错误，关闭Socket %d。\n", fd);
+    }
+    epoll.remove(fd, events);
+    shutdown(fd, SHUT_RDWR);
+    close(fd);
+    {
+        lock_guard<mutex> locker(clients_mutex);
+        for (auto it = clients.begin(); it != clients.end();)
         {
-            printf("Epoll已关闭。\n");
-            break;
-        }
-        else if (ret == 0)
-        {
-            printf("超时。\n");
-            continue;
-        }
-        printf("接收到%d个事件。\n", ret);
-        for (int i = 0; i < ret; i++)
-        {
-            int fd = event_list[i].data.fd;
-            if ((event_list[i].events & EPOLLERR) ||
-                (event_list[i].events & EPOLLHUP) ||
-                (event_list[i].events & EPOLLRDHUP) ||
-                !(event_list[i].events & EPOLLIN))
+            if (it->fd == fd)
             {
-                if (event_list[i].events & EPOLLRDHUP)
-                {
-                    printf("客户端已关闭Socket %d。\n", fd);
-                }
-                else
-                {
-                    printf("Epoll错误，关闭Socket %d。\n", fd);
-                }
-                epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, &(event_list[i]));
-                shutdown(fd, SHUT_RDWR);
-                close(fd);
-                {
-                    lock_guard<mutex> locker(clients_mutex);
-                    for (vector<fd_with_time>::iterator it = clients.begin();
-                         it != clients.end();)
-                    {
-                        if (it->fd == fd)
-                        {
-                            clients.erase(it);
-                        }
-                        else
-                        {
-                            it++;
-                        }
-                    }
-                }
-                continue;
-            }
-            if (fd == sock)
-            {
-                sockaddr_in paddr;
-                socklen_t len = sizeof(sockaddr_in);
-                int newsock;
-                if ((newsock = accept(sock, (sockaddr*)&paddr, &len)) > 0)
-                {
-                    printf("新建Socket：%d.\n", newsock);
-                    int flags = fcntl(newsock, F_GETFL, 0);
-                    fcntl(newsock, F_GETFL, flags | O_NONBLOCK);
-                    epoll_event e;
-                    e.data.fd = newsock;
-                    e.events = EPOLLIN | EPOLLRDHUP | EPOLLET;
-                    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, newsock, &e) < 0)
-                    {
-                        printf("接收%d错误。\n", newsock);
-                    }
-                    else
-                    {
-                        lock_guard<mutex> locker(clients_mutex);
-                        clients.push_back({ newsock, time_stamp });
-                    }
-                }
-            }
-            else if (fd == timer_fd)
-            {
-                unsigned long long timer_buf;
-                ssize_t len = read(timer_fd, &timer_buf, sizeof(timer_buf));
-                if (len < 0)
-                {
-                    continue;
-                }
-                time_stamp += timer_buf;
-                printf("时间戳：%d\n", time_stamp);
-                if (time_stamp > clock_timeout)
-                {
-                    clean(time_stamp - clock_timeout);
-                    time_stamp = 0;
-                }
+                clients.erase(it);
             }
             else
             {
-                {
-                    lock_guard<mutex> locker(clients_mutex);
-                    for (vector<fd_with_time>::iterator it = clients.begin();
-                         it != clients.end(); it++)
-                    {
-                        if (it->fd == fd)
-                        {
-                            it->time = time_stamp;
-                        }
-                    }
-                }
-                pool.post(fd);
+                it++;
             }
         }
     }
-    for (size_t i = 0; i < amount; i++)
+}
+
+void server::epoll_sock(int fd, uint32_t events)
+{
+    sockaddr_in paddr;
+    socklen_t len = sizeof(sockaddr_in);
+    int newsock;
+    if ((newsock = accept(sock, (sockaddr*)&paddr, &len)) > 0)
     {
-        close(event_list[i].data.fd);
+        printf("新建Socket：%d.\n", newsock);
+        int flags = fcntl(newsock, F_GETFL, 0);
+        fcntl(newsock, F_GETFL, flags | O_NONBLOCK);
+        if (epoll.add(newsock, EPOLLIN | EPOLLRDHUP | EPOLLET))
+        {
+            printf("接收%d错误。\n", newsock);
+        }
+        else
+        {
+            lock_guard<mutex> locker(clients_mutex);
+            clients.push_back({ newsock, time_stamp });
+        }
     }
-    close(epoll_fd);
-    close(sock);
+}
+
+void server::epoll_timer(int fd, uint32_t events)
+{
+    unsigned long long timer_buf;
+    ssize_t len = read(timer_fd, &timer_buf, sizeof(timer_buf));
+    if (len >= 0)
+    {
+        time_stamp += timer_buf;
+        printf("时间戳：%d\n", time_stamp);
+        if (time_stamp > clock_timeout)
+        {
+            clean(time_stamp - clock_timeout);
+            time_stamp = 0;
+        }
+    }
+}
+
+void server::epoll_default(int fd, uint32_t events)
+{
+    {
+        lock_guard<mutex> locker(clients_mutex);
+        for (auto it = clients.begin(); it != clients.end(); it++)
+        {
+            if (it->fd == fd)
+            {
+                it->time = time_stamp;
+            }
+        }
+    }
+    pool.post(fd);
 }
 
 void server::process_job(int fd)
