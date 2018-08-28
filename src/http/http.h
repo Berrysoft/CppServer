@@ -1,7 +1,7 @@
 //解析HTTP请求的类
 #pragma once
+#include "http_head.h"
 #include "http_request.h"
-#include "http_response.h"
 #include <cstdio>
 #include <map>
 #include <memory>
@@ -15,5 +15,5 @@ private:
 public:
     http();
     void refresh_modules();
-    std::unique_ptr<http_response> get_response(const http_request& request);
+    ssize_t send(int fd, const http_request& request);
 };

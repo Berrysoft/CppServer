@@ -9,7 +9,7 @@
 using namespace std;
 using std::filesystem::exists;
 
-markdown_response::markdown_response(string filename) : filename(move(filename))
+markdown_response::markdown_response(const http_request& request, string filename) : response(request), filename(move(filename))
 {
 }
 
@@ -168,15 +168,33 @@ ssize_t markdown_response::send(int fd)
     RETURN_RESULT;
 }
 
-void* get_instance_response(const char* command)
+void* get_instance_response(void* request)
 {
-    if (!command || command[0] == '\0')
+    const http_request& req = *(const http_request*)request;
+    string command = req.url();
+    if (!command.empty())
+    {
+        command.erase(command.begin());
+    }
+    size_t index = command.find_first_of('/');
+    if (index != string::npos)
+    {
+        if (index + 1 >= command.length())
+        {
+            command = string();
+        }
+        else
+        {
+            command = command.substr(index + 1);
+        }
+    }
+    if (command.empty())
     {
         command = "../README.md";
     }
     if (exists(command))
     {
-        return new markdown_response(command);
+        return new markdown_response(req, command);
     }
     return nullptr;
 }

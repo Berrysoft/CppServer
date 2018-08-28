@@ -64,7 +64,7 @@ ssize_t version_response::send(int fd)
     RETURN_RESULT;
 }
 
-void* get_instance_response(const char* command)
+void* get_instance_response(void* request)
 {
-    return new version_response();
+    return new version_response(*(const http_request*)request);
 }

@@ -138,7 +138,7 @@ Percentage of the requests served within a certain time (ms)
  100%     54 (longest request)
 ```
 ## 为本程序开发模块
-想要为本程序开发模块，需要引入`src/module/`文件夹下的头文件`response.h`，并实现`void *get_instance_response(const char *command)`方法。这个方法应当返回一个指向继承`response`的类的指针，并可以被`delete`。
+想要为本程序开发模块，需要引入`src/module/`文件夹下的头文件`response.h`，并实现`void* get_instance_response(void* request)`方法。这个方法接收一个指向`http_request`类实例的指针，应当返回一个指向继承`response`的类的指针，并可以被`delete`。
 
 `response`类定义了一个抽象方法`ssize_t send(int fd)`，这是用来向文件描述符`fd`直接写HTML文档的函数。建议引入`html_writer.h`头文件写HTML，这里面定义了一个向文件描述符写HTML文档的类，并使用了`style.css`的绝对路径。
 

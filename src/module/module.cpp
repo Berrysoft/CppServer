@@ -4,7 +4,7 @@
 
 using namespace std;
 
-typedef void* (*get_handle)(const char*);
+typedef void* (*get_handle)(void*);
 
 module::module() : handle(nullptr)
 {
@@ -24,12 +24,12 @@ void module::open(string name)
     handle = dlopen(name.c_str(), RTLD_LAZY);
 }
 
-unique_ptr<response> module::get_response(string command)
+unique_ptr<response> module::get_response(const http_request& request)
 {
     if (handle)
     {
         get_handle f = (get_handle)dlsym(handle, "get_instance_response");
-        return unique_ptr<response>((response*)f(command.c_str()));
+        return unique_ptr<response>((response*)f((void*)&request));
     }
     return nullptr;
 }

@@ -61,29 +61,19 @@
 
   <!--http/-->
   <Header Name="http/http.h">
-    <Include>http/http_response.h</Include>
+    <Include>http/http_head.h</Include>
     <Include>http/http_request.h</Include>
   </Header>
-  <Header Name="http/http_get.h">
-    <Include>http/http_response.h</Include>
-    <Include>http/http_request.h</Include>
-  </Header>
-  <Header Name="http/http_head.h">
-    <Include>http/http_response.h</Include>
-  </Header>
+  <Header Name="http/http_head.h"/>
   <Header Name="http/http_request.h"/>
-  <Header Name="http/http_response.h"/>
 
   <Source Name="http/http.cpp">
-    <Include>module/read_modules.h</Include>
-    <Include>http/http.h</Include>
-    <Include>http/http_get.h</Include>
-    <Include>http/http_head.h</Include>
-  </Source>
-  <Source Name="http/http_get.cpp">
+    <Include>html/html_writer.h</Include>
     <Include>module/module.h</Include>
     <Include>module/response.h</Include>
-    <Include>http/http_get.h</Include>
+    <Include>module/read_modules.h</Include>
+    <Include>http/http.h</Include>
+    <Include>http/http_head.h</Include>
   </Source>
   <Source Name="http/http_head.cpp">
     <Include>http/http_head.h</Include>
@@ -91,15 +81,9 @@
   <Source Name="http/http_request.cpp">
     <Include>http/http_request.h</Include>
   </Source>
-  <Source Name="http/http_response.cpp">
-    <Include>http/http_response.h</Include>
-  </Source>
 
   <Compile Target="http.o">
     <Source>http/http.cpp</Source>
-  </Compile>
-  <Compile Target="http_get.o">
-    <Source>http/http_get.cpp</Source>
   </Compile>
   <Compile Target="http_head.o">
     <Source>http/http_head.cpp</Source>
@@ -107,12 +91,10 @@
   <Compile Target="http_request.o">
     <Source>http/http_request.cpp</Source>
   </Compile>
-  <Compile Target="http_response.o">
-    <Source>http/http_response.cpp</Source>
-  </Compile>
 
   <!--module/-->
   <Header Name="module/module.h">
+    <Include>http/http_request.h</Include>
     <Include>module/response.h</Include>
   </Header>
   <Header Name="module/read_modules.h"/>
@@ -277,9 +259,7 @@
     <Object>ioepoll.o</Object>
     <Object>http.o</Object>
     <Object>http_request.o</Object>
-    <Object>http_get.o</Object>
     <Object>http_head.o</Object>
-    <Object>http_response.o</Object>
     <Object>module.o</Object>
     <Object>read_modules.o</Object>
   </Link>

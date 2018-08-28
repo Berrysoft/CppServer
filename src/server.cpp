@@ -222,12 +222,10 @@ void server::process_job(int fd)
     ssize_t size = -1;
     if (request)
     {
-        unique_ptr<http_response> response;
         {
             shared_lock<shared_mutex> locker(http_mutex);
-            response = http_parser.get_response(*request);
+            size = http_parser.send(fd, *request);
         }
-        size = response->send(fd);
     }
     if (size < 0)
     {

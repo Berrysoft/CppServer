@@ -10,8 +10,8 @@ private:
     std::string filename;
 
 public:
+    markdown_response(const http_request& request, std::string filename);
     virtual ~markdown_response() {}
-    markdown_response(std::string filename);
 
     virtual ssize_t send(int fd);
 };

@@ -4,6 +4,7 @@
 class error_response : public response
 {
 public:
+    error_response(const http_request& request) : response(request) {}
     virtual ~error_response() {}
     virtual bool supports(std::string) { return true; }
 

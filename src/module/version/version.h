@@ -5,6 +5,7 @@
 class version_response : public response
 {
 public:
+    version_response(const http_request& request) : response(request) {}
     virtual ~version_response() {}
     virtual ssize_t send(int fd);
 };

@@ -1,10 +1,16 @@
-//响应HEAD请求的类。
+//响应HTTP请求的抽象类
 #pragma once
-#include "http_response.h"
 #include <cstdio>
+#include <string>
 
-class http_head : public http_response
+class http_head
 {
+private:
+    int status;
+    long long length;
+    std::string type;
+
 public:
-    virtual ssize_t send(int fd);
+    http_head(int status, long long length, std::string type);
+    ssize_t send(int fd);
 };

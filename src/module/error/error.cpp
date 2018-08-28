@@ -13,7 +13,7 @@ ssize_t error_response::send(int fd)
     return ::send(fd, error_html, length(), 0);
 }
 
-void* get_instance_response(const char* command)
+void* get_instance_response(void* request)
 {
-    return new error_response();
+    return new error_response(*(const http_request*)request);
 }

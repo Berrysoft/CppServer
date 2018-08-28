@@ -9,8 +9,8 @@ private:
     std::string filename;
 
 public:
+    file_response(const http_request& request, std::string filename);
     virtual ~file_response() {}
-    file_response(std::string filename);
 
     virtual ssize_t send(int fd);
 };

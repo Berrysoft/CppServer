@@ -8,7 +8,7 @@ using namespace std;
 using std::filesystem::exists;
 using std::filesystem::path;
 
-raw_response::raw_response(string filename) : filename(move(filename))
+raw_response::raw_response(const http_request& request, string filename) : response(request), filename(move(filename))
 {
 }
 
@@ -90,11 +90,29 @@ ssize_t raw_response::send(int fd)
     RETURN_RESULT;
 }
 
-void* get_instance_response(const char* command)
+void* get_instance_response(void* request)
 {
-    if (command && (command[0] == '\0' || exists(command)))
+    const http_request& req = *(const http_request*)request;
+    string command = req.url();
+    if (!command.empty())
     {
-        return new raw_response(command);
+        command.erase(command.begin());
+    }
+    size_t index = command.find_first_of('/');
+    if (index != string::npos)
+    {
+        if (index + 1 >= command.length())
+        {
+            command = string();
+        }
+        else
+        {
+            command = command.substr(index + 1);
+        }
+    }
+    if (command.empty() || exists(command))
+    {
+        return new raw_response(req, command);
     }
     return nullptr;
 }
