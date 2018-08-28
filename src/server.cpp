@@ -218,13 +218,17 @@ void server::process_job(int fd)
 {
     printf("正在处理请求%d...\n", fd);
     signal(SIGPIPE, SIG_IGN);
-    http_request request = http_request::parse(fd);
-    unique_ptr<http_response> response;
+    optional<http_request> request = http_request::parse(fd);
+    ssize_t size = -1;
+    if (request)
     {
-        shared_lock<shared_mutex> locker(http_mutex);
-        response = http_parser.get_response(request);
+        unique_ptr<http_response> response;
+        {
+            shared_lock<shared_mutex> locker(http_mutex);
+            response = http_parser.get_response(*request);
+        }
+        size = response->send(fd);
     }
-    ssize_t size = response->send(fd);
     if (size < 0)
     {
         printf("信息发送失败%d。\n", fd);

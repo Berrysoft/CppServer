@@ -90,9 +90,9 @@ void thread_pool<TArgs...>::do_job()
         if (stopped)
             break;
         std::optional<std::tuple<TArgs...>> j = jobs.try_pop();
-        if (j.has_value())
+        if (j)
         {
-            apply(task, j.value());
+            apply(task, *j);
         }
     }
 }

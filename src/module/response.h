@@ -1,7 +1,7 @@
 //在动态模块中用来向文件描述符写HTML的抽象类。
 #pragma once
 #include <string>
-#include <unistd.h>
+#include <sys/types.h>
 
 class response
 {
