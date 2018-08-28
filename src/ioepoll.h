@@ -6,13 +6,16 @@
 
 class ioepoll
 {
+public:
+    typedef std::function<void(int, uint32_t)> handler_type;
+
 private:
     int epoll_fd;
     int amount;
     std::unique_ptr<epoll_event[]> event_list;
-    std::function<void(int, uint32_t)> error_handler;
-    std::function<void(int, uint32_t)> default_handler;
-    std::map<int, std::function<void(int, uint32_t)>> handlers;
+    handler_type error_handler;
+    handler_type default_handler;
+    std::map<int, handler_type> handlers;
 
 public:
     ioepoll() = default;
@@ -34,8 +37,7 @@ private:
     int ctl(int fd, uint32_t events, int op);
 
 public:
-    void set_error_handler(std::function<void(int, uint32_t)> handler);
-    void set_default_handler(std::function<void(int, uint32_t)> handler);
-    void set_handler(int fd, std::function<void(int, uint32_t)> handler);
-    void remove_handler(int fd);
+    void set_error_handler(handler_type handler);
+    void set_default_handler(handler_type handler);
+    void set_handler(int fd, handler_type handler);
 };

@@ -31,7 +31,7 @@ void ioepoll::start(int timeout)
     while (true)
     {
         int ret = epoll_wait(epoll_fd, event_list.get(), amount, timeout);
-        if (ret < 0 && ret != EINTR)
+        if (ret < 0)
         {
             break;
         }
@@ -45,17 +45,21 @@ void ioepoll::start(int timeout)
             uint32_t events = event_list[i].events;
             if ((events & EPOLLERR) || (events & EPOLLHUP) || (events & EPOLLRDHUP) || !(events & EPOLLIN))
             {
-                error_handler(fd, events);
-                continue;
-            }
-            auto it = handlers.find(fd);
-            if (it != handlers.end())
-            {
-                it->second(fd, events);
+                if (error_handler)
+                    error_handler(fd, events);
             }
             else
             {
-                default_handler(fd, events);
+                auto it = handlers.find(fd);
+                if (it != handlers.end())
+                {
+                    it->second(fd, events);
+                }
+                else
+                {
+                    if (default_handler)
+                        default_handler(fd, events);
+                }
             }
         }
     }
@@ -97,26 +101,28 @@ int ioepoll::ctl(int fd, uint32_t events, int op)
     return epoll_ctl(epoll_fd, op, fd, &e);
 }
 
-void ioepoll::set_error_handler(function<void(int, uint32_t)> handler)
+void ioepoll::set_error_handler(handler_type handler)
 {
     error_handler = handler;
 }
 
-void ioepoll::set_default_handler(function<void(int, uint32_t)> handler)
+void ioepoll::set_default_handler(handler_type handler)
 {
     default_handler = handler;
 }
 
-void ioepoll::set_handler(int fd, function<void(int, uint32_t)> handler)
+void ioepoll::set_handler(int fd, handler_type handler)
 {
-    handlers.emplace(fd, handler);
-}
-
-void ioepoll::remove_handler(int fd)
-{
-    auto it = handlers.find(fd);
-    if (it != handlers.end())
+    if (handler)
     {
-        handlers.erase(it);
+        handlers.emplace(fd, handler);
+    }
+    else
+    {
+        auto it = handlers.find(fd);
+        if (it != handlers.end())
+        {
+            handlers.erase(it);
+        }
     }
 }
