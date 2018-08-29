@@ -41,5 +41,10 @@ ssize_t disk_response::send(int fd)
 
 void* get_instance_response(void* request)
 {
-    return new disk_response(*(const http_request*)request);
+    const http_request& req = *(const http_request*)request;
+    if (req.version() != HTTP_1_0)
+    {
+        return new disk_response(req);
+    }
+    return nullptr;
 }

@@ -17,7 +17,7 @@ string get_version()
     return result;
 }
 
-const char* const weekdays[] = {"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
+const char* const weekdays[] = { "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六" };
 
 string get_time()
 {
@@ -66,5 +66,10 @@ ssize_t version_response::send(int fd)
 
 void* get_instance_response(void* request)
 {
-    return new version_response(*(const http_request*)request);
+    const http_request& req = *(const http_request*)request;
+    if (req.version() != HTTP_1_0)
+    {
+        return new version_response(req);
+    }
+    return nullptr;
 }

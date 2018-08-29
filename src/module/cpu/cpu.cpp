@@ -95,5 +95,10 @@ ssize_t cpu_response::send(int fd)
 
 void* get_instance_response(void* request)
 {
-    return new cpu_response(*(const http_request*)request);
+    const http_request& req = *(const http_request*)request;
+    if (req.version() != HTTP_1_0)
+    {
+        return new cpu_response(req);
+    }
+    return nullptr;
 }

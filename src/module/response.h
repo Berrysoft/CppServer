@@ -12,7 +12,6 @@ protected:
 public:
     response(const http_request& request) : request(request) {}
     virtual ~response() {}
-    virtual bool supports() { return request.version() != "HTTP/1.0"; }
     virtual int status() { return 200; }
     virtual long long length() { return -1; }
     virtual std::string type() { return "text/html"; }

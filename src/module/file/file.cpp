@@ -1,5 +1,6 @@
 #include "file.h"
 #include "../../html/html_writer.h"
+#include "../../http/http_url.h"
 #include "../read_modules.h"
 #include <filesystem>
 #include <fstream>
@@ -65,26 +66,13 @@ ssize_t file_response::send(int fd)
 void* get_instance_response(void* request)
 {
     const http_request& req = *(const http_request*)request;
-    string command = req.url();
-    if (!command.empty())
+    if (req.version() != HTTP_1_0)
     {
-        command.erase(command.begin());
-    }
-    size_t index = command.find_first_of('/');
-    if (index != string::npos)
-    {
-        if (index + 1 >= command.length())
+        string command = get_url_from_string(req.url()).command;
+        if (command.empty() || exists(command))
         {
-            command = string();
+            return new file_response(req, command);
         }
-        else
-        {
-            command = command.substr(index + 1);
-        }
-    }
-    if (command.empty() || exists(command))
-    {
-        return new file_response(req, command);
     }
     return nullptr;
 }

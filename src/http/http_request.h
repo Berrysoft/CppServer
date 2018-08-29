@@ -21,3 +21,7 @@ public:
 
     static std::optional<http_request> parse(int fd);
 };
+
+#define HTTP_1_0 "HTTP/1.0"
+#define HTTP_1_1 "HTTP/1.1"
+#define HTTP_2_0 "HTTP/2.0"

@@ -30,6 +30,8 @@ obj/http_head.o: src/http/http_head.cpp src/http/http_head.h
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto 
 obj/http_request.o: src/http/http_request.cpp src/http/http_request.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto 
+obj/http_url.o: src/http/http_url.cpp src/http/http_url.h 
+	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto -fPIC
 obj/module.o: src/module/module.cpp src/module/module.h src/http/http_request.h src/module/response.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto 
 obj/read_modules.o: src/module/read_modules.cpp src/module/read_modules.h 
@@ -44,23 +46,23 @@ obj/disk.o: src/module/disk/disk.cpp src/html/html_writer.h src/module/disk/disk
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto -fPIC
 obj/error.o: src/module/error/error.cpp src/module/error/error.h src/module/response.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto -fPIC
-obj/file.o: src/module/file/file.cpp src/html/html_writer.h src/module/file/file.h src/module/response.h 
+obj/file.o: src/module/file/file.cpp src/html/html_writer.h src/http/http_url.h src/module/file/file.h src/module/response.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto -fPIC
-obj/markdown.o: src/module/markdown/markdown.cpp src/html/html_writer.h src/module/markdown/markdown.h src/module/response.h 
+obj/markdown.o: src/module/markdown/markdown.cpp src/html/html_writer.h src/http/http_url.h src/module/markdown/markdown.h src/module/response.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto -fPIC
-obj/raw.o: src/module/raw/raw.cpp src/html/html_writer.h src/module/raw/raw.h src/module/response.h 
+obj/raw.o: src/module/raw/raw.cpp src/html/html_writer.h src/http/http_url.h src/module/raw/raw.h src/module/response.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto -fPIC
 obj/version.o: src/module/version/version.cpp src/html/html_writer.h src/module/version/version.h src/module/version/mem.h src/module/response.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto -fPIC
 obj/mem.o: src/module/version/mem.cpp src/module/version/mem.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto -fPIC
-bin/server.out: obj/main.o obj/options.o obj/server.o obj/ioepoll.o obj/http.o obj/http_request.o obj/http_head.o obj/module.o obj/read_modules.o 
+bin/server.out: obj/main.o obj/options.o obj/server.o obj/ioepoll.o obj/http.o obj/http_request.o obj/http_head.o obj/http_url.o obj/module.o obj/read_modules.o 
 	g++ -o $@ $^ -lpthread -ldl -lstdc++fs -flto
 bin/error.so: obj/error.o 
 	g++ -o $@ $^ -shared -fPIC -flto
-bin/file.so: obj/file.o obj/html_writer.o obj/read_modules.o 
+bin/file.so: obj/file.o obj/http_url.o obj/html_writer.o obj/read_modules.o 
 	g++ -o $@ $^ -lstdc++fs -shared -fPIC -flto
-bin/raw.so: obj/raw.o obj/html_writer.o 
+bin/raw.so: obj/raw.o obj/http_url.o obj/html_writer.o 
 	g++ -o $@ $^ -lstdc++fs -shared -fPIC -flto
 bin/cpu.so: obj/cpu.o obj/proc_cpuinfo.o obj/proc_stat.o obj/html_writer.o 
 	g++ -o $@ $^ -shared -fPIC -flto
@@ -68,7 +70,7 @@ bin/version.so: obj/version.o obj/mem.o obj/html_writer.o
 	g++ -o $@ $^ -shared -fPIC -flto
 bin/disk.so: obj/disk.o obj/html_writer.o 
 	g++ -o $@ $^ -shared -fPIC -flto
-bin/markdown.so: obj/markdown.o obj/html_writer.o 
+bin/markdown.so: obj/markdown.o obj/http_url.o obj/html_writer.o 
 	g++ -o $@ $^ -lstdc++fs -shared -fPIC -flto
 bin/modules: src/module/modules
 	cp $^ $@

@@ -1,5 +1,6 @@
 #include "markdown.h"
 #include "../../html/html_writer.h"
+#include "../../http/http_url.h"
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -171,30 +172,17 @@ ssize_t markdown_response::send(int fd)
 void* get_instance_response(void* request)
 {
     const http_request& req = *(const http_request*)request;
-    string command = req.url();
-    if (!command.empty())
+    if (req.version() != HTTP_1_0)
     {
-        command.erase(command.begin());
-    }
-    size_t index = command.find_first_of('/');
-    if (index != string::npos)
-    {
-        if (index + 1 >= command.length())
+        string command = get_url_from_string(req.url()).command;
+        if (command.empty())
         {
-            command = string();
+            command = "../README.md";
         }
-        else
+        if (exists(command))
         {
-            command = command.substr(index + 1);
+            return new markdown_response(req, command);
         }
-    }
-    if (command.empty())
-    {
-        command = "../README.md";
-    }
-    if (exists(command))
-    {
-        return new markdown_response(req, command);
     }
     return nullptr;
 }
