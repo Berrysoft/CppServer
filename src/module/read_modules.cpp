@@ -17,12 +17,16 @@ vector<string> read_modules_file()
         {
             string line;
             getline(ifs, line);
-            size_t i = line.find_first_not_of(' ');
-            if (i != string::npos && i > 0)
+            if (line.back() == '\r')
+                line.pop_back();
+            size_t i = line.find_first_not_of(" \t");
+            if (i != string::npos)
                 line = line.substr(i);
-            if (line.length() == 0)
+            else
                 continue;
-            if (line[0] == '#')
+            if (line.empty())
+                continue;
+            if (line.front() == '#')
                 continue;
             result.push_back(line);
         }

@@ -13,7 +13,7 @@ http_url get_url_from_string(std::string url)
         {
             if (index + 1 >= url.length())
             {
-                url.erase(--url.end());
+                url.pop_back();
                 result.module = url;
             }
             else
@@ -25,7 +25,7 @@ http_url get_url_from_string(std::string url)
                 {
                     if (index + 1 >= url.length())
                     {
-                        url.erase(--url.end());
+                        url.pop_back();
                         result.command = url;
                     }
                     else

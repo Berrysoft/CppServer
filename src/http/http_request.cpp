@@ -6,7 +6,6 @@ using namespace std;
 
 optional<http_request> http_request::parse(int fd)
 {
-    http_request result;
     stringstream ss;
     char buffer[4096];
     ssize_t len;
@@ -17,7 +16,8 @@ optional<http_request> http_request::parse(int fd)
             return nullopt;
         ss.write(buffer, len);
     } while (len >= (long)sizeof(buffer));
-    ss >> result.m_method >> result.m_url >> result.m_version;
+    optional<http_request> result = make_optional<http_request>();
+    ss >> result->m_method >> result->m_url >> result->m_version;
     string line;
     getline(ss, line);
     do
@@ -25,7 +25,7 @@ optional<http_request> http_request::parse(int fd)
         getline(ss, line);
         if (line.back() == '\r')
         {
-            line.erase(--line.end());
+            line.pop_back();
         }
     } while (!line.empty());
     ostringstream oss;
@@ -34,6 +34,6 @@ optional<http_request> http_request::parse(int fd)
         ss.read(buffer, sizeof(buffer));
         oss.write(buffer, ss.gcount());
     }
-    result.m_content = oss.str();
+    result->m_content = oss.str();
     return result;
 }
