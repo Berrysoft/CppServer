@@ -11,7 +11,7 @@ private:
 
 public:
     markdown_response(const http_request& request, std::string filename);
-    virtual ~markdown_response() {}
+    ~markdown_response() {}
 
-    virtual ssize_t send(int fd);
+    ssize_t send(int fd);
 };

@@ -8,6 +8,6 @@ class disk_response : public response
 {
 public:
     disk_response(const http_request& request) : response(request) {}
-    virtual ~disk_response() {}
-    virtual ssize_t send(int fd);
+    ~disk_response() {}
+    ssize_t send(int fd);
 };

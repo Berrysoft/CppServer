@@ -10,7 +10,7 @@ private:
 
 public:
     raw_response(const http_request& request, std::string filename);
-    virtual ~raw_response() {}
-    virtual std::string type();
-    virtual ssize_t send(int fd);
+    ~raw_response() {}
+    std::string type();
+    ssize_t send(int fd);
 };

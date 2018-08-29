@@ -10,7 +10,7 @@ private:
 
 public:
     file_response(const http_request& request, std::string filename);
-    virtual ~file_response() {}
+    ~file_response() {}
 
-    virtual ssize_t send(int fd);
+    ssize_t send(int fd);
 };
