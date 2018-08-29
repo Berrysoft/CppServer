@@ -219,22 +219,6 @@
     <Source>module/markdown/markdown.cpp</Source>
   </Compile>
 
-  <!--module/raw/-->
-  <Header Name="module/raw/raw.h">
-    <Include>module/response.h</Include>
-  </Header>
-
-  <Source Name="module/raw/raw.cpp">
-    <Include>html/html_writer.h</Include>
-    <Include>http/http_url.h</Include>
-    <Include>module/raw/raw.h</Include>
-  </Source>
-
-  <Compile Target="raw.o">
-    <PICEnabled>True</PICEnabled>
-    <Source>module/raw/raw.cpp</Source>
-  </Compile>
-
   <!--module/version/-->
   <Header Name="module/version/version.h">
     <Include>module/response.h</Include>
@@ -286,13 +270,6 @@
     <Object>http_url.o</Object>
     <Object>html_writer.o</Object>
     <Object>read_modules.o</Object>
-  </Link>
-  <Link Target="raw.so" Type="Shared">
-    <PICEnabled>True</PICEnabled>
-    <Library>stdc++fs</Library>
-    <Object>raw.o</Object>
-    <Object>http_url.o</Object>
-    <Object>html_writer.o</Object>
   </Link>
   <Link Target="cpu.so" Type="Shared">
     <PICEnabled>True</PICEnabled>

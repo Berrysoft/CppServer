@@ -19,9 +19,14 @@ optional<http_request> http_request::parse(int fd)
     } while (len >= (long)sizeof(buffer));
     ss >> result.m_method >> result.m_url >> result.m_version;
     string line;
+    getline(ss, line);
     do
     {
         getline(ss, line);
+        if (line.back() == '\r')
+        {
+            line.erase(--line.end());
+        }
     } while (!line.empty());
     ostringstream oss;
     while (!ss.eof())

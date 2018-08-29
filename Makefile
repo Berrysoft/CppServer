@@ -1,4 +1,4 @@
-ALL:= obj/ bin/ bin/server.out bin/error.so bin/file.so bin/raw.so bin/cpu.so bin/version.so bin/disk.so bin/markdown.so bin/modules bin/style.css 
+ALL:= obj/ bin/ bin/server.out bin/error.so bin/file.so bin/cpu.so bin/version.so bin/disk.so bin/markdown.so bin/modules bin/style.css 
 .PHONY: all
 all: $(ALL)
 .PHONY: clean
@@ -50,8 +50,6 @@ obj/file.o: src/module/file/file.cpp src/html/html_writer.h src/http/http_url.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto -fPIC
 obj/markdown.o: src/module/markdown/markdown.cpp src/html/html_writer.h src/http/http_url.h src/module/markdown/markdown.h src/module/response.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto -fPIC
-obj/raw.o: src/module/raw/raw.cpp src/html/html_writer.h src/http/http_url.h src/module/raw/raw.h src/module/response.h 
-	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto -fPIC
 obj/version.o: src/module/version/version.cpp src/html/html_writer.h src/module/version/version.h src/module/version/mem.h src/module/response.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto -fPIC
 obj/mem.o: src/module/version/mem.cpp src/module/version/mem.h 
@@ -61,8 +59,6 @@ bin/server.out: obj/main.o obj/options.o obj/server.o obj/ioepoll.o obj/http.o o
 bin/error.so: obj/error.o 
 	g++ -o $@ $^ -shared -fPIC -flto
 bin/file.so: obj/file.o obj/http_url.o obj/html_writer.o obj/read_modules.o 
-	g++ -o $@ $^ -lstdc++fs -shared -fPIC -flto
-bin/raw.so: obj/raw.o obj/http_url.o obj/html_writer.o 
 	g++ -o $@ $^ -lstdc++fs -shared -fPIC -flto
 bin/cpu.so: obj/cpu.o obj/proc_cpuinfo.o obj/proc_stat.o obj/html_writer.o 
 	g++ -o $@ $^ -shared -fPIC -flto

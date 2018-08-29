@@ -2,15 +2,18 @@
 #pragma once
 #include "../response.h"
 #include <string>
+#include <map>
 
 class file_response : public response
 {
 private:
     std::string filename;
+    std::map<std::string, std::string> requires;
+    bool israw;
 
 public:
     file_response(const http_request& request, std::string filename);
     ~file_response() {}
-
+    std::string type();
     ssize_t send(int fd);
 };

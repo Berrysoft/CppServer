@@ -7,6 +7,6 @@ public:
     error_response(const http_request& request) : response(request) {}
     ~error_response() {}
     long long length();
-    int status() { return 400; }
+    int status() { return 404; }
     ssize_t send(int fd);
 };

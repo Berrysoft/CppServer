@@ -5,7 +5,6 @@ file ./file.so 查看文件（默认为主页）
 error ./error.so 错误网页
 
 # 以下的可以随意注释
-raw ./raw.so 源文件
 cpu ./cpu.so CPU与进程信息
 version ./version.so 系统版本、时间与内存信息
 disk ./disk.so 硬盘信息
