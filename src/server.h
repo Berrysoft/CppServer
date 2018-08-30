@@ -1,4 +1,4 @@
-//服务器头文件，管理一个循环线程和一个线程池。
+//服务器头文件。
 #pragma once
 #include "http/http.h"
 #include "ioepoll.h"

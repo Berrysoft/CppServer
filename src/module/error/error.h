@@ -1,3 +1,5 @@
+//生成错误页面
+//支持HTTP/1.0
 #pragma once
 #include "../response.h"
 

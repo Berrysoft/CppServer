@@ -16,11 +16,11 @@ bin/:
 	mkdir bin
 obj/ioepoll.o: src/ioepoll.cpp src/ioepoll.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto 
-obj/main.o: src/main.cpp src/server.h src/thread_pool.h src/http/http.h src/ioepoll.h src/safe_queue.h src/http/http_head.h src/http/http_request.h 
+obj/main.o: src/main.cpp src/server.h src/thread_pool.h src/http/http.h src/ioepoll.h src/mem_fn_bind.h src/safe_queue.h src/http/http_head.h src/http/http_request.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto 
 obj/options.o: src/options.cpp src/options.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto 
-obj/server.o: src/server.cpp src/server.h src/http/http_request.h src/thread_pool.h src/http/http.h src/ioepoll.h src/safe_queue.h src/http/http_head.h 
+obj/server.o: src/server.cpp src/server.h src/http/http_request.h src/thread_pool.h src/http/http.h src/ioepoll.h src/mem_fn_bind.h src/safe_queue.h src/http/http_head.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto 
 obj/html_writer.o: src/html/html_writer.cpp src/html/html_writer.h 
 	g++ -o $@ -c $< -std=c++17 -O2 -Wall -flto -fPIC

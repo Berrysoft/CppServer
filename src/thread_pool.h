@@ -1,5 +1,6 @@
 //线程池模板类。
 #pragma once
+#include "mem_fn_bind.h"
 #include "safe_queue.h"
 #include <atomic>
 #include <condition_variable>
@@ -51,7 +52,7 @@ void thread_pool<TArgs...>::start(std::size_t dojob, std::function<void(TArgs...
         do_threads = std::valarray<std::thread>(dojob);
         for (std::size_t i = 0; i < dojob; i++)
         {
-            do_threads[i] = std::thread(std::mem_fn(&thread_pool<TArgs...>::do_job), this);
+            do_threads[i] = std::thread(std::mem_fn_bind(&thread_pool<TArgs...>::do_job, this));
         }
     }
 }

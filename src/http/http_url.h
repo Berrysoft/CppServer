@@ -1,3 +1,4 @@
+//把HTTP请求的URL分成三部分
 #pragma once
 #include <string>
 

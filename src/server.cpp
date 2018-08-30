@@ -41,7 +41,7 @@ server::server(int amount, size_t doj, bool verbose)
     printf("初始化Epoll...\n");
     NEGATIVE_RETURN(epoll.create(amount), "Epoll启动失败。\n");
     printf("初始化线程池...\n");
-    pool.start(doj, std::bind(&server::process_job, this, _1));
+    pool.start(doj, mem_fn_bind(&server::process_job, this));
     printf("刷新模块...\n");
     refresh_modules();
 }
@@ -89,10 +89,10 @@ void server::start(int epoll_timeout, long interval, int clock_timeout)
 
     NEGATIVE_RETURN(epoll.add(timer_fd, EPOLLIN | EPOLLET), "时钟启动失败。\n");
 
-    epoll.set_error_handler(std::bind(&server::epoll_error, this, _1, _2));
-    epoll.set_default_handler(std::bind(&server::epoll_default, this, _1, _2));
-    epoll.set_handler(sock, std::bind(&server::epoll_sock, this, _1, _2));
-    epoll.set_handler(timer_fd, std::bind(&server::epoll_timer, this, _1, _2));
+    epoll.set_error_handler(mem_fn_bind(&server::epoll_error, this));
+    epoll.set_default_handler(mem_fn_bind(&server::epoll_default, this));
+    epoll.set_handler(sock, mem_fn_bind(&server::epoll_sock, this));
+    epoll.set_handler(timer_fd, mem_fn_bind(&server::epoll_timer, this));
 
     loop_thread = thread(&ioepoll::start, &epoll, epoll_timeout);
 }

@@ -9,6 +9,7 @@
 
   <!--/-->
   <Header Name="ioepoll.h"/>
+  <Header Name="mem_fn_bind.h"/>
   <Header Name="options.h"/>
   <Header Name="safe_queue.h"/>
   <Header Name="server.h">
@@ -17,6 +18,7 @@
     <Include>ioepoll.h</Include>
   </Header>
   <Header Name="thread_pool.h">
+    <Include>mem_fn_bind.h</Include>
     <Include>safe_queue.h</Include>
   </Header>
 
