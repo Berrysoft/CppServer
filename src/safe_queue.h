@@ -15,8 +15,8 @@ public:
     typedef typename Container::reference reference;
     typedef typename Container::const_reference const_reference;
     typedef Mutex mutex_type;
-    typedef std::unique_lock<std::shared_mutex> unique_lock_type;
-    typedef std::shared_lock<std::shared_mutex> shared_lock_type;
+    typedef std::unique_lock<Mutex> unique_lock_type;
+    typedef std::shared_lock<Mutex> shared_lock_type;
 
 protected:
     container_type container;
