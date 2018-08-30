@@ -39,7 +39,7 @@ server::server(int amount, size_t doj, bool verbose)
     timer_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
     NEGATIVE_RETURN(timer_fd, "时钟初始化失败。\n");
     printf("初始化Epoll...\n");
-    NEGATIVE_RETURN(epoll.create(amount), "Epoll启动失败。\n");
+    NEGATIVE_RETURN(epoll.create(amount), "Epoll创建失败。\n");
     printf("初始化线程池...\n");
     pool.start(doj, mem_fn_bind(&server::process_job, this));
     printf("刷新模块...\n");

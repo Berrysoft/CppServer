@@ -108,35 +108,35 @@ Document Path:          /
 Document Length:        245 bytes
 
 Concurrency Level:      100
-Time taken for tests:   135.735 seconds
+Time taken for tests:   116.999 seconds
 Complete requests:      1000000
 Failed requests:        0
 Non-2xx responses:      1000000
 Keep-Alive requests:    1000000
-Total transferred:      391000000 bytes
+Total transferred:      400000000 bytes
 HTML transferred:       245000000 bytes
-Requests per second:    7367.32 [#/sec] (mean)
-Time per request:       13.573 [ms] (mean)
-Time per request:       0.136 [ms] (mean, across all concurrent requests)
-Transfer rate:          2813.11 [Kbytes/sec] received
+Requests per second:    8547.05 [#/sec] (mean)
+Time per request:       11.700 [ms] (mean)
+Time per request:       0.117 [ms] (mean, across all concurrent requests)
+Transfer rate:          3338.69 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    0   0.2      0      28
-Processing:     2   14   4.5     12      54
-Waiting:        2   13   4.5     12      54
-Total:          2   14   4.5     12      54
+Connect:        0    0   0.3      0      35
+Processing:     2   12   3.7     10      43
+Waiting:        2   12   3.7     10      43
+Total:          2   12   3.7     10      53
 
 Percentage of the requests served within a certain time (ms)
-  50%     12
-  66%     15
-  75%     17
-  80%     18
-  90%     20
-  95%     22
-  98%     24
-  99%     26
- 100%     54 (longest request)
+  50%     10
+  66%     12
+  75%     14
+  80%     15
+  90%     18
+  95%     19
+  98%     20
+  99%     21
+ 100%     53 (longest request)
 ```
 ## 为本程序开发模块
 想要为本程序开发模块，需要引入`src/module/`文件夹下的头文件`response.h`，并实现`void* get_instance_response(void* request)`方法。这个方法接收一个指向`http_request`类实例的指针，应当返回一个指向继承`response`的类的指针，并可以被`delete`。
