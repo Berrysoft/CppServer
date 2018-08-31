@@ -6,6 +6,6 @@ class cpu_response : public response
 {
 public:
     cpu_response(const http_request& request) : response(request) {}
-    ~cpu_response() {}
-    ssize_t send(int fd);
+    ~cpu_response() override {}
+    ssize_t send(int fd) override;
 };

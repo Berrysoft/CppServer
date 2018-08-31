@@ -11,7 +11,7 @@ private:
 
 public:
     markdown_response(const http_request& request, std::string filename);
-    ~markdown_response() {}
+    ~markdown_response() override {}
 
-    ssize_t send(int fd);
+    ssize_t send(int fd) override;
 };

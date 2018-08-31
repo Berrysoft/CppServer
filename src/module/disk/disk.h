@@ -8,6 +8,6 @@ class disk_response : public response
 {
 public:
     disk_response(const http_request& request) : response(request) {}
-    ~disk_response() {}
-    ssize_t send(int fd);
+    ~disk_response() override {}
+    ssize_t send(int fd) override;
 };
