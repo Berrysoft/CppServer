@@ -6,6 +6,7 @@
 #include "../module/response.h"
 #include "http_head.h"
 #include <sstream>
+#include <sys/socket.h>
 
 using namespace std;
 
@@ -43,22 +44,18 @@ ssize_t http::send(int fd, const http_request& request)
         {
             res = m.get_response(request);
         }
-        int res_status;
+        int res_status = 400;
         string content_type;
-        long long res_length;
+        long long res_length = 0;
         if (res)
         {
             res_status = res->status();
             res_length = res->length();
             content_type = res->type();
         }
-        else
-        {
-            res_status = 400;
-        }
         http_head head(res_status, res_length, content_type);
         IF_NEGATIVE_EXIT(head.send(fd));
-        if (res)
+        if (res && request.method() != "HEAD")
         {
             IF_NEGATIVE_EXIT(res->send(fd));
         }
