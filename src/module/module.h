@@ -14,6 +14,7 @@ public:
     module();
     ~module();
 
-    void open(std::string name);
+    bool open(std::string name);
     std::unique_ptr<response> get_response(const http_request& request);
+    void close();
 };

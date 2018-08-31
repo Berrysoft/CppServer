@@ -12,6 +12,7 @@ using std::filesystem::exists;
 
 markdown_response::markdown_response(const http_request& request, string filename) : response(request), filename(move(filename))
 {
+    file_exists = exists(this->filename);
 }
 
 string deal_with_code(string line)
@@ -71,7 +72,7 @@ ssize_t markdown_response::send(int fd)
     ifstream ifs(filename);
     html_writer writer(fd);
     IF_NEGATIVE_EXIT(writer.write_head("大作业-Markdown"));
-    if (ifs.is_open())
+    if (file_exists)
     {
         bool in_code = false;
         bool in_ul = false;
@@ -165,6 +166,11 @@ ssize_t markdown_response::send(int fd)
         }
         ifs.close();
     }
+    else
+    {
+        IF_NEGATIVE_EXIT(writer.write_h1("找不到文件"));
+        IF_NEGATIVE_EXIT(writer.write_p("您请求的文件找不到，请确认输入是否正确。"));
+    }
     IF_NEGATIVE_EXIT(writer.write_end());
     RETURN_RESULT;
 }
@@ -179,10 +185,7 @@ void* get_instance_response(void* request)
         {
             command = "../README.md";
         }
-        if (exists(command))
-        {
-            return new markdown_response(req, command);
-        }
+        return new markdown_response(req, command);
     }
     return nullptr;
 }

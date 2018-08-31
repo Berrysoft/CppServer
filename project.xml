@@ -175,20 +175,6 @@
     <Source>module/disk/disk.cpp</Source>
   </Compile>
 
-  <!--module/error/-->
-  <Header Name="module/error/error.h">
-    <Include>module/response.h</Include>
-  </Header>
-
-  <Source Name="module/error/error.cpp">
-    <Include>module/error/error.h</Include>
-  </Source>
-
-  <Compile Target="error.o">
-    <PICEnabled>True</PICEnabled>
-    <Source>module/error/error.cpp</Source>
-  </Compile>
-
   <!--module/file/-->
   <Header Name="module/file/file.h">
     <Include>module/response.h</Include>
@@ -249,7 +235,6 @@
   <Link Target="server.out" Type="Exe">
     <Library>pthread</Library>
     <Library>dl</Library>
-    <Library>stdc++fs</Library>
     <Object>main.o</Object>
     <Object>options.o</Object>
     <Object>server.o</Object>
@@ -260,10 +245,6 @@
     <Object>http_url.o</Object>
     <Object>module.o</Object>
     <Object>read_modules.o</Object>
-  </Link>
-  <Link Target="error.so" Type="Shared">
-    <PICEnabled>True</PICEnabled>
-    <Object>error.o</Object>
   </Link>
   <Link Target="file.so" Type="Shared">
     <PICEnabled>True</PICEnabled>

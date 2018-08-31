@@ -7,6 +7,7 @@ class markdown_response : public response
 {
 private:
     std::string filename;
+    bool file_exists;
 
 public:
     markdown_response(const http_request& request, std::string filename);

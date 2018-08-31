@@ -12,16 +12,13 @@ module::module() : handle(nullptr)
 
 module::~module()
 {
-    if (handle)
-    {
-        dlclose(handle);
-        handle = nullptr;
-    }
+    close();
 }
 
-void module::open(string name)
+bool module::open(string name)
 {
     handle = dlopen(name.c_str(), RTLD_LAZY);
+    return handle;
 }
 
 unique_ptr<response> module::get_response(const http_request& request)
@@ -32,4 +29,13 @@ unique_ptr<response> module::get_response(const http_request& request)
         return unique_ptr<response>((response*)f((void*)&request));
     }
     return nullptr;
+}
+
+void module::close()
+{
+    if (handle)
+    {
+        dlclose(handle);
+        handle = nullptr;
+    }
 }

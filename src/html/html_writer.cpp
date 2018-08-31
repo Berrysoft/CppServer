@@ -6,15 +6,15 @@
 
 using namespace std;
 
-ssize_t send_with_chunk(int fd, const void* buffer, size_t length, int flag)
+ssize_t send_with_chunk(int fd, const char* buffer, size_t length, int flag)
 {
     INIT_RESULT_AND_TEMP;
     ostringstream oss;
     oss << hex << uppercase << length << "\r\n";
+    oss.write(buffer, length);
+    oss << "\r\n";
     string buf = oss.str();
     IF_NEGATIVE_EXIT(send(fd, buf.c_str(), buf.length(), flag));
-    IF_NEGATIVE_EXIT(send(fd, buffer, length, flag));
-    IF_NEGATIVE_EXIT(send(fd, "\r\n", 2, flag));
     RETURN_RESULT;
 }
 

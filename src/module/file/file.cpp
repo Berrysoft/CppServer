@@ -67,6 +67,15 @@ file_response::file_response(const http_request& request, string filename) : res
             israw = stoi(raw_str);
         }
     }
+    file_exists = this->filename.empty() || exists(this->filename);
+}
+
+int file_response::status()
+{
+    if (file_exists)
+        return 200;
+    else
+        return 404;
 }
 
 string get_content_type(const string& ex)
@@ -149,7 +158,7 @@ ssize_t file_response::send(int fd)
         IF_NEGATIVE_EXIT(writer.write_ul(texts));
         IF_NEGATIVE_EXIT(writer.write_end());
     }
-    else
+    else if (file_exists)
     {
         if (!israw)
         {
@@ -180,6 +189,13 @@ ssize_t file_response::send(int fd)
             IF_NEGATIVE_EXIT(send_chunk_end(fd, 0));
         }
     }
+    else
+    {
+        IF_NEGATIVE_EXIT(writer.write_head("大作业-文件"));
+        IF_NEGATIVE_EXIT(writer.write_h1("找不到文件"));
+        IF_NEGATIVE_EXIT(writer.write_p("您请求的文件找不到，请确认输入是否正确。"));
+        IF_NEGATIVE_EXIT(writer.write_end());
+    }
     RETURN_RESULT;
 }
 
@@ -189,10 +205,7 @@ void* get_instance_response(void* request)
     if (req.version() != HTTP_1_0)
     {
         string command = get_url_from_string(req.url()).command;
-        if (command.empty() || exists(command))
-        {
-            return new file_response(req, command);
-        }
+        return new file_response(req, command);
     }
     return nullptr;
 }

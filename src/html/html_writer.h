@@ -13,7 +13,7 @@
     result += t
 #define RETURN_RESULT return result
 
-ssize_t send_with_chunk(int fd, const void* buffer, size_t length, int flag);
+ssize_t send_with_chunk(int fd, const char* buffer, size_t length, int flag);
 
 template <size_t size>
 inline ssize_t send_with_chunk(int fd, const char (&buffer)[size], int flag)
