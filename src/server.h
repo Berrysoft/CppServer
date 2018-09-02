@@ -10,13 +10,6 @@
 #include <shared_mutex>
 #include <string>
 #include <thread>
-#include <vector>
-
-struct fd_with_time
-{
-    int fd;
-    int time;
-};
 
 class server
 {
@@ -32,7 +25,7 @@ private:
     int timer_fd;
     int clock_timeout;
     int time_stamp;
-    std::vector<fd_with_time> clients;
+    std::map<int, int> clients;
     std::mutex clients_mutex;
 
 public:

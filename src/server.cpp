@@ -102,12 +102,12 @@ void server::clean(int ostamp)
     lock_guard<mutex> locker(clients_mutex);
     for (auto it = clients.begin(); it != clients.end();)
     {
-        if (it->time < ostamp)
+        if (it->second < ostamp)
         {
-            printf("清理%d。\n", it->fd);
-            clients.erase(it);
-            shutdown(it->fd, SHUT_RDWR);
-            close(it->fd);
+            printf("清理%d。\n", it->first);
+            shutdown(it->first, SHUT_RDWR);
+            close(it->first);
+            it = clients.erase(it);
         }
         else
         {
@@ -147,17 +147,7 @@ void server::epoll_error(int fd, uint32_t events)
     close(fd);
     {
         lock_guard<mutex> locker(clients_mutex);
-        for (auto it = clients.begin(); it != clients.end();)
-        {
-            if (it->fd == fd)
-            {
-                clients.erase(it);
-            }
-            else
-            {
-                it++;
-            }
-        }
+        clients.erase(fd);
     }
 }
 
@@ -178,7 +168,7 @@ void server::epoll_sock(int fd, uint32_t events)
         else
         {
             lock_guard<mutex> locker(clients_mutex);
-            clients.push_back({ newsock, time_stamp });
+            clients[newsock] = time_stamp;
         }
     }
 }
@@ -203,13 +193,7 @@ void server::epoll_default(int fd, uint32_t events)
 {
     {
         lock_guard<mutex> locker(clients_mutex);
-        for (auto it = clients.begin(); it != clients.end(); it++)
-        {
-            if (it->fd == fd)
-            {
-                it->time = time_stamp;
-            }
-        }
+        clients[fd] = time_stamp;
     }
     pool.post(fd);
 }
