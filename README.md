@@ -17,7 +17,7 @@ git clone https://github.com/Berrysoft/CppServer.git
 cd CppServer
 make run
 ```
-如果提示找不到`libfmt.a`，可以下载{fmt}库并自行编译。要使用`-fPIC`编译该库。
+如果提示找不到`libfmt.so`，可以下载{fmt}库并自行编译。注意要打开`-DBUILD_SHARED_LIBS=TRUE`。
 
 如果需要复杂的参数，需要进入`bin`文件夹：
 ``` bash

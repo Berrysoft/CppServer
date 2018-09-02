@@ -1,7 +1,7 @@
 //响应HTTP请求的抽象类
 #pragma once
-#include <cstdio>
 #include <string>
+#include <sys/types.h>
 
 class http_head
 {
