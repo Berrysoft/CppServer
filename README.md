@@ -11,6 +11,13 @@ make run
 ``` bash
 make runv
 ```
+也可以直接克隆Git仓库并编译运行：
+``` bash
+git clone https://github.com/Berrysoft/CppServer.git
+cd CppServer
+make run
+```
+如果提示找不到`libfmt.a`，可以下载{fmt}库并自行编译。要使用`-fPIC`编译该库。
 
 如果需要复杂的参数，需要进入`bin`文件夹：
 ``` bash
@@ -35,13 +42,6 @@ Berrysoft.Linux.Cpp.Server
 -e --epoll-timeout      设置Epoll的等待时间，默认为2000(ms)
 -i --clock-interval     设置时钟间隔，默认为60(s)
 -o --clock-timeout      设置时钟等待循环数，默认为2（个）
-```
-
-也可以直接克隆Git仓库并编译运行：
-``` bash
-git clone https://github.com/Berrysoft/CppServer.git
-cd CppServer
-make run
 ```
 ## 程序文件
 本程序需要以下文件才能相应HTTP请求：

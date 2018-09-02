@@ -2,12 +2,13 @@
 #include "../../html/html_writer.h"
 #include "mem.h"
 #include <ctime>
+#include <fmt/core.h>
 #include <fstream>
-#include <sstream>
 #include <string>
 #include <vector>
 
 using namespace std;
+using fmt::format;
 
 string get_version()
 {
@@ -25,10 +26,7 @@ string get_time()
     tm* p;
     time(&timep);
     p = localtime(&timep);
-    ostringstream oss;
-    oss << (1900 + p->tm_year) << "年" << (1 + p->tm_mon) << "月" << p->tm_mday << "日 ";
-    oss << weekdays[p->tm_wday] << ' ' << p->tm_hour << ':' << p->tm_min << ':' << p->tm_sec;
-    return oss.str();
+    return format("{0}年{1}月{2}日 {3} {4}:{5}:{6}", 1900 + p->tm_year, 1 + p->tm_mon, p->tm_mday, weekdays[p->tm_wday], p->tm_hour, p->tm_min, p->tm_sec);
 }
 
 ssize_t version_response::send(int fd)

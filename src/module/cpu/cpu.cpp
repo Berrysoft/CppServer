@@ -3,11 +3,12 @@
 #include "id.h"
 #include "proc_cpuinfo.h"
 #include "proc_stat.h"
-#include <sstream>
+#include <fmt/core.h>
 #include <string>
 #include <sys/socket.h>
 
 using namespace std;
+using fmt::format;
 
 void push_linuxcpu(vector<string>& texts, const linuxcpu& cpu)
 {
@@ -64,30 +65,29 @@ ssize_t cpu_response::send(int fd)
     for (size_t i = 0; i < ps.cpu_core.size(); i++)
     {
         texts.clear();
-        texts.push_back("CPU " + to_string(i));
+        texts.push_back(format("CPU {0}", i));
         push_linuxcpu(texts, ps.cpu_core[i]);
         IF_NEGATIVE_EXIT(writer.write_tr(texts));
     }
     IF_NEGATIVE_EXIT(writer.write_table_end());
-    ostringstream oss;
-    oss << "ctxt: " << ps.ctxt << "<br/>" << endl;
-    oss << "btime: " << ps.btime << "<br/>" << endl;
-    oss << "processes: " << ps.processes << "<br/>" << endl;
-    oss << "procs_running: " << ps.procs_running << "<br/>" << endl;
-    oss << "procs_blocked: " << ps.procs_blocked << "<br/>" << endl;
-    IF_NEGATIVE_EXIT(writer.write_p(oss.str()));
+    IF_NEGATIVE_EXIT(writer.write_p(
+        format("ctxt: {}<br/>\n"
+               "btime: {}<br/>\n"
+               "processes: {}<br/>\n"
+               "procs_running: {}<br/>\n"
+               "procs_blocked: {}<br/>\n",
+               ps.ctxt, ps.btime, ps.processes, ps.procs_running, ps.procs_blocked)));
 
     id i = get_id();
-    char buffer[64];
-    sprintf(buffer, "<a href=\"../file//proc/%d/status\">进程信息</a>", i.pid);
-    IF_NEGATIVE_EXIT(writer.write_h1(buffer));
-    oss.str("");
-    oss << "UID: " << i.uid << "<br/>" << endl;
-    oss << "EUID: " << i.euid << "<br/>" << endl;
-    oss << "GID: " << i.gid << "<br/>" << endl;
-    oss << "EGID: " << i.egid << "<br/>" << endl;
-    oss << "PID: " << i.pid << "<br/>" << endl;
-    IF_NEGATIVE_EXIT(writer.write_p(oss.str()));
+    IF_NEGATIVE_EXIT(writer.write_h1(
+        format("<a href=\"../file//proc/{0}/status\">进程信息</a>", i.pid)));
+    IF_NEGATIVE_EXIT(writer.write_p(
+        format("UID: {}<br/>\n"
+               "EUID: {}<br/>"
+               "GID: {}<br/>\n"
+               "EGID: {}<br/>\n"
+               "PID: {}<br/>\n",
+               i.uid, i.euid, i.gid, i.egid, i.pid)));
 
     IF_NEGATIVE_EXIT(writer.write_end());
     RETURN_RESULT;

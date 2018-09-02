@@ -1,9 +1,10 @@
 #include "options.h"
-#include <cstdio>
+#include <fmt/core.h>
 #include <getopt.h>
 #include <string>
 
 using namespace std;
+using fmt::print;
 
 const char help_opt[] = "help";
 const char verbose_opt[] = "verbose";
@@ -32,21 +33,21 @@ const option l_opts[] =
 
 void print_help(const char* name)
 {
-    printf("Berrysoft.Linux.Cpp.Server\n");
-    printf("网站在Edge、IE、Chrome、Safari(iPhone)下测试通过。\n");
-    printf("请使用支持chunked的浏览器打开网站。\n");
-    printf("用法：%s [-h] [-p %s] [-c %s] [-t %s]\n", name, port_opt, count_opt, threads_opt);
-    printf("\t\t[%s] [%s] [%s]\n", etime_opt, cinterval_opt, ctime_opt);
-    printf("选项：\n");
-    printf("-h --%s\t\t获取帮助\n", help_opt);
-    printf("-v --%s\t\t显示详细信息\n", verbose_opt);
-    printf("-a --%s\t\t设置监听地址，默认为所有IP\n", addr_opt);
-    printf("-p --%s\t\t设置监听端口，默认为3342\n", port_opt);
-    printf("-c --%s\t\t设置监听数，默认为16384\n", count_opt);
-    printf("-t --%s\t\t设置线程数，默认为4\n", threads_opt);
-    printf("-e --%s\t设置Epoll的等待时间，默认为2000(ms)\n", etime_opt);
-    printf("-i --%s\t设置时钟间隔，默认为60(s)\n", cinterval_opt);
-    printf("-o --%s\t设置时钟等待循环数，默认为2（个）\n", ctime_opt);
+    print("Berrysoft.Linux.Cpp.Server\n");
+    print("网站在Edge、IE、Chrome、Safari(iPhone)下测试通过。\n");
+    print("请使用支持chunked的浏览器打开网站。\n");
+    print("用法：{0} [-h] [-p {1}] [-c {2}] [-t {3}]\n", name, port_opt, count_opt, threads_opt);
+    print("\t\t[{0}] [{1}] [{2}]\n", etime_opt, cinterval_opt, ctime_opt);
+    print("选项：\n");
+    print("-h --{0}\t\t获取帮助\n", help_opt);
+    print("-v --{0}\t\t显示详细信息\n", verbose_opt);
+    print("-a --{0}\t\t设置监听地址，默认为所有IP\n", addr_opt);
+    print("-p --{0}\t\t设置监听端口，默认为3342\n", port_opt);
+    print("-c --{0}\t\t设置监听数，默认为16384\n", count_opt);
+    print("-t --{0}\t\t设置线程数，默认为4\n", threads_opt);
+    print("-e --{0}\t设置Epoll的等待时间，默认为2000(ms)\n", etime_opt);
+    print("-i --{0}\t设置时钟间隔，默认为60(s)\n", cinterval_opt);
+    print("-o --{0}\t设置时钟等待循环数，默认为2（个）\n", ctime_opt);
 }
 
 int get_opt(int argc, char** argv, options& opt)
@@ -85,7 +86,7 @@ int get_opt(int argc, char** argv, options& opt)
             print_help(argv[0]);
             return 0;
         default:
-            printf("未知错误。\n");
+            print("未知错误。\n");
             print_help(argv[0]);
             return argc;
         }

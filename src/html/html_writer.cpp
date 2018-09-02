@@ -1,19 +1,15 @@
 #include "html_writer.h"
-#include <cstring>
+#include <fmt/core.h>
 #include <fstream>
-#include <sstream>
 #include <sys/socket.h>
 
 using namespace std;
+using fmt::format;
 
 ssize_t send_with_chunk(int fd, const char* buffer, size_t length, int flag)
 {
     INIT_RESULT_AND_TEMP;
-    ostringstream oss;
-    oss << hex << uppercase << length << "\r\n";
-    oss.write(buffer, length);
-    oss << "\r\n";
-    string buf = oss.str();
+    string buf = format("{0:X}\r\n{1}\r\n", length, fmt::string_view(buffer, length));
     IF_NEGATIVE_EXIT(send(fd, buf.c_str(), buf.length(), flag));
     RETURN_RESULT;
 }
@@ -49,9 +45,7 @@ ssize_t html_writer::write_head(string title)
 
 ssize_t html_writer::write_spe(string spe, string text)
 {
-    ostringstream oss;
-    oss << '<' << spe << '>' << text << "</" << spe << '>';
-    string s = oss.str();
+    string s = format("<{0}>{1}</{0}>", spe, text);
     return send_with_chunk(fd, s, 0);
 }
 
@@ -77,13 +71,13 @@ ssize_t html_writer::write_h3(string title)
 
 ssize_t html_writer::write_spe_start(string spe)
 {
-    string t = '<' + spe + '>';
+    string t = format("<{0}>", spe);
     return send_with_chunk(fd, t, 0);
 }
 
 ssize_t html_writer::write_spe_end(string spe)
 {
-    string t = "</" + spe + '>';
+    string t = format("</{0}>", spe);
     return send_with_chunk(fd, t, 0);
 }
 

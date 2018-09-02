@@ -1,5 +1,4 @@
 #include "module.h"
-#include <cstring>
 #include <dlfcn.h>
 
 using namespace std;

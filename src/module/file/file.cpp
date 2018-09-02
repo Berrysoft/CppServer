@@ -3,12 +3,14 @@
 #include "../../http/http_url.h"
 #include "../read_modules.h"
 #include <filesystem>
+#include <fmt/core.h>
 #include <fstream>
 #include <sstream>
 #include <sys/socket.h>
 #include <vector>
 
 using namespace std;
+using fmt::format;
 using std::filesystem::exists;
 using std::filesystem::path;
 
@@ -151,9 +153,7 @@ ssize_t file_response::send(int fd)
             istringstream iss(line);
             string key, module_name, text;
             iss >> key >> module_name >> text;
-            ostringstream oss;
-            oss << "<a href=\"../" << key << "/\">" << text << "</a>";
-            texts.push_back(oss.str());
+            texts.push_back(format("<a href=\"../{0}/\">{1}</a>", key, text));
         }
         IF_NEGATIVE_EXIT(writer.write_ul(texts));
         IF_NEGATIVE_EXIT(writer.write_end());
