@@ -35,5 +35,4 @@
 .vscode
 
 # Folders
-bin
-obj
+make
