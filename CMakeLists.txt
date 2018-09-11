@@ -24,6 +24,7 @@ set_property(TARGET read_modules PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 configure_file(${PROJECT_SOURCE_DIR}/src/html/style.css style.css COPYONLY)
 configure_file(${PROJECT_SOURCE_DIR}/src/module/modules modules COPYONLY)
+configure_file(${PROJECT_SOURCE_DIR}/README.md README.md COPYONLY)
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/module/file/ FILE_SO_SOURCE)
 add_library(file SHARED ${FILE_SO_SOURCE})

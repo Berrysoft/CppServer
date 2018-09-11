@@ -65,7 +65,7 @@ ssize_t version_response::send(int fd)
 void* get_instance_response(void* request)
 {
     const http_request& req = *(const http_request*)request;
-    if (req.version() != HTTP_1_0)
+    if (req.version() > 1.0)
     {
         return new version_response(req);
     }

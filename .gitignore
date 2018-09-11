@@ -34,6 +34,9 @@
 # VS Code
 .vscode
 
+# VS
+.vs
+
 # CMake
 CMakeCache.txt
 CMakeFiles

@@ -178,7 +178,7 @@ ssize_t markdown_response::send(int fd)
 void* get_instance_response(void* request)
 {
     const http_request& req = *(const http_request*)request;
-    if (req.version() != HTTP_1_0)
+    if (req.version() > 1.0)
     {
         string command = get_url_from_string(req.url()).command;
         if (command.empty())
