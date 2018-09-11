@@ -1,10 +1,10 @@
-#include "options.h"
-#include <fmt/core.h>
 #include <getopt.h>
+#include <options.h>
+#include <sf/format.hpp>
 #include <string>
 
 using namespace std;
-using fmt::print;
+using namespace sf;
 
 const char help_opt[] = "help";
 const char verbose_opt[] = "verbose";
@@ -84,7 +84,7 @@ int get_opt(int argc, char** argv, options& opt)
         case 'h':
         case '?':
             print_help(argv[0]);
-            return 0;
+            return -1;
         default:
             print("未知错误。\n");
             print_help(argv[0]);

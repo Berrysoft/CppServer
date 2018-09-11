@@ -1,7 +1,6 @@
-#include "proc_cpuinfo.h"
-#include <cstdlib>
 #include <fstream>
-#include <ios>
+#include <module/cpu/proc_cpuinfo.h>
+#include <string>
 
 using namespace std;
 
@@ -42,7 +41,7 @@ vector<physical_cpu> read_proc_cpuinfo()
         int cores = stoi(get_first_info(ifs, "cpu cores"));
         if (tpid > pid)
         {
-            physical_cpu pcpu = {mname, cores, sibs};
+            physical_cpu pcpu = { mname, cores, sibs };
             result.push_back(pcpu);
             pid++;
         }

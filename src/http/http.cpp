@@ -1,10 +1,10 @@
-#include "http.h"
-#include "../html/html_writer.h"
-#include "../http/http_url.h"
-#include "../module/module.h"
-#include "../module/read_modules.h"
-#include "../module/response.h"
-#include "http_head.h"
+#include <html/html_writer.h>
+#include <http/http.h>
+#include <http/http_head.h>
+#include <http/http_url.h>
+#include <module/module.h>
+#include <module/read_modules.h>
+#include <module/response.h>
 #include <sstream>
 #include <sys/socket.h>
 

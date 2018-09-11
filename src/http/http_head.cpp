@@ -1,10 +1,10 @@
-#include "http_head.h"
-#include <fmt/printf.h>
+#include <http/http_head.h>
+#include <sf/format.hpp>
 #include <sstream>
 #include <sys/socket.h>
 
 using namespace std;
-using fmt::print;
+using namespace sf;
 
 http_head::http_head(int status, long long length, string type)
     : status(status), length(length), type(type)
@@ -29,18 +29,18 @@ string status_des(int status)
 ssize_t http_head::send(int fd)
 {
     ostringstream head;
-    print(head, "HTTP/1.1 {0} {1}\r\nServer: Berrysoft.Linux.Cpp.Server\r\nContent-Charset=UTF-8\r\nConnection: keep-alive\r\n", status, status_des(status));
+    print(head, "HTTP/1.1 {0} {1}\r\nServer: Berrysoft.Linux.Cpp.Server\r\nContent-Charset=UTF-8\r\nConnection: keep-alive\r\n"sv, status, status_des(status));
     if (!type.empty())
     {
-        print(head, "Content-Type: {0}\r\n", type);
+        print(head, "Content-Type: {0}\r\n"sv, type);
     }
     if (length < 0)
     {
-        print(head, "Transfer-Encoding: chunked\r\n\r\n");
+        print(head, "Transfer-Encoding: chunked\r\n\r\n"sv);
     }
     else
     {
-        print(head, "Content-Length: {0}\r\n\r\n", length);
+        print(head, "Content-Length: {0}\r\n\r\n"sv, length);
     }
     string realhead = head.str();
     return ::send(fd, realhead.c_str(), realhead.length(), 0);

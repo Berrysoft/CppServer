@@ -1,20 +1,20 @@
-﻿#include "server.h"
-#include "http/http_request.h"
-#include <arpa/inet.h>
+﻿#include <arpa/inet.h>
 #include <csignal>
 #include <fcntl.h>
-#include <fmt/core.h>
 #include <fstream>
+#include <http/http_request.h>
+#include <server.h>
+#include <sf/format.hpp>
 #include <sstream>
 #include <string>
 #include <sys/socket.h>
 #include <sys/timerfd.h>
 #include <unistd.h>
 
-#define print(exp, ...)                 \
-    if (verbose)                        \
-    {                                   \
-        fmt::print(exp, ##__VA_ARGS__); \
+#define print(exp, ...)                \
+    if (verbose)                       \
+    {                                  \
+        sf::print(exp, ##__VA_ARGS__); \
     }
 
 #define NEGATIVE_RETURN(exp, msg) \

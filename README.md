@@ -1,36 +1,32 @@
 # Linux中的C++大作业
 本程序是课程《Linux中的C++》的大作业，采用Socket与Epoll，实现了HTTP1.1的部分功能。
 ## 使用说明
-可以在目录下运行以下命令编译并启动服务器：
-``` bash
-make run
-```
-然后在浏览器中输入`http://127.0.0.1:3342/`访问。
-
-如果需要详细输出，可以运行：
-``` bash
-make runv
-```
-也可以直接克隆Git仓库并编译运行：
+克隆Git仓库并编译运行：
 ``` bash
 git clone https://github.com/Berrysoft/CppServer.git
 cd CppServer
-make run
+cmake .
+make -j4
+./server
 ```
-如果提示找不到`libfmt.so`，可以下载{fmt}库并自行编译。注意要打开`-DBUILD_SHARED_LIBS=TRUE`。
-
+编译本程序需要我开发的另一个库StreamFormat：
+``` bash
+git clone https://github.com/Berrysoft/StreamFormat.git
+cd StreamFormat
+cmake .
+sudo make install
+```
 如果需要复杂的参数，需要进入`bin`文件夹：
 ``` bash
-cd bin
-./server.out -v -a 127.0.0.1 -p 8080 -c 64 -t 16 -e 1000 -i 1 -o 2
+./server -v -a 127.0.0.1 -p 8080 -c 64 -t 16 -e 1000 -i 1 -o 2
 ```
 希望查看提示可以使用`-h`或者`--help`命令：
 ```
-$ ./bin/server.out -h
+$ ./server -h
 Berrysoft.Linux.Cpp.Server
 网站在Edge、IE、Chrome、Safari(iPhone)下测试通过。
 请使用支持chunked的浏览器打开网站。
-用法：./bin/server.out [-h] [-p port] [-c count] [-t threads]
+用法：./server [-h] [-p port] [-c count] [-t threads]
                 [epoll-timeout] [clock-interval] [clock-timeout]
 选项：
 -h --help               获取帮助
@@ -57,7 +53,7 @@ Berrysoft.Linux.Cpp.Server
 * disk.so（硬盘模块）
 * markdown.so（Markdown解释模块）
 * style.css（HTML样式表）
-* ../README.md（自述文件）
+* README.md（自述文件）
 ## 功能
 在服务器端输入`r`刷新模块加载，输入`c`清理所有连接，输入`q`退出。
 
@@ -86,7 +82,7 @@ Berrysoft.Linux.Cpp.Server
 ### 硬盘信息
 WSL没有`/proc/partitions`文件，因此采用VFS文件系统获取根目录信息。
 ### Markdown解释器
-默认用的是`../README.md`绝对路径，打开的就是本文件。
+默认用的是`README.md`绝对路径，打开的就是本文件。
 
 这个解释器实现了Markdown的一些基本功能，使得至少本文件能够显示正常。
 ## 压力测试

@@ -1,8 +1,8 @@
-#include "markdown.h"
-#include "../../html/html_writer.h"
-#include "../../http/http_url.h"
 #include <filesystem>
 #include <fstream>
+#include <html/html_writer.h>
+#include <http/http_url.h>
+#include <module/markdown/markdown.h>
 #include <sstream>
 #include <sys/socket.h>
 #include <vector>
@@ -183,7 +183,7 @@ void* get_instance_response(void* request)
         string command = get_url_from_string(req.url()).command;
         if (command.empty())
         {
-            command = "../README.md";
+            command = "README.md";
         }
         return new markdown_response(req, command);
     }

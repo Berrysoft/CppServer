@@ -1,15 +1,20 @@
-﻿#include "options.h"
-#include "server.h"
-#include <arpa/inet.h>
-#include <fmt/core.h>
+﻿#include <arpa/inet.h>
+#include <options.h>
+#include <server.h>
+#include <sf/format.hpp>
 
 using namespace std;
-using fmt::print;
+using namespace sf;
 
 int main(int argc, char** argv)
 {
     options opt = default_options;
-    if (get_opt(argc, argv, opt))
+    int go = get_opt(argc, argv, opt);
+    if (go < 0)
+    {
+        return 0;
+    }
+    else if (go > 0)
     {
         return 1;
     }

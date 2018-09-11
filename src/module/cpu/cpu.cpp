@@ -1,14 +1,14 @@
-#include "cpu.h"
-#include "../../html/html_writer.h"
-#include "id.h"
-#include "proc_cpuinfo.h"
-#include "proc_stat.h"
-#include <fmt/core.h>
+#include <html/html_writer.h>
+#include <module/cpu/cpu.h>
+#include <module/cpu/id.h>
+#include <module/cpu/proc_cpuinfo.h>
+#include <module/cpu/proc_stat.h>
+#include <sf/sformat.hpp>
 #include <string>
 #include <sys/socket.h>
 
 using namespace std;
-using fmt::format;
+using namespace sf;
 
 void push_linuxcpu(vector<string>& texts, const linuxcpu& cpu)
 {
@@ -65,28 +65,28 @@ ssize_t cpu_response::send(int fd)
     for (size_t i = 0; i < ps.cpu_core.size(); i++)
     {
         texts.clear();
-        texts.push_back(format("CPU {0}", i));
+        texts.push_back(sprint("CPU {0}"sv, i));
         push_linuxcpu(texts, ps.cpu_core[i]);
         IF_NEGATIVE_EXIT(writer.write_tr(texts));
     }
     IF_NEGATIVE_EXIT(writer.write_table_end());
     IF_NEGATIVE_EXIT(writer.write_p(
-        format("ctxt: {}<br/>\n"
-               "btime: {}<br/>\n"
-               "processes: {}<br/>\n"
-               "procs_running: {}<br/>\n"
-               "procs_blocked: {}<br/>\n",
+        sprint("ctxt: {0}<br/>\n"
+               "btime: {1}<br/>\n"
+               "processes: {2}<br/>\n"
+               "procs_running: {3}<br/>\n"
+               "procs_blocked: {4}<br/>\n"sv,
                ps.ctxt, ps.btime, ps.processes, ps.procs_running, ps.procs_blocked)));
 
     id i = get_id();
     IF_NEGATIVE_EXIT(writer.write_h1(
-        format("<a href=\"../file//proc/{0}/status\">进程信息</a>", i.pid)));
+        sprint("<a href=\"../file//proc/{0}/status\">进程信息</a>"sv, i.pid)));
     IF_NEGATIVE_EXIT(writer.write_p(
-        format("UID: {}<br/>\n"
-               "EUID: {}<br/>"
-               "GID: {}<br/>\n"
-               "EGID: {}<br/>\n"
-               "PID: {}<br/>\n",
+        sprint("UID: {0}<br/>\n"
+               "EUID: {1}<br/>"
+               "GID: {2}<br/>\n"
+               "EGID: {3}<br/>\n"
+               "PID: {4}<br/>\n"sv,
                i.uid, i.euid, i.gid, i.egid, i.pid)));
 
     IF_NEGATIVE_EXIT(writer.write_end());

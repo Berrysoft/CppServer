@@ -1,5 +1,5 @@
-#include "disk.h"
-#include "../../html/html_writer.h"
+#include <html/html_writer.h>
+#include <module/disk/disk.h>
 #include <string>
 #include <sys/statfs.h>
 #include <vector>
