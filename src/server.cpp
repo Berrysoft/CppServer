@@ -21,7 +21,7 @@
 #define NEGATIVE_RETURN(exp, msg)                       \
     if ((exp) < 0)                                      \
     {                                                   \
-        print("{0}", sf::make_color_arg(msg, sf::red)); \
+        print(sf::make_color_arg(msg, sf::red)); \
         return;                                         \
     }
 
