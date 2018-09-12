@@ -38,6 +38,7 @@
 .vs
 
 # CMake
+CMakeSettings.json
 CMakeCache.txt
 CMakeFiles
 CMakeScripts

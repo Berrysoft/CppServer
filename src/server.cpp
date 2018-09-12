@@ -4,6 +4,7 @@
 #include <fstream>
 #include <http/http_request.h>
 #include <server.h>
+#include <sf/ansi.hpp>
 #include <sf/format.hpp>
 #include <sstream>
 #include <string>
@@ -17,11 +18,11 @@
         sf::print(exp, ##__VA_ARGS__); \
     }
 
-#define NEGATIVE_RETURN(exp, msg) \
-    if ((exp) < 0)                \
-    {                             \
-        print(msg);               \
-        return;                   \
+#define NEGATIVE_RETURN(exp, msg)                       \
+    if ((exp) < 0)                                      \
+    {                                                   \
+        print("{0}", sf::make_color_arg(msg, sf::red)); \
+        return;                                         \
     }
 
 using namespace std;

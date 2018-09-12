@@ -1,6 +1,7 @@
 ﻿#include <arpa/inet.h>
 #include <options.h>
 #include <server.h>
+#include <sf/ansi.hpp>
 #include <sf/format.hpp>
 
 using namespace std;
@@ -51,7 +52,10 @@ int main(int argc, char** argv)
         }
         print("参数的调整请使用命令 {0} -h 查看。\n", argv[0]);
     }
-    print("按r <回车>刷新模块，c <回车>清除超时连接，q <回车>结束服务器。\n");
+    print("按{0}刷新模块，{1}清除超时连接，{2}结束服务器。\n",
+          make_color_arg("r <回车>", cyan),
+          make_color_arg("c <回车>", cyan),
+          make_color_arg("q <回车>", cyan));
 
     char c;
     while ((c = getchar()) != 'q')
