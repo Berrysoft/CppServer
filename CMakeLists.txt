@@ -32,7 +32,7 @@ target_link_libraries(file stdc++fs html_writer http_url read_modules)
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/module/cpu/ CPU_SOURCE)
 add_library(cpu SHARED ${CPU_SOURCE})
-target_link_libraries(cpu html_writer)
+target_link_libraries(cpu stdc++fs html_writer)
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/module/disk/ DISK_SOURCE)
 add_library(disk SHARED ${DISK_SOURCE})

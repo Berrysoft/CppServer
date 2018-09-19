@@ -1,6 +1,6 @@
 //输出系统版本和内存信息。
 #pragma once
-#include "../response.h"
+#include <module/response.h>
 
 class version_response : public response
 {

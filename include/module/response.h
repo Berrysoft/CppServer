@@ -1,6 +1,6 @@
 //在动态模块中用来向文件描述符写HTML的抽象类。
 #pragma once
-#include "../http/http_request.h"
+#include <http/http_request.h>
 #include <string>
 #include <sys/types.h>
 

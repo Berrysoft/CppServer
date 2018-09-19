@@ -1,13 +1,16 @@
+#include <filesystem>
 #include <html/html_writer.h>
 #include <module/cpu/cpu.h>
-#include <module/cpu/id.h>
 #include <module/cpu/proc_cpuinfo.h>
+#include <module/cpu/proc_pid_stat.h>
 #include <module/cpu/proc_stat.h>
 #include <sf/sformat.hpp>
 #include <string>
 #include <sys/socket.h>
+#include <vector>
 
 using namespace std;
+using namespace std::filesystem;
 using namespace sf;
 
 void push_linuxcpu(vector<string>& texts, const linuxcpu& cpu)
@@ -78,16 +81,30 @@ ssize_t cpu_response::send(int fd)
                "procs_blocked: {4}<br/>\n",
                ps.ctxt, ps.btime, ps.processes, ps.procs_running, ps.procs_blocked)));
 
-    id i = get_id();
-    IF_NEGATIVE_EXIT(writer.write_h1(
-        sprint("<a href=\"../file//proc/{0}/status\">进程信息</a>", i.pid)));
-    IF_NEGATIVE_EXIT(writer.write_p(
-        sprint("UID: {0}<br/>\n"
-               "EUID: {1}<br/>"
-               "GID: {2}<br/>\n"
-               "EGID: {3}<br/>\n"
-               "PID: {4}<br/>\n",
-               i.uid, i.euid, i.gid, i.egid, i.pid)));
+    IF_NEGATIVE_EXIT(writer.write_h1("<a href=\"../file//proc/self/status\">进程信息</a>"));
+    texts.clear();
+    texts.push_back("PID");
+    texts.push_back("名称");
+    texts.push_back("状态");
+    IF_NEGATIVE_EXIT(writer.write_table_start(texts));
+    for (auto& d : directory_iterator("/proc"))
+    {
+        if (d.is_directory())
+        {
+            const path& name = d;
+            int pid = (int)strtol(name.filename().c_str(), nullptr, 10);
+            if (pid > 0)
+            {
+                texts.clear();
+                process_stat pstat = read_proc_stat(pid);
+                texts.push_back(to_string(pstat.pid));
+                texts.push_back(pstat.comm);
+                texts.push_back(get_state_str(pstat.state));
+                IF_NEGATIVE_EXIT(writer.write_tr(texts));
+            }
+        }
+    }
+    IF_NEGATIVE_EXIT(writer.write_table_end());
 
     IF_NEGATIVE_EXIT(writer.write_end());
     RETURN_RESULT;

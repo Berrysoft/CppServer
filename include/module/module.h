@@ -1,8 +1,8 @@
 //模块类，用于动态加载模块。
 #pragma once
-#include "../http/http_request.h"
-#include "response.h"
+#include <http/http_request.h>
 #include <memory>
+#include <module/response.h>
 #include <string>
 
 class module

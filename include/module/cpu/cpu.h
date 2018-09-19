@@ -1,6 +1,6 @@
 //输出CPU、时间与进程信息。
 #pragma once
-#include "../response.h"
+#include <module/response.h>
 
 class cpu_response : public response
 {

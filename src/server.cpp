@@ -26,24 +26,25 @@
     }
 
 using namespace std;
+using namespace sf;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
 server::server(int amount, size_t doj, bool verbose)
     : verbose(verbose), amount(amount)
 {
-    print("初始化Socket...\n");
+    print(make_color_arg("初始化Socket...\n", yellow));
     sock = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
     NEGATIVE_RETURN(sock, "Socket初始化失败。\n");
-    print("初始化时钟...\n");
+    print(make_color_arg("初始化时钟...\n", yellow));
     time_stamp = 0;
     timer_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
     NEGATIVE_RETURN(timer_fd, "时钟初始化失败。\n");
-    print("初始化Epoll...\n");
+    print(make_color_arg("初始化Epoll...\n", yellow));
     NEGATIVE_RETURN(epoll.create(amount), "Epoll创建失败。\n");
-    print("初始化线程池...\n");
+    print(make_color_arg("初始化线程池...\n", yellow));
     pool.start(doj, mem_fn_bind(&server::process_job, this));
-    print("刷新模块...\n");
+    print(make_color_arg("刷新模块...\n", yellow));
     refresh_modules();
 }
 
@@ -69,7 +70,7 @@ void server::bind(const sockaddr* addr, socklen_t len, int n)
 {
     NEGATIVE_RETURN(::bind(sock, addr, len), "Socket命名失败。\n");
     NEGATIVE_RETURN(listen(sock, n), "监听失败。\n");
-    print("监听数：{0}\n", n);
+    print("监听数：{0}\n", make_color_arg(n, bright_blue));
     print("监听Socket：{0}.\n", sock);
 }
 
@@ -82,9 +83,9 @@ void server::start(int epoll_timeout, long interval, int clock_timeout)
     NEGATIVE_RETURN(timerfd_settime(timer_fd, 0, &itimer, nullptr), "时钟设置失败。\n");
     this->clock_timeout = clock_timeout;
 
-    print("Epoll等待时间：{0}(ms)\n", epoll_timeout);
-    print("时钟间隔：{0}(s)\n", interval);
-    print("时钟等待循环数：{0}（个）\n", clock_timeout);
+    print("Epoll等待时间：{0}(ms)\n", make_color_arg(epoll_timeout, bright_blue));
+    print("时钟间隔：{0}(s)\n", make_color_arg(interval, bright_blue));
+    print("时钟等待循环数：{0}（个）\n", make_color_arg(clock_timeout, bright_blue));
 
     NEGATIVE_RETURN(epoll.add(sock, EPOLLIN), "Socket启动失败。\n");
 
@@ -181,7 +182,7 @@ void server::epoll_timer(int fd, uint32_t events)
     if (len >= 0)
     {
         time_stamp += timer_buf;
-        print("时间戳：{0}\n", time_stamp);
+        print("时间戳：{0}\n", make_color_arg(time_stamp, bright_blue));
         if (time_stamp > clock_timeout)
         {
             clean(time_stamp - clock_timeout);

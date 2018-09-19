@@ -1,6 +1,6 @@
 //一个简易Markdown引擎.
 #pragma once
-#include "../response.h"
+#include <module/response.h>
 #include <string>
 
 class markdown_response : public response
