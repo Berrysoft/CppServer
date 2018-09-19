@@ -65,7 +65,7 @@ ssize_t cpu_response::send(int fd)
     for (size_t i = 0; i < ps.cpu_core.size(); i++)
     {
         texts.clear();
-        texts.push_back(sprint("CPU {0}"sv, i));
+        texts.push_back(sprint("CPU {0}", i));
         push_linuxcpu(texts, ps.cpu_core[i]);
         IF_NEGATIVE_EXIT(writer.write_tr(texts));
     }
@@ -75,18 +75,18 @@ ssize_t cpu_response::send(int fd)
                "btime: {1}<br/>\n"
                "processes: {2}<br/>\n"
                "procs_running: {3}<br/>\n"
-               "procs_blocked: {4}<br/>\n"sv,
+               "procs_blocked: {4}<br/>\n",
                ps.ctxt, ps.btime, ps.processes, ps.procs_running, ps.procs_blocked)));
 
     id i = get_id();
     IF_NEGATIVE_EXIT(writer.write_h1(
-        sprint("<a href=\"../file//proc/{0}/status\">进程信息</a>"sv, i.pid)));
+        sprint("<a href=\"../file//proc/{0}/status\">进程信息</a>", i.pid)));
     IF_NEGATIVE_EXIT(writer.write_p(
         sprint("UID: {0}<br/>\n"
                "EUID: {1}<br/>"
                "GID: {2}<br/>\n"
                "EGID: {3}<br/>\n"
-               "PID: {4}<br/>\n"sv,
+               "PID: {4}<br/>\n",
                i.uid, i.euid, i.gid, i.egid, i.pid)));
 
     IF_NEGATIVE_EXIT(writer.write_end());

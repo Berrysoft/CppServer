@@ -153,7 +153,7 @@ ssize_t file_response::send(int fd)
             istringstream iss(line);
             string key, module_name, text;
             iss >> key >> module_name >> text;
-            texts.push_back(sprint("<a href=\"../{0}/\">{1}</a>"sv, key, text));
+            texts.push_back(sprint("<a href=\"../{0}/\">{1}</a>", key, text));
         }
         IF_NEGATIVE_EXIT(writer.write_ul(texts));
         IF_NEGATIVE_EXIT(writer.write_end());

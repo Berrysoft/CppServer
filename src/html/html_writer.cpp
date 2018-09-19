@@ -10,7 +10,7 @@ using namespace sf;
 ssize_t send_with_chunk(int fd, const char* buffer, size_t length, int flag)
 {
     INIT_RESULT_AND_TEMP;
-    string buf = sprint("{0:X}\r\n{1}\r\n"sv, length, string_view(buffer, length));
+    string buf = sprint("{0:X}\r\n{1}\r\n", length, string_view(buffer, length));
     IF_NEGATIVE_EXIT(send(fd, buf.c_str(), buf.length(), flag));
     RETURN_RESULT;
 }
@@ -46,7 +46,7 @@ ssize_t html_writer::write_head(string title)
 
 ssize_t html_writer::write_spe(string spe, string text)
 {
-    string s = sprint("<{0}>{1}</{0}>"sv, spe, text);
+    string s = sprint("<{0}>{1}</{0}>", spe, text);
     return send_with_chunk(fd, s, 0);
 }
 
@@ -72,13 +72,13 @@ ssize_t html_writer::write_h3(string title)
 
 ssize_t html_writer::write_spe_start(string spe)
 {
-    string t = sprint("<{0}>"sv, spe);
+    string t = sprint("<{0}>", spe);
     return send_with_chunk(fd, t, 0);
 }
 
 ssize_t html_writer::write_spe_end(string spe)
 {
-    string t = sprint("</{0}>"sv, spe);
+    string t = sprint("</{0}>", spe);
     return send_with_chunk(fd, t, 0);
 }
 

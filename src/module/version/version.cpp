@@ -26,7 +26,7 @@ string get_time()
     tm* p;
     time(&timep);
     p = localtime(&timep);
-    return sprint("{0}年{1}月{2}日 {3} {4}:{5}:{6}"sv, 1900 + p->tm_year, 1 + p->tm_mon, p->tm_mday, weekdays[p->tm_wday], p->tm_hour, p->tm_min, p->tm_sec);
+    return sprint("{0}年{1}月{2}日 {3} {4}:{5}:{6}", 1900 + p->tm_year, 1 + p->tm_mon, p->tm_mday, weekdays[p->tm_wday], p->tm_hour, p->tm_min, p->tm_sec);
 }
 
 ssize_t version_response::send(int fd)
