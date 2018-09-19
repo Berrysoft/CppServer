@@ -18,11 +18,11 @@
         sf::print(exp, ##__VA_ARGS__); \
     }
 
-#define NEGATIVE_RETURN(exp, msg)                       \
-    if ((exp) < 0)                                      \
-    {                                                   \
+#define NEGATIVE_RETURN(exp, msg)                \
+    if ((exp) < 0)                               \
+    {                                            \
         print(sf::make_color_arg(msg, sf::red)); \
-        return;                                         \
+        return;                                  \
     }
 
 using namespace std;

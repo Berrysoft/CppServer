@@ -17,19 +17,18 @@ const char cinterval_opt[] = "clock-interval";
 const char ctime_opt[] = "clock-timeout";
 
 const char s_opts[] = "hva:p:c:t:e:i:o:";
-const option l_opts[] =
-    {
-        { help_opt, no_argument, nullptr, 'h' },
-        { verbose_opt, no_argument, nullptr, 'v' },
-        { addr_opt, required_argument, nullptr, 'a' },
-        { port_opt, required_argument, nullptr, 'p' },
-        { count_opt, required_argument, nullptr, 'c' },
-        { threads_opt, required_argument, nullptr, 't' },
-        { etime_opt, required_argument, nullptr, 'e' },
-        { cinterval_opt, required_argument, nullptr, 'i' },
-        { ctime_opt, required_argument, nullptr, 'o' },
-        { nullptr, 0, nullptr, 0 }
-    };
+const option l_opts[] = {
+    { help_opt, no_argument, nullptr, 'h' },
+    { verbose_opt, no_argument, nullptr, 'v' },
+    { addr_opt, required_argument, nullptr, 'a' },
+    { port_opt, required_argument, nullptr, 'p' },
+    { count_opt, required_argument, nullptr, 'c' },
+    { threads_opt, required_argument, nullptr, 't' },
+    { etime_opt, required_argument, nullptr, 'e' },
+    { cinterval_opt, required_argument, nullptr, 'i' },
+    { ctime_opt, required_argument, nullptr, 'o' },
+    { nullptr, 0, nullptr, 0 }
+};
 
 void print_help(const char* name)
 {

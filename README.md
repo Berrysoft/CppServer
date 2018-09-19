@@ -45,13 +45,13 @@ Berrysoft.Linux.Cpp.Server
 
 本程序需要以下文件才能正常使用：
 * modules（模块列表文件）
-* file.so（文件模块）
+* libfile.so（文件模块）
 
 以下均为本程序的可选文件：
-* cpu.so（CPU模块）
-* version.so（系统模块）
-* disk.so（硬盘模块）
-* markdown.so（Markdown解释模块）
+* libcpu.so（CPU模块）
+* libversion.so（系统模块）
+* libdisk.so（硬盘模块）
+* libmarkdown.so（Markdown解释模块）
 * style.css（HTML样式表）
 * README.md（自述文件）
 ## 功能
@@ -100,17 +100,17 @@ Document Path:          /
 Document Length:        0 bytes
 
 Concurrency Level:      100
-Time taken for tests:   106.853 seconds
+Time taken for tests:   63.797 seconds
 Complete requests:      1000000
 Failed requests:        0
 Non-2xx responses:      1000000
 Keep-Alive requests:    1000000
 Total transferred:      130000000 bytes
 HTML transferred:       0 bytes
-Requests per second:    9358.68 [#/sec] (mean)
-Time per request:       10.685 [ms] (mean)
-Time per request:       0.107 [ms] (mean, across all concurrent requests)
-Transfer rate:          1188.11 [Kbytes/sec] received
+Requests per second:    15674.70 [#/sec] (mean)
+Time per request:       6.380 [ms] (mean)
+Time per request:       0.064 [ms] (mean, across all concurrent requests)
+Transfer rate:          1989.95 [Kbytes/sec] received
 
 ...
 ```

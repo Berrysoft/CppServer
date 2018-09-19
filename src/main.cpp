@@ -63,11 +63,11 @@ int main(int argc, char** argv)
         switch (c)
         {
         case 'r':
-            print("刷新模块...\n");
+            print(make_color_arg("刷新模块...\n", yellow));
             ser.refresh_modules();
             break;
         case 'c':
-            print("正在清理...\n");
+            print(make_color_arg("正在清理...\n", yellow));
             ser.clean(ser.get_time_stamp() + 1);
             break;
         }

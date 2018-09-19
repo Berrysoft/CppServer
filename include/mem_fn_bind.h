@@ -9,7 +9,7 @@ namespace std
 template <typename _Tp, typename _Class, typename... _Args, size_t... _Idx>
 constexpr decltype(auto) __mem_fn_bind_impl(_Class (_Tp::*__f)(_Args...), _Tp* __t, index_sequence<_Idx...>)
 {
-    return bind(__f, __t, _Placeholder<_Idx + 1>()...);
+    return bind(mem_fn(__f), __t, _Placeholder<_Idx + 1>()...);
 }
 
 template <typename _Tp, typename _Class, typename... _Args>
