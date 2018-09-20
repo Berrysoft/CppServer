@@ -1,7 +1,7 @@
 ﻿#include <arpa/inet.h>
 #include <options.h>
 #include <server.h>
-#include <sf/ansi.hpp>
+#include <sf/color.hpp>
 #include <sf/format.hpp>
 
 using namespace std;
