@@ -29,18 +29,18 @@ string status_des(int status)
 ssize_t http_head::send(int fd)
 {
     ostringstream head;
-    print(head, "HTTP/1.1 {0} {1}\r\nServer: Berrysoft.Linux.Cpp.Server\r\nContent-Charset=UTF-8\r\nConnection: keep-alive\r\n"sv, status, status_des(status));
+    print(head, "HTTP/1.1 {0} {1}\r\nServer: Berrysoft.Linux.Cpp.Server\r\nContent-Charset=UTF-8\r\nConnection: keep-alive\r\n", status, status_des(status));
     if (!type.empty())
     {
-        print(head, "Content-Type: {0}\r\n"sv, type);
+        print(head, "Content-Type: {0}\r\n", type);
     }
     if (length < 0)
     {
-        print(head, "Transfer-Encoding: chunked\r\n\r\n"sv);
+        print(head, "Transfer-Encoding: chunked\r\n\r\n");
     }
     else
     {
-        print(head, "Content-Length: {0}\r\n\r\n"sv, length);
+        print(head, "Content-Length: {0}\r\n\r\n", length);
     }
     string realhead = head.str();
     return ::send(fd, realhead.c_str(), realhead.length(), 0);

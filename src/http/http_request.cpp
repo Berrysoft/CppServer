@@ -19,7 +19,7 @@ optional<http_request> http_request::parse(int fd)
         ss.write(buffer, len);
     } while (len >= (long)sizeof(buffer));
     optional<http_request> result = make_optional<http_request>();
-    scan(ss, "{0}{1}HTTP/{2}"sv, result->m_method, result->m_url, result->m_version);
+    scan(ss, "{0}{1}HTTP/{2}", result->m_method, result->m_url, result->m_version);
     string line;
     getline(ss, line);
     do
