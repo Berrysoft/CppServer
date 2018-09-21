@@ -48,9 +48,9 @@ server::server(int amount, size_t doj, bool verbose)
 
 server::~server()
 {
-    print("关闭Socket。\n");
+    print(make_color_arg("关闭Socket。\n", yellow));
     close(sock);
-    print("关闭时钟。\n");
+    print(make_color_arg("关闭时钟。\n", yellow));
     close(timer_fd);
 }
 
@@ -118,11 +118,11 @@ void server::clean(int ostamp)
 
 void server::stop()
 {
-    print("关闭Epoll。\n");
+    print(make_color_arg("关闭Epoll。\n", yellow));
     epoll.close();
-    puts("停止循环，请耐心等待...");
+    print(make_color_arg("停止循环。\n", yellow));
     loop_thread.join();
-    print("停止线程池。\n");
+    print(make_color_arg("停止线程池。\n", yellow));
     pool.stop();
 }
 

@@ -50,7 +50,7 @@ int main(int argc, char** argv)
         {
             print("正在通过{0}端口监听所有IP地址。\n", opt.port);
         }
-        print("参数的调整请使用命令 {0} -h 查看。\n", argv[0]);
+        print("参数的调整请使用命令 {0} {1} 查看。\n", make_color_arg(argv[0], bright_blue), make_color_arg("-h", cyan));
     }
     print("按{0}刷新模块，{1}清除超时连接，{2}结束服务器。\n",
           make_color_arg("r <回车>", cyan),
@@ -63,16 +63,17 @@ int main(int argc, char** argv)
         switch (c)
         {
         case 'r':
-            print(make_color_arg("刷新模块...\n", yellow));
+            print(make_color_arg("刷新模块...\n", bright_magenta));
             ser.refresh_modules();
             break;
         case 'c':
-            print(make_color_arg("正在清理...\n", yellow));
+            print(make_color_arg("正在清理...\n", bright_magenta));
             ser.clean(ser.get_time_stamp() + 1);
             break;
         }
     }
 
+    print(make_color_arg("正在停止，请耐心等待...\n", bright_magenta));
     ser.stop();
     return 0;
 }
