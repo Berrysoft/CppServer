@@ -27,8 +27,6 @@
 
 using namespace std;
 using namespace sf;
-using std::placeholders::_1;
-using std::placeholders::_2;
 
 server::server(int amount, size_t doj, bool verbose)
     : verbose(verbose), amount(amount)
