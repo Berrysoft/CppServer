@@ -18,11 +18,17 @@
         sf::print(exp, ##__VA_ARGS__); \
     }
 
-#define NEGATIVE_RETURN(exp, msg)                \
-    if ((exp) < 0)                               \
-    {                                            \
-        print(sf::make_color_arg(msg, sf::red)); \
-        return;                                  \
+#define println(exp, ...)                \
+    if (verbose)                         \
+    {                                    \
+        sf::println(exp, ##__VA_ARGS__); \
+    }
+
+#define NEGATIVE_RETURN(exp, msg)                  \
+    if ((exp) < 0)                                 \
+    {                                              \
+        println(sf::make_color_arg(msg, sf::red)); \
+        return;                                    \
     }
 
 using namespace std;
@@ -33,13 +39,13 @@ server::server(int amount, size_t doj, bool verbose)
 {
     print(make_color_arg("初始化Socket...\n", yellow));
     sock = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
-    NEGATIVE_RETURN(sock, "Socket初始化失败。\n");
+    NEGATIVE_RETURN(sock, "Socket初始化失败。");
     print(make_color_arg("初始化时钟...\n", yellow));
     time_stamp = 0;
     timer_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
-    NEGATIVE_RETURN(timer_fd, "时钟初始化失败。\n");
+    NEGATIVE_RETURN(timer_fd, "时钟初始化失败。");
     print(make_color_arg("初始化Epoll...\n", yellow));
-    NEGATIVE_RETURN(epoll.create(amount), "Epoll创建失败。\n");
+    NEGATIVE_RETURN(epoll.create(amount), "Epoll创建失败。");
     print(make_color_arg("初始化线程池...\n", yellow));
     pool.start(doj, mem_fn_bind(&server::process_job, this));
     print(make_color_arg("刷新模块...\n", yellow));
@@ -66,8 +72,8 @@ void server::bind(const sockaddr_in6& addr, int n)
 
 void server::bind(const sockaddr* addr, socklen_t len, int n)
 {
-    NEGATIVE_RETURN(::bind(sock, addr, len), "Socket命名失败。\n");
-    NEGATIVE_RETURN(listen(sock, n), "监听失败。\n");
+    NEGATIVE_RETURN(::bind(sock, addr, len), "Socket命名失败。");
+    NEGATIVE_RETURN(listen(sock, n), "监听失败。");
     print("监听数：{0}\n", make_color_arg(n, bright_blue));
     print("监听Socket：{0}.\n", sock);
 }
@@ -75,19 +81,19 @@ void server::bind(const sockaddr* addr, socklen_t len, int n)
 void server::start(int epoll_timeout, long interval, int clock_timeout)
 {
     itimerspec itimer;
-    NEGATIVE_RETURN(clock_gettime(CLOCK_MONOTONIC, &itimer.it_value), "时钟获取失败。\n");
+    NEGATIVE_RETURN(clock_gettime(CLOCK_MONOTONIC, &itimer.it_value), "时钟获取失败。");
     itimer.it_value = { interval, 0 };
     itimer.it_interval = { interval, 0 };
-    NEGATIVE_RETURN(timerfd_settime(timer_fd, 0, &itimer, nullptr), "时钟设置失败。\n");
+    NEGATIVE_RETURN(timerfd_settime(timer_fd, 0, &itimer, nullptr), "时钟设置失败。");
     this->clock_timeout = clock_timeout;
 
     print("Epoll等待时间：{0}(ms)\n", make_color_arg(epoll_timeout, bright_blue));
     print("时钟间隔：{0}(s)\n", make_color_arg(interval, bright_blue));
     print("时钟等待循环数：{0}（个）\n", make_color_arg(clock_timeout, bright_blue));
 
-    NEGATIVE_RETURN(epoll.add(sock, EPOLLIN), "Socket启动失败。\n");
+    NEGATIVE_RETURN(epoll.add(sock, EPOLLIN), "Socket启动失败。");
 
-    NEGATIVE_RETURN(epoll.add(timer_fd, EPOLLIN | EPOLLET), "时钟启动失败。\n");
+    NEGATIVE_RETURN(epoll.add(timer_fd, EPOLLIN | EPOLLET), "时钟启动失败。");
 
     epoll.set_error_handler(mem_fn_bind(&server::epoll_error, this));
     epoll.set_default_handler(mem_fn_bind(&server::epoll_default, this));
@@ -136,11 +142,11 @@ void server::epoll_error(int fd, uint32_t events)
 {
     if (events & EPOLLRDHUP)
     {
-        print("客户端已关闭Socket {0}。\n", fd);
+        println("客户端已关闭Socket {0}。", fd);
     }
     else
     {
-        print("Epoll错误，关闭Socket {0}。\n", fd);
+        println("Epoll错误，关闭Socket {0}。", fd);
     }
     epoll.remove(fd, events);
     shutdown(fd, SHUT_RDWR);
@@ -163,7 +169,7 @@ void server::epoll_sock(int fd, uint32_t events)
         fcntl(newsock, F_GETFL, flags | O_NONBLOCK);
         if (epoll.add(newsock, EPOLLIN | EPOLLRDHUP | EPOLLET))
         {
-            print("接收{0}错误。\n", newsock);
+            println("接收{0}错误。", newsock);
         }
         else
         {
@@ -180,7 +186,7 @@ void server::epoll_timer(int fd, uint32_t events)
     if (len >= 0)
     {
         time_stamp += timer_buf;
-        print("时间戳：{0}\n", make_color_arg(time_stamp, bright_blue));
+        println("时间戳：{0}", make_color_arg(time_stamp, bright_blue));
         if (time_stamp > clock_timeout)
         {
             clean(time_stamp - clock_timeout);
@@ -213,10 +219,10 @@ void server::process_job(int fd)
     }
     if (size < 0)
     {
-        print("信息发送失败{0}。\n", fd);
+        println("信息发送失败{0}。", fd);
     }
     else
     {
-        print("信息已发送{0}。\n", fd);
+        println("信息已发送{0}。", fd);
     }
 }

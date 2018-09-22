@@ -56,6 +56,7 @@ int main(int argc, char** argv)
           make_color_arg("r <回车>", cyan),
           make_color_arg("c <回车>", cyan),
           make_color_arg("q <回车>", cyan));
+    cout.flush();
 
     char c;
     while ((c = getchar()) != 'q')
@@ -63,17 +64,19 @@ int main(int argc, char** argv)
         switch (c)
         {
         case 'r':
-            print(make_color_arg("刷新模块...\n", bright_magenta));
+            println(make_color_arg("刷新模块...", bright_magenta));
             ser.refresh_modules();
+            cout.flush();
             break;
         case 'c':
-            print(make_color_arg("正在清理...\n", bright_magenta));
+            println(make_color_arg("正在清理...", bright_magenta));
             ser.clean(ser.get_time_stamp() + 1);
+            cout.flush();
             break;
         }
     }
 
-    print(make_color_arg("正在停止，请耐心等待...\n", bright_magenta));
+    println(make_color_arg("正在停止，请耐心等待...", bright_magenta));
     ser.stop();
     return 0;
 }
