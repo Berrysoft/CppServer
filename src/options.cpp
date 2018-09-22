@@ -1,5 +1,6 @@
 #include <getopt.h>
 #include <options.h>
+#include <sf/color.hpp>
 #include <sf/format.hpp>
 #include <string>
 
@@ -35,18 +36,18 @@ void print_help(const char* name)
     print("Berrysoft.Linux.Cpp.Server\n");
     print("网站在Edge、IE、Chrome、Safari(iPhone)下测试通过。\n");
     print("请使用支持chunked的浏览器打开网站。\n");
-    print("用法：{0} [-h] [-p {1}] [-c {2}] [-t {3}]\n", name, port_opt, count_opt, threads_opt);
-    print("\t\t[{0}] [{1}] [{2}]\n", etime_opt, cinterval_opt, ctime_opt);
+    print("用法：{0} [-h] [-p {1}] [-c {2}] [-t {3}]\n", make_color_arg(name, bright_blue), port_opt, count_opt, threads_opt);
+    print("\t\t[-e {0}] [-i {1}] [-o {2}]\n", etime_opt, cinterval_opt, ctime_opt);
     print("选项：\n");
-    print("-h --{0}\t\t获取帮助\n", help_opt);
-    print("-v --{0}\t\t显示详细信息\n", verbose_opt);
-    print("-a --{0}\t\t设置监听地址，默认为所有IP\n", addr_opt);
-    print("-p --{0}\t\t设置监听端口，默认为3342\n", port_opt);
-    print("-c --{0}\t\t设置监听数，默认为16384\n", count_opt);
-    print("-t --{0}\t\t设置线程数，默认为4\n", threads_opt);
-    print("-e --{0}\t设置Epoll的等待时间，默认为2000(ms)\n", etime_opt);
-    print("-i --{0}\t设置时钟间隔，默认为60(s)\n", cinterval_opt);
-    print("-o --{0}\t设置时钟等待循环数，默认为2（个）\n", ctime_opt);
+    print("-h --{0:l16}获取帮助\n", help_opt);
+    print("-v --{0:l16}显示详细信息\n", verbose_opt);
+    print("-a --{0:l16}设置监听地址，默认为所有IP\n", addr_opt);
+    print("-p --{0:l16}设置监听端口，默认为3342\n", port_opt);
+    print("-c --{0:l16}设置监听数，默认为16384\n", count_opt);
+    print("-t --{0:l16}设置线程数，默认为4\n", threads_opt);
+    print("-e --{0:l16}设置Epoll的等待时间，默认为2000(ms)\n", etime_opt);
+    print("-i --{0:l16}设置时钟间隔，默认为60(s)\n", cinterval_opt);
+    print("-o --{0:l16}设置时钟等待循环数，默认为2（个）\n", ctime_opt);
 }
 
 int get_opt(int argc, char** argv, options& opt)
