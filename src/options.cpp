@@ -1,8 +1,8 @@
+#include <cstdlib>
 #include <getopt.h>
 #include <options.h>
 #include <sf/color.hpp>
 #include <sf/format.hpp>
-#include <string>
 
 using namespace std;
 using namespace sf;
@@ -64,22 +64,22 @@ int get_opt(int argc, char** argv, options& opt)
             opt.addr_string = optarg;
             break;
         case 'p':
-            opt.port = stoi(optarg);
+            opt.port = atoi(optarg);
             break;
         case 'c':
-            opt.amount = stoi(optarg);
+            opt.amount = atoi(optarg);
             break;
         case 't':
-            opt.jobs_count = stoul(optarg);
+            opt.jobs_count = strtoul(optarg, nullptr, 10);
             break;
         case 'e':
-            opt.epoll_timeout = stoi(optarg);
+            opt.epoll_timeout = atoi(optarg);
             break;
         case 'i':
-            opt.interval = stol(optarg);
+            opt.interval = atol(optarg);
             break;
         case 'o':
-            opt.clock_timeout = stoi(optarg);
+            opt.clock_timeout = atoi(optarg);
             break;
         case 'h':
         case '?':

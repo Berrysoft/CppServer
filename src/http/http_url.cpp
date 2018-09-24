@@ -1,48 +1,28 @@
 #include <http/http_url.h>
+#include <regex>
 
 using namespace std;
+
+const regex module_regex("/([^/]*)/(\\S*)");
+const regex args_regex("(\\S*)\\?(\\S*)");
 
 http_url get_url_from_string(std::string url)
 {
     http_url result;
-    if (!url.empty())
+    auto r1 = *(sregex_iterator(url.begin(), url.end(), module_regex));
+    if (r1.size() > 2)
     {
-        url.erase(url.begin());
-        size_t index = url.find_first_of('/');
-        if (index != string::npos)
+        result.module = r1[1];
+        string suf = r1[2];
+        auto r2 = *(sregex_iterator(suf.begin(), suf.end(), args_regex));
+        if (r2.size() < 3)
         {
-            if (index + 1 >= url.length())
-            {
-                url.pop_back();
-                result.module = url;
-            }
-            else
-            {
-                result.module = url.substr(0, index);
-                url = url.substr(index + 1);
-                index = url.find_first_of('?');
-                if (index != string::npos)
-                {
-                    if (index + 1 >= url.length())
-                    {
-                        url.pop_back();
-                        result.command = url;
-                    }
-                    else
-                    {
-                        result.command = url.substr(0, index);
-                        result.args = url.substr(index + 1);
-                    }
-                }
-                else
-                {
-                    result.command = url;
-                }
-            }
+            result.command = suf;
         }
         else
         {
-            result.module = url;
+            result.command = r2[1];
+            result.args = r2[2];
         }
     }
     return result;

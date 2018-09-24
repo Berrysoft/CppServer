@@ -1,27 +1,24 @@
 ﻿#include <arpa/inet.h>
 #include <csignal>
 #include <fcntl.h>
-#include <fstream>
 #include <http/http_request.h>
 #include <server.h>
 #include <sf/color.hpp>
 #include <sf/format.hpp>
-#include <sstream>
-#include <string>
 #include <sys/socket.h>
 #include <sys/timerfd.h>
 #include <unistd.h>
 
-#define print(exp, ...)                \
-    if (verbose)                       \
-    {                                  \
-        sf::print(exp, ##__VA_ARGS__); \
+#define print(...)              \
+    if (verbose)                \
+    {                           \
+        sf::print(__VA_ARGS__); \
     }
 
-#define println(exp, ...)                \
-    if (verbose)                         \
-    {                                    \
-        sf::println(exp, ##__VA_ARGS__); \
+#define println(...)              \
+    if (verbose)                  \
+    {                             \
+        sf::println(__VA_ARGS__); \
     }
 
 #define NEGATIVE_RETURN(exp, msg)                  \
