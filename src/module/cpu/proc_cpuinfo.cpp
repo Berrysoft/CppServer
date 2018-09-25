@@ -1,25 +1,24 @@
 #include <fstream>
 #include <module/cpu/proc_cpuinfo.h>
+#include <sf/sformat.hpp>
 #include <string>
 
 using namespace std;
+using namespace sf;
 
 string get_first_info(istream& is, string head)
 {
-    while (true)
+    string inf;
+    string line;
+    while (getline(is, line))
     {
-        if (is.eof())
+        if (line.substr(0, head.length()) == head)
         {
-            return string();
-        }
-        string temp;
-        getline(is, temp);
-        if (temp.substr(0, head.length()) == head)
-        {
-            size_t i = temp.find_first_of(':');
-            return temp.substr(i + 2);
+            sscan(line, ": {0}", inf);
+            return inf;
         }
     }
+    return string();
 }
 
 vector<physical_cpu> read_proc_cpuinfo()

@@ -1,24 +1,19 @@
 #include <fstream>
 #include <module/version/mem.h>
-#include <sstream>
+#include <sf/format.hpp>
 #include <string>
 
-using std::ifstream;
-using std::istringstream;
-using std::string;
+using namespace std;
+using namespace sf;
 
 mem_info read_proc_meminfo()
 {
     ifstream ifs("/proc/meminfo");
     mem_info result;
-    while (!ifs.eof())
+    string key;
+    int num;
+    while (scan(ifs, "{0}{1}\n", key, num))
     {
-        string line;
-        getline(ifs, line);
-        istringstream iss(line);
-        string key;
-        int num;
-        iss >> key >> num;
         if (key == "MemTotal:")
         {
             result.total = num;

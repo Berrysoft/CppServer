@@ -30,12 +30,10 @@ optional<http_request> http_request::parse(int fd)
             line.pop_back();
         }
     } while (!line.empty());
-    ostringstream oss;
-    while (!ss.eof())
+    if (!ss.eof())
     {
-        ss.read(buffer, sizeof(buffer));
-        oss.write(buffer, ss.gcount());
+        auto index = ss.tellg();
+        result->m_content = ss.str().substr(index);
     }
-    result->m_content = oss.str();
     return result;
 }

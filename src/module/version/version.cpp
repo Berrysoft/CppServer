@@ -22,10 +22,8 @@ const char* const weekdays[] = { "星期日", "星期一", "星期二", "星期�
 
 string get_time()
 {
-    time_t timep;
-    tm* p;
-    time(&timep);
-    p = localtime(&timep);
+    time_t timep = time(nullptr);
+    tm* p = localtime(&timep);
     return sprint("{0}年{1}月{2}日 {3} {4}:{5}:{6}", 1900 + p->tm_year, 1 + p->tm_mon, p->tm_mday, weekdays[p->tm_wday], p->tm_hour, p->tm_min, p->tm_sec);
 }
 
