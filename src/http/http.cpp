@@ -1,7 +1,6 @@
 #include <html/html_writer.h>
 #include <http/http.h>
 #include <http/http_head.h>
-#include <http/http_url.h>
 #include <module/module.h>
 #include <module/read_modules.h>
 #include <module/response.h>
@@ -31,7 +30,7 @@ void http::refresh_modules()
 ssize_t http::send(int fd, const http_request& request)
 {
     INIT_RESULT_AND_TEMP;
-    string mod = get_url_from_string(request.url()).module;
+    string mod = request.split_url().module;
     if (mod.empty())
     {
         mod = "file";

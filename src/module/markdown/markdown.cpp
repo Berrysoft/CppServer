@@ -1,7 +1,6 @@
 #include <filesystem>
 #include <fstream>
 #include <html/html_writer.h>
-#include <http/http_url.h>
 #include <module/markdown/markdown.h>
 #include <sstream>
 #include <sys/socket.h>
@@ -180,7 +179,7 @@ void* get_instance_response(void* request)
     const http_request& req = *(const http_request*)request;
     if (req.version() > 1.0)
     {
-        string command = get_url_from_string(req.url()).command;
+        string command = req.split_url().command;
         if (command.empty())
         {
             command = "README.md";

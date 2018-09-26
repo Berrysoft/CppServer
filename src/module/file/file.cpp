@@ -1,7 +1,6 @@
 #include <filesystem>
 #include <fstream>
 #include <html/html_writer.h>
-#include <http/http_url.h>
 #include <module/file/file.h>
 #include <module/read_modules.h>
 #include <sf/sformat.hpp>
@@ -37,7 +36,7 @@ vector<string> split(const string& str, char c)
 
 file_response::file_response(const http_request& request, string filename) : response(request), filename(move(filename))
 {
-    string r = get_url_from_string(request.url()).args;
+    string r = request.split_url().args;
     if (!r.empty() && r.back() != '&')
     {
         r += '&';
@@ -204,7 +203,7 @@ void* get_instance_response(void* request)
     const http_request& req = *(const http_request*)request;
     if (req.version() > 1.0)
     {
-        string command = get_url_from_string(req.url()).command;
+        string command = req.split_url().command;
         return new file_response(req, command);
     }
     return nullptr;

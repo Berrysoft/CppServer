@@ -20,6 +20,7 @@ optional<http_request> http_request::parse(int fd)
     } while (len >= (long)sizeof(buffer));
     optional<http_request> result = make_optional<http_request>();
     scan(ss, "{0}{1}HTTP/{2}", result->m_method, result->m_url, result->m_version);
+    result->m_split_url = get_url_from_string(result->m_url);
     string line;
     getline(ss, line);
     do
