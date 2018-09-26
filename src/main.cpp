@@ -9,6 +9,7 @@ using namespace sf;
 
 int main(int argc, char** argv)
 {
+    cout.sync_with_stdio(false);
     options opt = default_options;
     int go = get_opt(argc, argv, opt);
     if (go < 0)

@@ -123,7 +123,7 @@ void server::stop()
 {
     print(make_color_arg("关闭Epoll。\n", yellow));
     epoll.close();
-    print(make_color_arg("停止循环。\n", yellow));
+    println(make_color_arg("停止循环。", yellow));
     loop_thread.join();
     print(make_color_arg("停止线程池。\n", yellow));
     pool.stop();
