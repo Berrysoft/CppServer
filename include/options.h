@@ -16,4 +16,4 @@ struct options
 
 constexpr options default_options = { false, nullptr, 3342, 16384, 4, 2000, 60, 2 };
 
-int get_opt(int argc, char** argv, options& opt);
+int get_opt(int argc, char* const* argv, options& opt);

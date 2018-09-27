@@ -7,7 +7,7 @@
 using namespace std;
 using namespace sf;
 
-int main(int argc, char** argv)
+int main(int argc, char* const* argv)
 {
     cout.sync_with_stdio(false);
     options opt = default_options;
@@ -54,9 +54,9 @@ int main(int argc, char** argv)
         print("参数的调整请使用命令 {0} {1} 查看。\n", make_color_arg(argv[0], bright_blue), make_color_arg("-h", cyan));
     }
     println("按{0}刷新模块，{1}清除超时连接，{2}结束服务器。",
-          make_color_arg("r <回车>", cyan),
-          make_color_arg("c <回车>", cyan),
-          make_color_arg("q <回车>", cyan));
+            make_color_arg("r <回车>", cyan),
+            make_color_arg("c <回车>", cyan),
+            make_color_arg("q <回车>", cyan));
 
     char c;
     while ((c = getchar()) != 'q')

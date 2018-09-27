@@ -31,13 +31,12 @@ const option l_opts[] = {
     { nullptr, 0, nullptr, 0 }
 };
 
-void print_help(const char* name)
+void print_help(char* const name)
 {
     print("Berrysoft.Linux.Cpp.Server\n");
     print("网站在Edge、IE、Chrome、Safari(iPhone)下测试通过。\n");
     print("请使用支持chunked的浏览器打开网站。\n");
-    print("用法：{0} [-h] [-p {1}] [-c {2}] [-t {3}]\n", make_color_arg(name, bright_blue), port_opt, count_opt, threads_opt);
-    print("\t\t[-e {0}] [-i {1}] [-o {2}]\n", etime_opt, cinterval_opt, ctime_opt);
+    print("用法：{0} [-hv]|[-apcteio 参数]\n", make_color_arg(name, bright_blue));
     print("选项：\n");
     print("-h --{0:l16}获取帮助\n", help_opt);
     print("-v --{0:l16}显示详细信息\n", verbose_opt);
@@ -50,7 +49,7 @@ void print_help(const char* name)
     print("-o --{0:l16}设置时钟等待循环数，默认为2（个）\n", ctime_opt);
 }
 
-int get_opt(int argc, char** argv, options& opt)
+int get_opt(int argc, char* const* argv, options& opt)
 {
     int optc;
     while ((optc = getopt_long(argc, argv, s_opts, l_opts, nullptr)) >= 0)
