@@ -10,7 +10,7 @@ using namespace sf;
 ssize_t send_with_chunk(int fd, const char* buffer, size_t length, int flag)
 {
     INIT_RESULT_AND_TEMP;
-    string buf = sprint("{0:X}\r\n{1}\r\n", length, sf::string_view(buffer, length));
+    string buf = sprint("{0:x,u}\r\n{1}\r\n", length, sf::string_view(buffer, length));
     IF_NEGATIVE_EXIT(send(fd, buf.c_str(), buf.length(), flag));
     RETURN_RESULT;
 }
