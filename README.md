@@ -9,13 +9,8 @@ cmake .
 make -j4
 ./server
 ```
-编译本程序需要我开发的另一个库StreamFormat：
-``` bash
-git clone https://github.com/Berrysoft/StreamFormat.git
-cd StreamFormat
-cmake .
-sudo make install
-```
+编译本程序需要我开发的库StreamFormat与CppLinq。
+
 如果需要复杂的参数，需要进入`bin`文件夹：
 ``` bash
 ./server -v -a 127.0.0.1 -p 8080 -c 64 -t 16 -e 1000 -i 1 -o 2

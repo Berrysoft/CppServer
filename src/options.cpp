@@ -36,7 +36,7 @@ void print_help(char* const name)
     print("Berrysoft.Linux.Cpp.Server\n");
     print("网站在Edge、IE、Chrome、Safari(iPhone)下测试通过。\n");
     print("请使用支持chunked的浏览器打开网站。\n");
-    print("用法：{0} [-hv]|[-apcteio 参数]\n", make_color_arg(name, bright_blue));
+    print("用法：{0} [-hv]|[-apcteio 参数]\n", make_color_arg(name, bright_blue, user_default, bold));
     print("选项：\n");
     print("-h --{0:l16}获取帮助\n", help_opt);
     print("-v --{0:l16}显示详细信息\n", verbose_opt);

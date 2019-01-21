@@ -1,6 +1,8 @@
 #include <filesystem>
 #include <fstream>
 #include <html/html_writer.h>
+#include <linq/string.hpp>
+#include <linq/to_container.hpp>
 #include <module/file/file.h>
 #include <module/read_modules.h>
 #include <sf/sformat.hpp>
@@ -10,29 +12,9 @@
 
 using namespace std;
 using namespace sf;
+using namespace linq;
 using std::filesystem::exists;
 using std::filesystem::path;
-
-vector<string> split(const string& str, char c)
-{
-    vector<string> result;
-    size_t index = 0;
-    while (index != string::npos && index < str.length())
-    {
-        size_t i = str.find(c, index);
-        if (i != string::npos)
-        {
-            result.push_back(str.substr(index, i - index));
-            index = i + 1;
-        }
-        else
-        {
-            result.push_back(str.substr(index));
-            break;
-        }
-    }
-    return result;
-}
 
 file_response::file_response(const http_request& request, string filename) : response(request), filename(move(filename))
 {
@@ -45,10 +27,10 @@ file_response::file_response(const http_request& request, string filename) : res
     {
         r += request.content();
     }
-    vector<string> req_strs = split(r, '&');
-    for (string& rs : req_strs)
+    auto req_strs = r >> split('&');
+    for (auto rs : req_strs)
     {
-        vector<string> rls = split(rs, '=');
+        vector<string> rls = rs >> split('=') >> to_vector<string>();
         if (rls.size() >= 2)
         {
             requires.emplace(rls[0], rls[1]);

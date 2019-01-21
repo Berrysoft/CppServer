@@ -1,5 +1,8 @@
 #include <filesystem>
 #include <html/html_writer.h>
+#include <linq/aggregate.hpp>
+#include <linq/query.hpp>
+#include <linq/to_container.hpp>
 #include <module/cpu/cpu.h>
 #include <module/cpu/proc_cpuinfo.h>
 #include <module/cpu/proc_pid_stat.h>
@@ -12,14 +15,14 @@
 using namespace std;
 using namespace std::filesystem;
 using namespace sf;
+using namespace linq;
 
 void push_linuxcpu(vector<string>& texts, const linuxcpu& cpu)
 {
     int* p = (int*)(&cpu);
-    for (int i = 0; i < 10; i++)
-    {
-        texts.push_back(to_string(p[i]));
-    }
+    get_enumerable(move(p), p + 10) >>
+        select([](int& i) { return to_string(i); }) >>
+        for_each([&texts](string s) { texts.push_back(move(s)); });
 }
 
 ssize_t cpu_response::send(int fd)
@@ -30,10 +33,7 @@ ssize_t cpu_response::send(int fd)
     IF_NEGATIVE_EXIT(writer.write_h1("CPU信息"));
 
     IF_NEGATIVE_EXIT(writer.write_h2("<a href=\"../file//proc/cpuinfo\">硬件信息</a>"));
-    vector<string> texts;
-    texts.push_back("名称");
-    texts.push_back("核心数");
-    texts.push_back("线程数");
+    vector<string> texts{ "名称", "核心数", "线程数" };
     IF_NEGATIVE_EXIT(writer.write_table_start(texts));
     vector<physical_cpu> cpus = read_proc_cpuinfo();
     for (physical_cpu& cpu : cpus)
@@ -47,18 +47,7 @@ ssize_t cpu_response::send(int fd)
     IF_NEGATIVE_EXIT(writer.write_table_end());
 
     IF_NEGATIVE_EXIT(writer.write_h2("<a href=\"../file//proc/stat\">软件信息</a>"));
-    texts.clear();
-    texts.push_back("序号");
-    texts.push_back("user");
-    texts.push_back("nice");
-    texts.push_back("system");
-    texts.push_back("idle");
-    texts.push_back("iowait");
-    texts.push_back("irq");
-    texts.push_back("softirq");
-    texts.push_back("steal");
-    texts.push_back("guest");
-    texts.push_back("guest_nice");
+    texts = vector<string>{ "序号", "user", "nice", "system", "idle", "iowait", "irq", "softirq", "steal", "guest", "guest_nice" };
     IF_NEGATIVE_EXIT(writer.write_table_start(texts));
     proc_stat ps = read_proc_stat();
     texts.clear();

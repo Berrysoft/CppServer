@@ -10,7 +10,7 @@ using namespace sf;
 ssize_t send_with_chunk(int fd, const char* buffer, size_t length, int flag)
 {
     INIT_RESULT_AND_TEMP;
-    string buf = sprint("{0:x,u}\r\n{1}\r\n", length, sf::string_view(buffer, length));
+    string buf = sprint("{0:x,u}\r\n{1}\r\n", length, string_view(buffer, length));
     IF_NEGATIVE_EXIT(send(fd, buf.c_str(), buf.length(), flag));
     RETURN_RESULT;
 }
@@ -20,7 +20,7 @@ ssize_t send_chunk_end(int fd, int flag)
     return send(fd, "0\r\n\r\n", 5, flag);
 }
 
-ssize_t html_writer::write_head(string title)
+ssize_t html_writer::write_head(const string& title)
 {
     INIT_RESULT_AND_TEMP;
     const char head_start[] = "<!DOCTYPE html><html><head><meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\"><title>";
@@ -44,49 +44,49 @@ ssize_t html_writer::write_head(string title)
     RETURN_RESULT;
 }
 
-ssize_t html_writer::write_spe(string spe, string text)
+ssize_t html_writer::write_spe(const string& spe, const string& text)
 {
     string s = sprint("<{0}>{1}</{0}>", spe, text);
     return send_with_chunk(fd, s, 0);
 }
 
-ssize_t html_writer::write_h1(string title)
+ssize_t html_writer::write_h1(const string& title)
 {
     return write_spe("h1", title);
 }
 
-ssize_t html_writer::write_p(string text)
+ssize_t html_writer::write_p(const string& text)
 {
     return write_spe("p", text);
 }
 
-ssize_t html_writer::write_h2(string title)
+ssize_t html_writer::write_h2(const string& title)
 {
     return write_spe("h2", title);
 }
 
-ssize_t html_writer::write_h3(string title)
+ssize_t html_writer::write_h3(const string& title)
 {
     return write_spe("h3", title);
 }
 
-ssize_t html_writer::write_spe_start(string spe)
+ssize_t html_writer::write_spe_start(const string& spe)
 {
     string t = sprint("<{0}>", spe);
     return send_with_chunk(fd, t, 0);
 }
 
-ssize_t html_writer::write_spe_end(string spe)
+ssize_t html_writer::write_spe_end(const string& spe)
 {
     string t = sprint("</{0}>", spe);
     return send_with_chunk(fd, t, 0);
 }
 
-ssize_t html_writer::write_ul(vector<string> texts)
+ssize_t html_writer::write_ul(const vector<string>& texts)
 {
     INIT_RESULT_AND_TEMP;
     IF_NEGATIVE_EXIT(write_spe_start("ul"));
-    for (string& text : texts)
+    for (const string& text : texts)
     {
         IF_NEGATIVE_EXIT(write_spe("li", text));
     }
@@ -104,13 +104,13 @@ ssize_t html_writer::write_p_end()
     return write_spe_end("p");
 }
 
-ssize_t html_writer::write_table_start(vector<string> texts)
+ssize_t html_writer::write_table_start(const vector<string>& texts)
 {
     INIT_RESULT_AND_TEMP;
     const char table_start[] = "<table><thead><tr>";
     const char thead_end[] = "</tr></thead><tbody>";
     IF_NEGATIVE_EXIT(send_with_chunk(fd, table_start, 0));
-    for (string& text : texts)
+    for (const string& text : texts)
     {
         IF_NEGATIVE_EXIT(write_spe("th", text));
     }
@@ -118,11 +118,11 @@ ssize_t html_writer::write_table_start(vector<string> texts)
     RETURN_RESULT;
 }
 
-ssize_t html_writer::write_tr(vector<string> texts)
+ssize_t html_writer::write_tr(const vector<string>& texts)
 {
     INIT_RESULT_AND_TEMP;
     IF_NEGATIVE_EXIT(write_spe_start("tr"));
-    for (string& text : texts)
+    for (const string& text : texts)
     {
         IF_NEGATIVE_EXIT(write_spe("td", text));
     }

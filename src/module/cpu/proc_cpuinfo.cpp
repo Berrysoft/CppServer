@@ -1,10 +1,12 @@
 #include <fstream>
+#include <linq/string.hpp>
 #include <module/cpu/proc_cpuinfo.h>
 #include <sf/sformat.hpp>
 #include <string>
 
 using namespace std;
 using namespace sf;
+using namespace linq;
 
 string get_first_info(istream& is, string head)
 {
@@ -12,7 +14,7 @@ string get_first_info(istream& is, string head)
     string line;
     while (getline(is, line))
     {
-        if (line.substr(0, head.length()) == head)
+        if (line >> starts_with<char>(head))
         {
             sscan(line, ": {0}", inf);
             return inf;

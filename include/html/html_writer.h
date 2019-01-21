@@ -33,25 +33,25 @@ class html_writer
 private:
     int fd;
 
-    ssize_t write_spe(std::string spe, std::string text);
-    ssize_t write_spe_start(std::string spe);
-    ssize_t write_spe_end(std::string spe);
+    ssize_t write_spe(const std::string& spe, const std::string& text);
+    ssize_t write_spe_start(const std::string& spe);
+    ssize_t write_spe_end(const std::string& spe);
 
 public:
     html_writer(int fd) : fd(fd) {}
 
-    ssize_t write_head(std::string title);
-    ssize_t write_h1(std::string title);
-    ssize_t write_h2(std::string title);
-    ssize_t write_h3(std::string title);
-    ssize_t write_ul(std::vector<std::string> texts);
+    ssize_t write_head(const std::string& title);
+    ssize_t write_h1(const std::string& title);
+    ssize_t write_h2(const std::string& title);
+    ssize_t write_h3(const std::string& title);
+    ssize_t write_ul(const std::vector<std::string>& texts);
 
-    ssize_t write_p(std::string text);
+    ssize_t write_p(const std::string& text);
     ssize_t write_p_start();
     ssize_t write_p_end();
 
-    ssize_t write_table_start(std::vector<std::string> texts);
-    ssize_t write_tr(std::vector<std::string> texts);
+    ssize_t write_table_start(const std::vector<std::string>& texts);
+    ssize_t write_tr(const std::vector<std::string>& texts);
     ssize_t write_table_end();
 
     ssize_t write_pre_code_start();

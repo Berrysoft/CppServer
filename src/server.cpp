@@ -209,10 +209,8 @@ void server::process_job(int fd)
     ssize_t size = -1;
     if (request)
     {
-        {
-            shared_lock<shared_mutex> locker(http_mutex);
-            size = http_parser.send(fd, *request);
-        }
+        shared_lock<shared_mutex> locker(http_mutex);
+        size = http_parser.send(fd, *request);
     }
     if (size < 0)
     {
