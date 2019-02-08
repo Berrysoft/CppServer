@@ -20,7 +20,7 @@ public:
 
 protected:
     container_type container;
-    mutex_type mutex;
+    mutable mutex_type mutex;
 
 public:
     safe_queue() : safe_queue(container_type()) {}
@@ -30,23 +30,23 @@ public:
     safe_queue& operator=(const safe_queue& queue) = delete;
     safe_queue& operator=(safe_queue&& queue) = delete;
 
-    reference front()
+    reference front() const
     {
         shared_lock_type locker(mutex);
         return container.front();
     }
-    reference back()
+    reference back() const
     {
         shared_lock_type locker(mutex);
         return container.back();
     }
 
-    bool empty()
+    bool empty() const
     {
         shared_lock_type locker(mutex);
         return container.empty();
     }
-    size_type size()
+    size_type size() const
     {
         shared_lock_type locker(mutex);
         return container.size();
