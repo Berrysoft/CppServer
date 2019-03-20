@@ -26,11 +26,11 @@ private:
 
 public:
     thread_pool() : stopped(true) {}
-    thread_pool(const thread_pool<TArgs...>& pool) = delete;
-    thread_pool(thread_pool<TArgs...>&& pool) = delete;
+    thread_pool(const thread_pool& pool) = delete;
+    thread_pool(thread_pool&& pool) = delete;
 
-    thread_pool<TArgs...>& operator=(const thread_pool<TArgs...>& pool) = delete;
-    thread_pool<TArgs...>& operator=(thread_pool<TArgs...>&& pool) = delete;
+    thread_pool& operator=(const thread_pool& pool) = delete;
+    thread_pool& operator=(thread_pool&& pool) = delete;
 
     void start(std::size_t dojob, std::function<void(TArgs...)>&& task)
     {
@@ -43,7 +43,7 @@ public:
             do_threads = std::valarray<std::thread>(dojob);
             for (std::size_t i = 0; i < dojob; i++)
             {
-                do_threads[i] = std::thread(std::mem_fn_bind(&thread_pool<TArgs...>::do_job, this));
+                do_threads[i] = std::thread(mem_fn_bind(&thread_pool::do_job, this));
             }
         }
     }

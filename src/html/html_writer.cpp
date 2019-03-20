@@ -1,7 +1,6 @@
 #include <fstream>
 #include <html/html_writer.h>
 #include <sf/sformat.hpp>
-#include <string_view>
 #include <sys/socket.h>
 
 using namespace std;
@@ -20,7 +19,7 @@ ssize_t send_chunk_end(int fd, int flag)
     return send(fd, "0\r\n\r\n", 5, flag);
 }
 
-ssize_t html_writer::write_head(const string& title)
+ssize_t html_writer::write_head(std::string_view title)
 {
     INIT_RESULT_AND_TEMP;
     const char head_start[] = "<!DOCTYPE html><html><head><meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\"><title>";
@@ -44,39 +43,39 @@ ssize_t html_writer::write_head(const string& title)
     RETURN_RESULT;
 }
 
-ssize_t html_writer::write_spe(const string& spe, const string& text)
+ssize_t html_writer::write_spe(std::string_view spe, std::string_view text)
 {
     string s = sprint("<{0}>{1}</{0}>", spe, text);
     return send_with_chunk(fd, s, 0);
 }
 
-ssize_t html_writer::write_h1(const string& title)
+ssize_t html_writer::write_h1(std::string_view title)
 {
     return write_spe("h1", title);
 }
 
-ssize_t html_writer::write_p(const string& text)
+ssize_t html_writer::write_p(std::string_view text)
 {
     return write_spe("p", text);
 }
 
-ssize_t html_writer::write_h2(const string& title)
+ssize_t html_writer::write_h2(std::string_view title)
 {
     return write_spe("h2", title);
 }
 
-ssize_t html_writer::write_h3(const string& title)
+ssize_t html_writer::write_h3(std::string_view title)
 {
     return write_spe("h3", title);
 }
 
-ssize_t html_writer::write_spe_start(const string& spe)
+ssize_t html_writer::write_spe_start(std::string_view spe)
 {
     string t = sprint("<{0}>", spe);
     return send_with_chunk(fd, t, 0);
 }
 
-ssize_t html_writer::write_spe_end(const string& spe)
+ssize_t html_writer::write_spe_end(std::string_view spe)
 {
     string t = sprint("</{0}>", spe);
     return send_with_chunk(fd, t, 0);
@@ -86,7 +85,7 @@ ssize_t html_writer::write_ul(const vector<string>& texts)
 {
     INIT_RESULT_AND_TEMP;
     IF_NEGATIVE_EXIT(write_spe_start("ul"));
-    for (const string& text : texts)
+    for (std::string_view text : texts)
     {
         IF_NEGATIVE_EXIT(write_spe("li", text));
     }
@@ -110,7 +109,7 @@ ssize_t html_writer::write_table_start(const vector<string>& texts)
     const char table_start[] = "<table><thead><tr>";
     const char thead_end[] = "</tr></thead><tbody>";
     IF_NEGATIVE_EXIT(send_with_chunk(fd, table_start, 0));
-    for (const string& text : texts)
+    for (std::string_view text : texts)
     {
         IF_NEGATIVE_EXIT(write_spe("th", text));
     }
@@ -122,7 +121,7 @@ ssize_t html_writer::write_tr(const vector<string>& texts)
 {
     INIT_RESULT_AND_TEMP;
     IF_NEGATIVE_EXIT(write_spe_start("tr"));
-    for (const string& text : texts)
+    for (std::string_view text : texts)
     {
         IF_NEGATIVE_EXIT(write_spe("td", text));
     }
