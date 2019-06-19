@@ -25,11 +25,11 @@ configure_file(${PROJECT_SOURCE_DIR}/README.md README.md COPYONLY)
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/module/file/ FILE_SO_SOURCE)
 add_library(file SHARED ${FILE_SO_SOURCE})
-target_link_libraries(file stdc++fs html_writer read_modules)
+target_link_libraries(file html_writer read_modules)
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/module/cpu/ CPU_SOURCE)
 add_library(cpu SHARED ${CPU_SOURCE})
-target_link_libraries(cpu stdc++fs html_writer)
+target_link_libraries(cpu html_writer)
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/module/disk/ DISK_SOURCE)
 add_library(disk SHARED ${DISK_SOURCE})
@@ -37,7 +37,7 @@ target_link_libraries(disk html_writer)
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/module/markdown/ MD_SOURCE)
 add_library(markdown SHARED ${MD_SOURCE})
-target_link_libraries(markdown stdc++fs html_writer)
+target_link_libraries(markdown html_writer)
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/module/version/ V_SOURCE)
 add_library(version SHARED ${V_SOURCE})
