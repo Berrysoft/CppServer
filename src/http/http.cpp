@@ -37,7 +37,7 @@ ssize_t http::send(int fd, const http_request& request)
     }
     module m;
     {
-        unique_ptr<response> res;
+        module::response_ptr res;
         auto it = modules.find(mod);
         if (it != modules.end() && m.open(it->second))
         {

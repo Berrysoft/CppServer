@@ -190,3 +190,9 @@ void* get_instance_response(void* request)
     }
     return nullptr;
 }
+
+void delete_instance_response(void* response)
+{
+    file_response* res = (file_response*)response;
+    delete res;
+}

@@ -19,4 +19,8 @@ public:
 };
 
 //这是为动态库提供的接口，因此采用C语言的指针与参数
-extern "C" void* get_instance_response(void* request);
+extern "C"
+{
+    void* get_instance_response(void* request);
+    void delete_instance_response(void* response);
+}

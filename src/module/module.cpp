@@ -3,7 +3,8 @@
 
 using namespace std;
 
-typedef void* (*get_handle)(void*);
+using get_handle = void* (*)(void*);
+using delete_handle = void (*)(void*);
 
 module::module() : handle(nullptr)
 {
@@ -20,12 +21,13 @@ bool module::open(string name)
     return handle;
 }
 
-unique_ptr<response> module::get_response(const http_request& request)
+module::response_ptr module::get_response(const http_request& request)
 {
     if (handle)
     {
         get_handle f = (get_handle)dlsym(handle, "get_instance_response");
-        return unique_ptr<response>((response*)f((void*)&request));
+        delete_handle d = (delete_handle)dlsym(handle, "delete_instance_response");
+        return module::response_ptr((response*)f((void*)&request), d);
     }
     return nullptr;
 }

@@ -188,3 +188,9 @@ void* get_instance_response(void* request)
     }
     return nullptr;
 }
+
+void delete_instance_response(void* response)
+{
+    markdown_response* res = (markdown_response*)response;
+    delete res;
+}

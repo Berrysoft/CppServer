@@ -48,3 +48,9 @@ void* get_instance_response(void* request)
     }
     return nullptr;
 }
+
+void delete_instance_response(void* response)
+{
+    disk_response* res = (disk_response*)response;
+    delete res;
+}

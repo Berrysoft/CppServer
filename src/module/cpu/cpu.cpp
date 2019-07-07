@@ -108,3 +108,9 @@ void* get_instance_response(void* request)
     }
     return nullptr;
 }
+
+void delete_instance_response(void* response)
+{
+    cpu_response* res = (cpu_response*)response;
+    delete res;
+}

@@ -69,3 +69,9 @@ void* get_instance_response(void* request)
     }
     return nullptr;
 }
+
+void delete_instance_response(void* response)
+{
+    version_response* res = (version_response*)response;
+    delete res;
+}
