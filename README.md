@@ -81,7 +81,7 @@ WSL没有`/proc/partitions`文件，因此采用VFS文件系统获取根目录�
 
 这个解释器实现了Markdown的一些基本功能，使得至少本文件能够显示正常。
 ## 压力测试
-下面是用ApacheBench在WSL上进行并发100、总数1000000的压力测试结果：
+下面是用ApacheBench进行并发100、总数1000000的压力测试结果：
 ```
 $ ab -k -n 1000000 -c 100 http://127.0.0.1:3342/
 
@@ -95,22 +95,22 @@ Document Path:          /
 Document Length:        0 bytes
 
 Concurrency Level:      100
-Time taken for tests:   63.797 seconds
+Time taken for tests:   12.473 seconds
 Complete requests:      1000000
 Failed requests:        0
 Non-2xx responses:      1000000
 Keep-Alive requests:    1000000
 Total transferred:      130000000 bytes
 HTML transferred:       0 bytes
-Requests per second:    15674.70 [#/sec] (mean)
-Time per request:       6.380 [ms] (mean)
-Time per request:       0.064 [ms] (mean, across all concurrent requests)
-Transfer rate:          1989.95 [Kbytes/sec] received
+Requests per second:    80172.08 [#/sec] (mean)
+Time per request:       1.247 [ms] (mean)
+Time per request:       0.012 [ms] (mean, across all concurrent requests)
+Transfer rate:          10178.10 [Kbytes/sec] received
 
 ...
 ```
 ## 为本程序开发模块
-想要为本程序开发模块，需要引入`src/module/`文件夹下的头文件`response.h`，并实现`void* get_instance_response(void* request)`方法。这个方法接收一个指向`http_request`类实例的指针，应当返回一个指向继承`response`的类的指针，并可以被`delete`。
+想要为本程序开发模块，需要引入`include/module/`文件夹下的头文件`response.h`，并实现`void* get_instance_response(void* request)`与`void delete_instance_response(void* response)`方法。前者接收一个指向`http_request`类实例的指针，应当返回一个指向继承`response`的类的指针；后者负责销毁。
 
 `response`类定义了一个抽象方法`ssize_t send(int fd)`，这是用来向文件描述符`fd`直接写HTML文档的函数。建议引入`html_writer.h`头文件写HTML，这里面定义了一个向文件描述符写HTML文档的类，并使用了`style.css`的绝对路径。
 
