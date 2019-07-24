@@ -69,7 +69,7 @@ void server::bind(const sockaddr_in6& addr, int n)
 
 void server::bind(const sockaddr* addr, socklen_t len, int n)
 {
-    NEGATIVE_RETURN(::bind(sock, addr, len), "Socket命名失败。");
+    NEGATIVE_RETURN(::bind(sock, addr, len), "Socket绑定失败。");
     NEGATIVE_RETURN(listen(sock, n), "监听失败。");
     print("监听数：{0}\n", make_color_arg(n, bright_blue));
     print("监听Socket：{0}.\n", sock);

@@ -1,10 +1,17 @@
+#include <fstream>
 #include <html/html_writer.h>
+#include <linq/query.hpp>
+#include <linq/string.hpp>
+#include <linq/to_container.hpp>
 #include <module/disk/disk.h>
+#include <sf/sformat.hpp>
 #include <string>
 #include <sys/statfs.h>
 #include <vector>
 
 using namespace std;
+using namespace sf;
+using namespace linq;
 
 ssize_t disk_response::send(int fd)
 {
@@ -12,13 +19,7 @@ ssize_t disk_response::send(int fd)
     html_writer writer(fd);
     IF_NEGATIVE_EXIT(writer.write_head("大作业-硬盘"));
     IF_NEGATIVE_EXIT(writer.write_h1("硬盘信息"));
-    IF_NEGATIVE_EXIT(writer.write_p("由于WSL中没有<code>/proc/partitions</code>文件，本模块采用VFS文件系统获取根目录信息。"));
-    vector<string> texts;
-    texts.push_back("扇区大小");
-    texts.push_back("总扇区数");
-    texts.push_back("总大小");
-    texts.push_back("剩余扇区数");
-    texts.push_back("剩余大小");
+    vector<string> texts{ "扇区大小", "总扇区数", "总大小", "剩余扇区数", "剩余大小" };
     IF_NEGATIVE_EXIT(writer.write_table_start(texts));
     struct statfs disk;
     statfs("/", &disk);
@@ -30,10 +31,23 @@ ssize_t disk_response::send(int fd)
     texts.clear();
     texts.push_back(to_string(b) + " B");
     texts.push_back(to_string(bs));
-    texts.push_back(to_string(bss >> 30) + " GB");
+    texts.push_back(sprint("{:f2} GB", bss / 1073741824.0));
     texts.push_back(to_string(fbs));
-    texts.push_back(to_string(fbss >> 30) + " GB");
+    texts.push_back(sprint("{:f2} GB", fbss / 1073741824.0));
     IF_NEGATIVE_EXIT(writer.write_tr(texts));
+    IF_NEGATIVE_EXIT(writer.write_table_end());
+    IF_NEGATIVE_EXIT(writer.write_h1("<a href=\"../file//proc/partitions\">硬盘分区信息</a>"));
+    texts.assign({ "名称", "大小" });
+    IF_NEGATIVE_EXIT(writer.write_table_start(texts));
+    {
+        ifstream ifs{ "/proc/partitions" };
+        for (const string& line : read_lines(ifs) >> skip(2))
+        {
+            vector<string_view> arr = line >> split(' ') >> where([](auto s) { return !s.empty(); }) >> to_vector<string_view>();
+            texts.assign({ string(arr[3]), sprint("{:f2} GB", stoull(string(arr[2])) / 1048576.0) });
+            IF_NEGATIVE_EXIT(writer.write_tr(texts));
+        }
+    }
     IF_NEGATIVE_EXIT(writer.write_table_end());
     IF_NEGATIVE_EXIT(writer.write_end());
     RETURN_RESULT;
