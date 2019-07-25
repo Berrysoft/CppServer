@@ -3,17 +3,17 @@
 ## 使用说明
 克隆Git仓库并编译运行：
 ``` bash
-git clone https://github.com/Berrysoft/CppServer.git
-cd CppServer
-cmake .
-make -j4
-./server
+$ git clone https://github.com/Berrysoft/CppServer.git
+$ cd CppServer
+$ cmake . -GNinja
+$ ninja
+$ ./server
 ```
 编译本程序需要我开发的库StreamFormat与CppLinq。
 
-如果需要复杂的参数，需要进入`bin`文件夹：
+如果需要复杂的参数：
 ``` bash
-./server -v -a 127.0.0.1 -p 8080 -c 64 -t 16 -e 1000 -i 1 -o 2
+$ ./server -v -a 127.0.0.1 -p 8080 -c 64 -t 16 -e 1000 -i 1 -o 2
 ```
 希望查看提示可以使用`-h`或者`--help`命令：
 ```

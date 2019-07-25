@@ -11,13 +11,28 @@ process_stat read_proc_stat(int pid)
     if (ifs.is_open())
     {
         process_stat result;
-        string name;
-        scan(ifs, "{0}{1}{2}", result.pid, name, result.state);
-        if (name.front() == '(')
-            name = name.substr(1);
-        if (name.back() == ')')
-            name.pop_back();
-        result.comm = name;
+        ifs >> result.pid;
+        while (ifs.get() != '(')
+            ;
+        ostringstream name_stream;
+        size_t bra_count = 0;
+        while (bra_count || ifs.peek() != ')')
+        {
+            switch (ifs.peek())
+            {
+            case '(':
+                bra_count++;
+                break;
+            case ')':
+                bra_count--;
+                break;
+            }
+            name_stream << (char)ifs.get();
+        }
+        result.comm = name_stream.str();
+        while (ifs.get() != ' ')
+            ;
+        ifs >> result.state;
         return result;
     }
     return {};
@@ -41,6 +56,8 @@ string get_state_str(char state)
         return "停止跟踪";
     case 'X':
         return "死亡";
+    case 'I':
+        return "空闲";
     default:
         return {};
     }
