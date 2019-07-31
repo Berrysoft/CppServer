@@ -86,7 +86,7 @@ ssize_t cpu_response::send(int fd)
             {
                 texts.clear();
                 process_stat pstat = read_proc_stat(pid);
-                texts.push_back(to_string(pstat.pid));
+                texts.push_back(sprint("<a href=\"../file//proc/{0}/status\">{0}</a>", pstat.pid));
                 texts.push_back(pstat.comm);
                 texts.push_back(get_state_str(pstat.state));
                 IF_NEGATIVE_EXIT(writer.write_tr(texts));
