@@ -13,6 +13,9 @@ set(CMAKE_CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto")
 
+find_package(sf CONFIG REQUIRED)
+find_package(cpplinq CONFIG REQUIRED)
+
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/html HTML_SOURCE)
 add_library(html_writer SHARED ${HTML_SOURCE})
 
