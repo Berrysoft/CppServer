@@ -8,7 +8,7 @@
 class ioepoll
 {
 public:
-    typedef std::function<void(int, uint32_t)> handler_type;
+    using handler_type = std::function<void(int, uint32_t)>;
 
 private:
     int epoll_fd;
@@ -30,15 +30,15 @@ public:
     void start(int timeout);
     void close();
 
-    int add(int fd, uint32_t events);
-    int modify(int fd, uint32_t events);
-    int remove(int fd, uint32_t events);
+    int add(int fd, std::uint32_t events);
+    int modify(int fd, std::uint32_t events);
+    int remove(int fd, std::uint32_t events);
 
 private:
-    int ctl(int fd, uint32_t events, int op);
+    int ctl(int fd, std::uint32_t events, int op);
 
 public:
-    void set_error_handler(handler_type handler);
-    void set_default_handler(handler_type handler);
-    void set_handler(int fd, handler_type handler);
+    void set_error_handler(handler_type&& handler);
+    void set_default_handler(handler_type&& handler);
+    void set_handler(int fd, handler_type&& handler);
 };

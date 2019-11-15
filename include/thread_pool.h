@@ -9,14 +9,14 @@
 #include <safe_queue.h>
 #include <thread>
 #include <tuple>
-#include <valarray>
+#include <vector>
 
 template <typename... TArgs>
 class thread_pool
 {
 private:
     std::function<void(TArgs...)> task;
-    std::valarray<std::thread> do_threads;
+    std::vector<std::thread> do_threads;
 
     safe_queue<std::tuple<TArgs...>> jobs;
     std::condition_variable cond;
@@ -40,7 +40,7 @@ public:
             this->task = std::move(task);
             if (dojob < 1)
                 dojob = 1;
-            do_threads = std::valarray<std::thread>(dojob);
+            do_threads.resize(dojob);
             for (std::size_t i = 0; i < dojob; i++)
             {
                 do_threads[i] = std::thread(mem_fn_bind(&thread_pool::do_job, this));

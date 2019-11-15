@@ -6,9 +6,9 @@ using namespace std;
 const regex module_regex("/([^/\\f\\n\\r\\t\\v]*)/(\\S*)");
 const regex args_regex("(\\S*)\\?(\\S*)");
 
-http_url get_url_from_string(std::string url)
+http_url get_url_from_string(const string& url)
 {
-    http_url result = {};
+    http_url result{};
     smatch r1;
     if (regex_match(url, r1, module_regex))
     {

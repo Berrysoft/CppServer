@@ -21,11 +21,10 @@
         sf::println(__VA_ARGS__); \
     }
 
-#define NEGATIVE_RETURN(exp, msg)                  \
-    if ((exp) < 0)                                 \
-    {                                              \
-        println(sf::make_color_arg(msg, sf::red)); \
-        return;                                    \
+#define NEGATIVE_RETURN(exp, msg)      \
+    if ((exp) < 0)                     \
+    {                                  \
+        throw server_exception{ msg }; \
     }
 
 using namespace std;

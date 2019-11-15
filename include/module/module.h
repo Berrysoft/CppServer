@@ -14,7 +14,7 @@ public:
     module();
     ~module();
 
-    bool open(std::string name);
+    bool open(std::string_view name);
     bool init(const http_request& request);
     std::int32_t status();
     std::int64_t length();
@@ -22,4 +22,17 @@ public:
     ssize_t send(int fd);
     bool destory();
     void close();
+};
+
+struct module_guard
+{
+private:
+    module& m;
+    bool m_inited;
+
+public:
+    module_guard(module& m, const http_request& req) : m(m) { m_inited = m.init(req); }
+    ~module_guard() { m.destory(); }
+
+    constexpr bool inited() const noexcept { return m_inited; }
 };

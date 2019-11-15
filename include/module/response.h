@@ -6,6 +6,7 @@ extern "C"
 #endif // __cplusplus
 
 #include <stdint.h>
+#include <sys/types.h>
 
     struct init_response_arg
     {

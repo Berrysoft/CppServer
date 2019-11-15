@@ -14,9 +14,9 @@ module::~module()
     close();
 }
 
-bool module::open(string name)
+bool module::open(string_view name)
 {
-    handle = dlopen(name.c_str(), RTLD_LAZY);
+    handle = dlopen(name.data(), RTLD_LAZY);
     return handle;
 }
 

@@ -27,19 +27,6 @@ void http::refresh_modules()
     }
 }
 
-struct module_guard
-{
-private:
-    module& m;
-    bool m_inited;
-
-public:
-    module_guard(module& m, const http_request& req) : m(m) { m_inited = m.init(req); }
-    ~module_guard() { m.destory(); }
-
-    constexpr bool inited() const noexcept { return m_inited; }
-};
-
 ssize_t http::send(int fd, const http_request& request)
 {
     INIT_RESULT_AND_TEMP;
@@ -55,9 +42,9 @@ ssize_t http::send(int fd, const http_request& request)
         {
             m.open(it->second);
         }
-        int res_status = 400;
+        int32_t res_status = 400;
         string content_type;
-        long long res_length = 0;
+        int64_t res_length = 0;
         module_guard guard(m, request);
         if (guard.inited())
         {

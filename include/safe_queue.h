@@ -60,14 +60,14 @@ public:
     void push(value_type&& value)
     {
         unique_lock_type locker(mutex);
-        container.push_back(value);
+        container.push_back(std::move(value));
     }
 
     template <typename... Args>
     decltype(auto) emplace(Args&&... args)
     {
         unique_lock_type locker(mutex);
-        container.emplace_back(args...);
+        container.emplace_back(std::forward<Args>(args)...);
     }
 
     std::optional<value_type> try_pop()

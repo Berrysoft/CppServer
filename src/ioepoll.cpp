@@ -101,21 +101,21 @@ int ioepoll::ctl(int fd, uint32_t events, int op)
     return epoll_ctl(epoll_fd, op, fd, &e);
 }
 
-void ioepoll::set_error_handler(handler_type handler)
+void ioepoll::set_error_handler(handler_type&& handler)
 {
-    error_handler = handler;
+    error_handler = move(handler);
 }
 
-void ioepoll::set_default_handler(handler_type handler)
+void ioepoll::set_default_handler(handler_type&& handler)
 {
-    default_handler = handler;
+    default_handler = move(handler);
 }
 
-void ioepoll::set_handler(int fd, handler_type handler)
+void ioepoll::set_handler(int fd, handler_type&& handler)
 {
     if (handler)
     {
-        handlers.emplace(fd, handler);
+        handlers.emplace(fd, move(handler));
     }
     else
     {

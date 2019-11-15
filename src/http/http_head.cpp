@@ -6,12 +6,12 @@
 using namespace std;
 using namespace sf;
 
-http_head::http_head(int status, long long length, string type)
+http_head::http_head(int32_t status, int64_t length, string_view type)
     : status(status), length(length), type(type)
 {
 }
 
-string status_des(int status)
+string_view status_des(int status)
 {
     switch (status)
     {
@@ -22,7 +22,7 @@ string status_des(int status)
     case 404:
         return "Not Found";
     default:
-        return string();
+        return {};
     }
 }
 

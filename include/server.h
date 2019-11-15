@@ -1,5 +1,6 @@
 //服务器头文件。
 #pragma once
+#include <exception>
 #include <http/http.h>
 #include <ioepoll.h>
 #include <map>
@@ -8,8 +9,21 @@
 #include <netinet/in.h>
 #include <shared_mutex>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <thread_pool.h>
+
+struct server_exception : std::exception
+{
+private:
+    std::string msg;
+
+public:
+    server_exception(std::string_view msg) : msg(msg) {}
+    ~server_exception() override {}
+
+    const char* what() const noexcept override { return msg.c_str(); }
+};
 
 class server
 {
@@ -26,7 +40,7 @@ private:
     int clock_timeout;
     int time_stamp;
     std::map<int, int> clients;
-    std::mutex clients_mutex;
+    mutable std::mutex clients_mutex;
 
 public:
     server(int amount, std::size_t doj, bool verbose);
@@ -49,12 +63,12 @@ public:
     void stop();
 
     void refresh_modules();
-    int get_time_stamp() { return time_stamp; }
+    constexpr int get_time_stamp() const noexcept { return time_stamp; }
 
 private:
-    void epoll_error(int fd, uint32_t events);
-    void epoll_sock(int fd, uint32_t events);
-    void epoll_timer(int fd, uint32_t events);
-    void epoll_default(int fd, uint32_t events);
+    void epoll_error(int fd, std::uint32_t events);
+    void epoll_sock(int fd, std::uint32_t events);
+    void epoll_timer(int fd, std::uint32_t events);
+    void epoll_default(int fd, std::uint32_t events);
     void process_job(int fd);
 };
