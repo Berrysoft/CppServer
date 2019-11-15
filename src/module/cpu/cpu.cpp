@@ -34,8 +34,6 @@ int32_t res_init(init_response_arg* arg)
     return -1;
 }
 
-int32_t res_destory() { return 0; }
-
 ssize_t res_send(int fd)
 {
     INIT_RESULT_AND_TEMP;

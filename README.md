@@ -5,7 +5,9 @@
 ``` bash
 $ git clone https://github.com/Berrysoft/CppServer.git
 $ cd CppServer
-$ cmake . -GNinja
+$ mkdir build
+$ cd build
+$ cmake .. -GNinja
 $ ninja
 $ ./server
 ```
@@ -36,19 +38,21 @@ Berrysoft.Linux.Cpp.Server
 ```
 ## 程序文件
 本程序需要以下文件才能相应HTTP请求：
-* server
+* `server`
 
 本程序需要以下文件才能正常使用：
-* modules（模块列表文件）
-* libfile.so（文件模块）
+* `modules`（模块列表文件）
+* `libread_modules.so`（读取列表模块）
+* `libhtml_writer.so`（HTML模块）
+* `libfile.so`（文件模块）
 
 以下均为本程序的可选文件：
-* libcpu.so（CPU模块）
-* libversion.so（系统模块）
-* libdisk.so（硬盘模块）
-* libmarkdown.so（Markdown解释模块）
-* style.css（HTML样式表）
-* README.md（自述文件）
+* `libcpu.so`（CPU模块）
+* `libversion.so`（系统模块）
+* `libdisk.so`（硬盘模块）
+* `libmarkdown.so`（Markdown解释模块）
+* `style.css`（HTML样式表）
+* `README.md`（自述文件）
 ## 功能
 在服务器端输入`r`刷新模块加载，输入`c`清理所有连接，输入`q`退出。
 
@@ -110,9 +114,11 @@ Transfer rate:          10178.10 [Kbytes/sec] received
 ...
 ```
 ## 为本程序开发模块
-想要为本程序开发模块，需要引入`include/module/`文件夹下的头文件`response.h`，并实现`void* get_instance_response(void* request)`与`void delete_instance_response(void* response)`方法。前者接收一个指向`http_request`类实例的指针，应当返回一个指向继承`response`的类的指针；后者负责销毁。
+想要为本程序开发模块，需要引入`include/module/`文件夹下的头文件`response.h`，并实现相应的方法。其中`int32_t res_init(struct init_response_arg* arg)`与`ssize_t res_send(int fd)`必须实现。前者根据请求初始化响应，后者向文件描述符写入响应内容。
 
-`response`类定义了一个抽象方法`ssize_t send(int fd)`，这是用来向文件描述符`fd`直接写HTML文档的函数。建议引入`html_writer.h`头文件写HTML，这里面定义了一个向文件描述符写HTML文档的类，并使用了`style.css`的绝对路径。
+由于是C语言接口，理论上任何一个可以写C接口动态库的语言（如Rust或C#）都可以为本程序开发模块。
+
+如果使用C/C++，建议引入`html_writer.h`头文件写HTML，这里面定义了一个向文件描述符写HTML文档的类，并使用了`style.css`的绝对路径。
 
 `html_writer.h`中还定义了3个有用的宏：
 ``` cpp

@@ -38,7 +38,7 @@ T invoke_module(void* handle, const char* name, T&& def, Args... args)
 bool module::init(const http_request& request)
 {
     init_response_arg arg{ request.method().c_str(), request.split_url().module.c_str(), request.split_url().command.c_str(), request.split_url().args.c_str(), request.content().c_str(), request.version() };
-    return invoke_module<int32_t>(handle, "res_init", 0, &arg) == 0;
+    return invoke_module<int32_t>(handle, "res_init", -1, &arg) == 0;
 }
 
 int32_t module::status()
