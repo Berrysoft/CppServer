@@ -3,7 +3,7 @@
 #include <linq/query.hpp>
 #include <linq/string.hpp>
 #include <linq/to_container.hpp>
-#include <module/disk/disk.h>
+#include <module/response.h>
 #include <sf/sformat.hpp>
 #include <string>
 #include <sys/statfs.h>
@@ -13,7 +13,18 @@ using namespace std;
 using namespace sf;
 using namespace linq;
 
-ssize_t disk_response::send(int fd)
+int32_t res_init(init_response_arg* arg)
+{
+    if (arg->version > 1.0)
+    {
+        return 0;
+    }
+    return -1;
+}
+
+int32_t res_destory() { return 0; }
+
+ssize_t res_send(int fd)
 {
     INIT_RESULT_AND_TEMP;
     html_writer writer(fd);
@@ -51,20 +62,4 @@ ssize_t disk_response::send(int fd)
     IF_NEGATIVE_EXIT(writer.write_table_end());
     IF_NEGATIVE_EXIT(writer.write_end());
     RETURN_RESULT;
-}
-
-void* get_instance_response(void* request)
-{
-    const http_request& req = *(const http_request*)request;
-    if (req.version() > 1.0)
-    {
-        return new disk_response(req);
-    }
-    return nullptr;
-}
-
-void delete_instance_response(void* response)
-{
-    disk_response* res = (disk_response*)response;
-    delete res;
 }

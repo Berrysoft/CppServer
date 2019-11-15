@@ -1,8 +1,8 @@
 #include <ctime>
 #include <fstream>
 #include <html/html_writer.h>
+#include <module/response.h>
 #include <module/version/mem.h>
-#include <module/version/version.h>
 #include <sf/sformat.hpp>
 #include <string>
 #include <vector>
@@ -27,7 +27,18 @@ string get_time()
     return sprint("{0}年{1}月{2}日 {3} {4}:{5}:{6}", 1900 + p->tm_year, 1 + p->tm_mon, p->tm_mday, weekdays[p->tm_wday], p->tm_hour, p->tm_min, p->tm_sec);
 }
 
-ssize_t version_response::send(int fd)
+int32_t res_init(init_response_arg* arg)
+{
+    if (arg->version > 1.0)
+    {
+        return 0;
+    }
+    return -1;
+}
+
+int32_t res_destory() { return 0; }
+
+ssize_t res_send(int fd)
 {
     INIT_RESULT_AND_TEMP;
     html_writer writer(fd);
@@ -58,20 +69,4 @@ ssize_t version_response::send(int fd)
     IF_NEGATIVE_EXIT(writer.write_table_end());
     IF_NEGATIVE_EXIT(writer.write_end());
     RETURN_RESULT;
-}
-
-void* get_instance_response(void* request)
-{
-    const http_request& req = *(const http_request*)request;
-    if (req.version() > 1.0)
-    {
-        return new version_response(req);
-    }
-    return nullptr;
-}
-
-void delete_instance_response(void* response)
-{
-    version_response* res = (version_response*)response;
-    delete res;
 }

@@ -4,7 +4,7 @@
 #include <module/response.h>
 #include <string>
 
-class file_response : public response
+class file_response
 {
 private:
     std::string filename;
@@ -13,9 +13,9 @@ private:
     bool file_exists;
 
 public:
-    file_response(const http_request& request, std::string filename);
-    ~file_response() override {}
-    int status() override;
-    std::string type() override;
-    ssize_t send(int fd) override;
+    file_response(init_response_arg* request);
+    ~file_response() {}
+    int status();
+    const char* type();
+    ssize_t send(int fd);
 };

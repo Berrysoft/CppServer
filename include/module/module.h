@@ -3,7 +3,6 @@
 #include <functional>
 #include <http/http_request.h>
 #include <memory>
-#include <module/response.h>
 #include <string>
 
 class module
@@ -12,12 +11,15 @@ private:
     void* handle;
 
 public:
-    using response_ptr = std::unique_ptr<response, std::function<void(void*)>>;
-
     module();
     ~module();
 
     bool open(std::string name);
-    response_ptr get_response(const http_request& request);
+    bool init(const http_request& request);
+    std::int32_t status();
+    std::int64_t length();
+    const char* type();
+    ssize_t send(int fd);
+    bool destory();
     void close();
 };

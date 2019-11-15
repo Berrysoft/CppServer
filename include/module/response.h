@@ -1,26 +1,29 @@
-//在动态模块中用来向文件描述符写HTML的抽象类。
 #pragma once
-#include <http/http_request.h>
-#include <string>
-#include <sys/types.h>
 
-class response
-{
-protected:
-    const http_request& request;
-
-public:
-    response(const http_request& request) : request(request) {}
-    virtual ~response() {}
-    virtual int status() { return 200; }
-    virtual long long length() { return -1; }
-    virtual std::string type() { return "text/html"; }
-    virtual ssize_t send(int fd) = 0;
-};
-
-//这是为动态库提供的接口，因此采用C语言的指针与参数
+#ifdef __cplusplus
 extern "C"
 {
-    void* get_instance_response(void* request);
-    void delete_instance_response(void* response);
+#endif // __cplusplus
+
+#include <stdint.h>
+
+    struct init_response_arg
+    {
+        const char* method;
+        const char* module;
+        const char* command;
+        const char* args;
+        const char* content;
+        double version;
+    };
+
+    int32_t res_init(struct init_response_arg* arg);
+    int32_t res_status();
+    int64_t res_length();
+    const char* res_type();
+    ssize_t res_send(int fd);
+    int32_t res_destory();
+
+#ifdef __cplusplus
 }
+#endif // __cplusplus

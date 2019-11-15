@@ -3,10 +3,10 @@
 #include <linq/aggregate.hpp>
 #include <linq/query.hpp>
 #include <linq/to_container.hpp>
-#include <module/cpu/cpu.h>
 #include <module/cpu/proc_cpuinfo.h>
 #include <module/cpu/proc_pid_stat.h>
 #include <module/cpu/proc_stat.h>
+#include <module/response.h>
 #include <sf/sformat.hpp>
 #include <string>
 #include <sys/socket.h>
@@ -25,7 +25,18 @@ void push_linuxcpu(vector<string>& texts, const linuxcpu& cpu)
         for_each([&texts](string s) { texts.push_back(move(s)); });
 }
 
-ssize_t cpu_response::send(int fd)
+int32_t res_init(init_response_arg* arg)
+{
+    if (arg->version > 1.0)
+    {
+        return 0;
+    }
+    return -1;
+}
+
+int32_t res_destory() { return 0; }
+
+ssize_t res_send(int fd)
 {
     INIT_RESULT_AND_TEMP;
     html_writer writer(fd);
@@ -97,20 +108,4 @@ ssize_t cpu_response::send(int fd)
 
     IF_NEGATIVE_EXIT(writer.write_end());
     RETURN_RESULT;
-}
-
-void* get_instance_response(void* request)
-{
-    const http_request& req = *(const http_request*)request;
-    if (req.version() > 1.0)
-    {
-        return new cpu_response(req);
-    }
-    return nullptr;
-}
-
-void delete_instance_response(void* response)
-{
-    cpu_response* res = (cpu_response*)response;
-    delete res;
 }

@@ -3,15 +3,15 @@
 #include <module/response.h>
 #include <string>
 
-class markdown_response : public response
+class markdown_response
 {
 private:
     std::string filename;
     bool file_exists;
 
 public:
-    markdown_response(const http_request& request, std::string filename);
-    ~markdown_response() override {}
+    markdown_response(init_response_arg* arg);
+    ~markdown_response() {}
 
-    ssize_t send(int fd) override;
+    ssize_t send(int fd);
 };

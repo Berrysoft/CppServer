@@ -27,6 +27,19 @@ void http::refresh_modules()
     }
 }
 
+struct module_guard
+{
+private:
+    module& m;
+    bool m_inited;
+
+public:
+    module_guard(module& m, const http_request& req) : m(m) { m_inited = m.init(req); }
+    ~module_guard() { m.destory(); }
+
+    constexpr bool inited() const noexcept { return m_inited; }
+};
+
 ssize_t http::send(int fd, const http_request& request)
 {
     INIT_RESULT_AND_TEMP;
@@ -37,26 +50,26 @@ ssize_t http::send(int fd, const http_request& request)
     }
     module m;
     {
-        module::response_ptr res;
         auto it = modules.find(mod);
-        if (it != modules.end() && m.open(it->second))
+        if (it != modules.end())
         {
-            res = m.get_response(request);
+            m.open(it->second);
         }
         int res_status = 400;
         string content_type;
         long long res_length = 0;
-        if (res)
+        module_guard guard(m, request);
+        if (guard.inited())
         {
-            res_status = res->status();
-            res_length = res->length();
-            content_type = res->type();
+            res_status = m.status();
+            res_length = m.length();
+            content_type = m.type();
         }
         http_head head(res_status, res_length, content_type);
         IF_NEGATIVE_EXIT(head.send(fd));
-        if (res && request.method() != "HEAD")
+        if (request.method() != "HEAD")
         {
-            IF_NEGATIVE_EXIT(res->send(fd));
+            IF_NEGATIVE_EXIT(m.send(fd));
         }
     }
     RETURN_RESULT;

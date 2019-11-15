@@ -3,6 +3,7 @@
 #include <html/html_writer.h>
 #include <linq/string.hpp>
 #include <linq/to_container.hpp>
+#include <memory>
 #include <module/file/file.h>
 #include <module/read_modules.h>
 #include <sf/sformat.hpp>
@@ -16,16 +17,16 @@ using namespace linq;
 using std::filesystem::exists;
 using std::filesystem::path;
 
-file_response::file_response(const http_request& request, string filename) : response(request), filename(move(filename))
+file_response::file_response(init_response_arg* request) : filename(request->command)
 {
-    string r = request.split_url().args;
+    string r = request->args;
     if (!r.empty() && r.back() != '&')
     {
         r += '&';
     }
-    if (request.method() == "POST")
+    if (request->method == "POST"s)
     {
-        r += request.content();
+        r += request->content;
     }
     auto req_strs = r >> split('&');
     for (auto rs : req_strs)
@@ -61,7 +62,7 @@ int file_response::status()
         return 404;
 }
 
-string get_content_type(const string& ex)
+const char* get_content_type(const string& ex)
 {
     if (ex == "htm" || ex == "html")
     {
@@ -89,7 +90,7 @@ string get_content_type(const string& ex)
     }
 }
 
-string file_response::type()
+const char* file_response::type()
 {
     if (israw)
     {
@@ -180,19 +181,26 @@ ssize_t file_response::send(int fd)
     RETURN_RESULT;
 }
 
-void* get_instance_response(void* request)
+static unique_ptr<file_response> res_ptr;
+
+int32_t res_init(init_response_arg* arg)
 {
-    const http_request& req = *(const http_request*)request;
-    if (req.version() > 1.0)
+    if (arg->version > 1.0)
     {
-        string command = req.split_url().command;
-        return new file_response(req, command);
+        res_ptr = make_unique<file_response>(arg);
+        return 0;
     }
-    return nullptr;
+    return -1;
 }
 
-void delete_instance_response(void* response)
+int32_t res_status() { return res_ptr->status(); }
+
+const char* res_type() { return res_ptr->type(); }
+
+ssize_t res_send(int fd) { return res_ptr->send(fd); }
+
+int32_t res_destory()
 {
-    file_response* res = (file_response*)response;
-    delete res;
+    res_ptr = nullptr;
+    return 0;
 }

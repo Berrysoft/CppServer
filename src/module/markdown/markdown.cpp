@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <fstream>
 #include <html/html_writer.h>
+#include <memory>
 #include <module/markdown/markdown.h>
 #include <sstream>
 #include <sys/socket.h>
@@ -9,8 +10,10 @@
 using namespace std;
 using std::filesystem::exists;
 
-markdown_response::markdown_response(const http_request& request, string filename) : response(request), filename(move(filename))
+markdown_response::markdown_response(init_response_arg* arg) : filename(arg->command)
 {
+    if (filename.empty())
+        filename = "README.md";
     file_exists = exists(this->filename);
 }
 
@@ -174,23 +177,22 @@ ssize_t markdown_response::send(int fd)
     RETURN_RESULT;
 }
 
-void* get_instance_response(void* request)
+static unique_ptr<markdown_response> res_ptr;
+
+int32_t res_init(init_response_arg* arg)
 {
-    const http_request& req = *(const http_request*)request;
-    if (req.version() > 1.0)
+    if (arg->version > 1.0)
     {
-        string command = req.split_url().command;
-        if (command.empty())
-        {
-            command = "README.md";
-        }
-        return new markdown_response(req, command);
+        res_ptr = make_unique<markdown_response>(arg);
+        return 0;
     }
-    return nullptr;
+    return -1;
 }
 
-void delete_instance_response(void* response)
+ssize_t res_send(int fd) { return res_ptr->send(fd); }
+
+int32_t res_destory()
 {
-    markdown_response* res = (markdown_response*)response;
-    delete res;
+    res_ptr = nullptr;
+    return 0;
 }
