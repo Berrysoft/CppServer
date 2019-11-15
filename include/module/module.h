@@ -4,6 +4,7 @@
 #include <http/http_request.h>
 #include <memory>
 #include <string>
+#include <string_view>
 
 class module
 {
@@ -11,8 +12,8 @@ private:
     void* handle;
 
 public:
-    module();
-    ~module();
+    module() : handle(nullptr) {}
+    ~module() { destory(); }
 
     bool open(std::string_view name);
     bool init(const http_request& request);

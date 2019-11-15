@@ -30,7 +30,7 @@ void http::refresh_modules()
 ssize_t http::send(int fd, const http_request& request)
 {
     INIT_RESULT_AND_TEMP;
-    string mod = request.split_url().module;
+    string mod = request.module;
     if (mod.empty())
     {
         mod = "file";
@@ -54,7 +54,7 @@ ssize_t http::send(int fd, const http_request& request)
         }
         http_head head(res_status, res_length, content_type);
         IF_NEGATIVE_EXIT(head.send(fd));
-        if (request.method() != "HEAD")
+        if (request.method != "HEAD")
         {
             IF_NEGATIVE_EXIT(m.send(fd));
         }
