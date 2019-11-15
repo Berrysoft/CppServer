@@ -21,7 +21,7 @@ bool module::open(string name)
 }
 
 template <typename T, typename... Args>
-T invoke_module(void* handle, const char* name, T&& def, Args&&... args)
+T invoke_module(void* handle, const char* name, T&& def, Args... args)
 {
     using F = T (*)(Args...);
     if (handle)
@@ -29,7 +29,7 @@ T invoke_module(void* handle, const char* name, T&& def, Args&&... args)
         F f = (F)dlsym(handle, name);
         if (f)
         {
-            return f(forward<Args>(args)...);
+            return f(args...);
         }
     }
     return forward<T>(def);
