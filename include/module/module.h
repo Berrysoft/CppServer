@@ -1,39 +1,49 @@
 //模块类，用于动态加载模块。
 #pragma once
+#include <dlfcn.h>
 #include <functional>
 #include <http/http_request.h>
 #include <memory>
 #include <string>
 #include <string_view>
 
+struct module_ptr_deleter
+{
+    constexpr module_ptr_deleter() noexcept = default;
+    void operator()(void* ptr) const
+    {
+        if (ptr) ::dlclose(ptr);
+    }
+};
+
+using module_ptr = std::unique_ptr<void, module_ptr_deleter>;
+
 class module
 {
 private:
-    void* handle;
+    module_ptr handle;
+
+    bool init(const http_request& request);
+    void destory();
 
 public:
     module() : handle(nullptr) {}
+    module(std::string_view name, const http_request& request);
+    module(module&& m) : handle(std::move(m.handle)) {}
+
+    module& operator=(module&& m)
+    {
+        std::swap(handle, m.handle);
+        return *this;
+    }
+
     ~module() { destory(); }
 
-    bool open(std::string_view name);
-    bool init(const http_request& request);
+    operator bool() const noexcept { return (bool)handle; }
+
     std::int32_t status();
     std::int64_t length();
-    const char* type();
+    std::string type();
     ssize_t send(int fd);
-    bool destory();
-    void close();
-};
-
-struct module_guard
-{
-private:
-    module& m;
-    bool m_inited;
-
-public:
-    module_guard(module& m, const http_request& req) : m(m) { m_inited = m.init(req); }
-    ~module_guard() { m.destory(); }
-
-    constexpr bool inited() const noexcept { return m_inited; }
+    std::string last_error();
 };

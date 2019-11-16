@@ -23,7 +23,8 @@ extern "C"
     int64_t res_length();
     const char* res_type();
     ssize_t res_send(int fd);
-    int32_t res_destory();
+    void res_destory();
+    const char* res_last_error();
 
 #ifdef __cplusplus
 }

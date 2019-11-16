@@ -1,66 +1,65 @@
-#include <dlfcn.h>
 #include <module/module.h>
 #include <module/response.h>
 
 using namespace std;
 
-bool module::open(string_view name)
+module::module(string_view name, const http_request& request)
+    : handle(dlopen(name.data(), RTLD_LAZY))
 {
-    handle = dlopen(name.data(), RTLD_LAZY);
-    return handle;
+    init(request);
 }
 
-template <typename T, typename... Args>
-T invoke_module(void* handle, const char* name, T&& def, Args... args)
+template <typename T>
+struct module_helper
 {
-    using F = T (*)(Args...);
-    if (handle)
+    template <typename... Args>
+    static T invoke(const module_ptr& handle, const char* name, T&& def, Args... args)
     {
-        F f = (F)dlsym(handle, name);
-        if (f)
+        using F = T (*)(Args...);
+        if (handle)
         {
-            return f(args...);
+            F f = (F)dlsym(handle.get(), name);
+            if (f)
+            {
+                return f(args...);
+            }
+        }
+        return forward<T>(def);
+    }
+};
+
+template <>
+struct module_helper<void>
+{
+    template <typename... Args>
+    static void invoke(const module_ptr& handle, const char* name, Args... args)
+    {
+        using F = void (*)(Args...);
+        if (handle)
+        {
+            F f = (F)dlsym(handle.get(), name);
+            if (f)
+            {
+                f(args...);
+            }
         }
     }
-    return forward<T>(def);
-}
+};
 
 bool module::init(const http_request& request)
 {
     init_response_arg arg{ request.method.c_str(), request.module.c_str(), request.command.c_str(), request.args.c_str(), request.content.c_str(), request.version };
-    return invoke_module<int32_t>(handle, "res_init", -1, &arg) == 0;
+    return module_helper<int32_t>::invoke(handle, "res_init", -1, &arg) == 0;
 }
 
-int32_t module::status()
-{
-    return invoke_module<int32_t>(handle, "res_status", 200);
-}
+int32_t module::status() { return module_helper<int32_t>::invoke(handle, "res_status", 200); }
 
-int64_t module::length()
-{
-    return invoke_module<int64_t>(handle, "res_length", -1);
-}
+int64_t module::length() { return module_helper<int64_t>::invoke(handle, "res_length", -1); }
 
-const char* module::type()
-{
-    return invoke_module<const char*>(handle, "res_type", "text/html");
-}
+string module::type() { return module_helper<const char*>::invoke(handle, "res_type", "text/html"); }
 
-ssize_t module::send(int fd)
-{
-    return invoke_module<ssize_t>(handle, "res_send", -1, fd);
-}
+ssize_t module::send(int fd) { return module_helper<ssize_t>::invoke(handle, "res_send", -1, fd); }
 
-bool module::destory()
-{
-    return invoke_module<int32_t>(handle, "res_destory", 0) == 0;
-}
+void module::destory() { module_helper<void>::invoke(handle, "res_destory"); }
 
-void module::close()
-{
-    if (handle)
-    {
-        dlclose(handle);
-        handle = nullptr;
-    }
-}
+string module::last_error() { return module_helper<const char*>::invoke(handle, "res_last_error", ""); }

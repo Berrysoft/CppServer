@@ -191,8 +191,4 @@ int32_t res_init(init_response_arg* arg)
 
 ssize_t res_send(int fd) { return res_ptr->send(fd); }
 
-int32_t res_destory()
-{
-    res_ptr = nullptr;
-    return 0;
-}
+void res_destory() { res_ptr = nullptr; }

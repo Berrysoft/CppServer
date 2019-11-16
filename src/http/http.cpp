@@ -36,28 +36,25 @@ ssize_t http::send(int fd, const http_request& request)
         mod = "file";
     }
     module m;
+    auto it = modules.find(mod);
+    if (it != modules.end())
     {
-        auto it = modules.find(mod);
-        if (it != modules.end())
-        {
-            m.open(it->second);
-        }
-        int32_t res_status = 400;
-        string content_type;
-        int64_t res_length = 0;
-        module_guard guard(m, request);
-        if (guard.inited())
-        {
-            res_status = m.status();
-            res_length = m.length();
-            content_type = m.type();
-        }
-        http_head head(res_status, res_length, content_type);
-        IF_NEGATIVE_EXIT(head.send(fd));
-        if (request.method != "HEAD")
-        {
-            IF_NEGATIVE_EXIT(m.send(fd));
-        }
+        m = module(it->second, request);
+    }
+    int32_t res_status = 400;
+    string content_type;
+    int64_t res_length = 0;
+    if (m)
+    {
+        res_status = m.status();
+        res_length = m.length();
+        content_type = m.type();
+    }
+    http_head head(res_status, res_length, content_type);
+    IF_NEGATIVE_EXIT(head.send(fd));
+    if (m && request.method != "HEAD")
+    {
+        IF_NEGATIVE_EXIT(m.send(fd));
     }
     RETURN_RESULT;
 }

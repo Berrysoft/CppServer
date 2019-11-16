@@ -199,8 +199,4 @@ const char* res_type() { return res_ptr->type(); }
 
 ssize_t res_send(int fd) { return res_ptr->send(fd); }
 
-int32_t res_destory()
-{
-    res_ptr = nullptr;
-    return 0;
-}
+void res_destory() { res_ptr = nullptr; }
