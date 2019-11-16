@@ -9,12 +9,6 @@
 #include <sys/timerfd.h>
 #include <unistd.h>
 
-#define print(...)              \
-    if (verbose)                \
-    {                           \
-        sf::print(__VA_ARGS__); \
-    }
-
 #define println(...)              \
     if (verbose)                  \
     {                             \
@@ -33,26 +27,26 @@ using namespace sf;
 server::server(int amount, size_t doj, bool verbose)
     : verbose(verbose), amount(amount)
 {
-    print(make_color_arg("初始化Socket...\n", yellow));
+    println(make_color_arg("初始化Socket...", yellow));
     sock = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
     NEGATIVE_RETURN(sock, "Socket初始化失败。");
-    print(make_color_arg("初始化时钟...\n", yellow));
+    println(make_color_arg("初始化时钟...", yellow));
     time_stamp = 0;
     timer_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
     NEGATIVE_RETURN(timer_fd, "时钟初始化失败。");
-    print(make_color_arg("初始化Epoll...\n", yellow));
+    println(make_color_arg("初始化Epoll...", yellow));
     NEGATIVE_RETURN(epoll.create(amount), "Epoll创建失败。");
-    print(make_color_arg("初始化线程池...\n", yellow));
+    println(make_color_arg("初始化线程池...", yellow));
     pool.start(doj, mem_fn_bind(&server::process_job, this));
-    print(make_color_arg("刷新模块...\n", yellow));
+    println(make_color_arg("刷新模块...", yellow));
     refresh_modules();
 }
 
 server::~server()
 {
-    print(make_color_arg("关闭Socket。\n", yellow));
+    println(make_color_arg("关闭Socket。", yellow));
     close(sock);
-    print(make_color_arg("关闭时钟。\n", yellow));
+    println(make_color_arg("关闭时钟。", yellow));
     close(timer_fd);
 }
 
@@ -70,8 +64,8 @@ void server::bind(const sockaddr* addr, socklen_t len, int n)
 {
     NEGATIVE_RETURN(::bind(sock, addr, len), "Socket绑定失败。");
     NEGATIVE_RETURN(listen(sock, n), "监听失败。");
-    print("监听数：{0}\n", make_color_arg(n, bright_blue));
-    print("监听Socket：{0}.\n", sock);
+    println("监听数：{0}", make_color_arg(n, bright_blue));
+    println("监听Socket：{0}.", sock);
 }
 
 void server::start(int epoll_timeout, long interval, int clock_timeout)
@@ -83,9 +77,9 @@ void server::start(int epoll_timeout, long interval, int clock_timeout)
     NEGATIVE_RETURN(timerfd_settime(timer_fd, 0, &itimer, nullptr), "时钟设置失败。");
     this->clock_timeout = clock_timeout;
 
-    print("Epoll等待时间：{0}(ms)\n", make_color_arg(epoll_timeout, bright_blue));
-    print("时钟间隔：{0}(s)\n", make_color_arg(interval, bright_blue));
-    print("时钟等待循环数：{0}（个）\n", make_color_arg(clock_timeout, bright_blue));
+    println("Epoll等待时间：{0}(ms)", make_color_arg(epoll_timeout, bright_blue));
+    println("时钟间隔：{0}(s)", make_color_arg(interval, bright_blue));
+    println("时钟等待循环数：{0}（个）", make_color_arg(clock_timeout, bright_blue));
 
     NEGATIVE_RETURN(epoll.add(sock, EPOLLIN), "Socket启动失败。");
 
@@ -106,7 +100,7 @@ void server::clean(int ostamp)
     {
         if (it->second < ostamp)
         {
-            print("清理{0}。\n", it->first);
+            println("清理{0}。", it->first);
             shutdown(it->first, SHUT_RDWR);
             close(it->first);
             it = clients.erase(it);
@@ -120,11 +114,11 @@ void server::clean(int ostamp)
 
 void server::stop()
 {
-    print(make_color_arg("关闭Epoll。\n", yellow));
+    println(make_color_arg("关闭Epoll。", yellow));
     epoll.close();
     println(make_color_arg("停止循环。", yellow));
     loop_thread.join();
-    print(make_color_arg("停止线程池。\n", yellow));
+    println(make_color_arg("停止线程池。", yellow));
     pool.stop();
 }
 
@@ -160,7 +154,7 @@ void server::epoll_sock(int fd, uint32_t events)
     int newsock;
     if ((newsock = accept(sock, (sockaddr*)&paddr, &len)) > 0)
     {
-        print("新建Socket：{0}.\n", newsock);
+        println("新建Socket：{0}", newsock);
         int flags = fcntl(newsock, F_GETFL, 0);
         fcntl(newsock, F_GETFL, flags | O_NONBLOCK);
         if (epoll.add(newsock, EPOLLIN | EPOLLRDHUP | EPOLLET))
@@ -202,7 +196,7 @@ void server::epoll_default(int fd, uint32_t events)
 
 void server::process_job(int fd)
 {
-    print("正在处理请求{0}...\n", fd);
+    println("正在处理请求{0}...", fd);
     signal(SIGPIPE, SIG_IGN);
     optional<http_request> request = http_request::parse(fd);
     ssize_t size = -1;

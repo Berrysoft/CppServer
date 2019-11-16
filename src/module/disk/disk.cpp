@@ -45,19 +45,22 @@ ssize_t res_send(int fd)
     texts.push_back(sprint("{:f2} GB", fbss / 1073741824.0));
     IF_NEGATIVE_EXIT(writer.write_tr(texts));
     IF_NEGATIVE_EXIT(writer.write_table_end());
-    IF_NEGATIVE_EXIT(writer.write_h1("<a href=\"../file//proc/partitions\">硬盘分区信息</a>"));
-    texts.assign({ "名称", "大小" });
-    IF_NEGATIVE_EXIT(writer.write_table_start(texts));
+    ifstream ifs{ "/proc/partitions" };
+    if (ifs.is_open())
     {
-        ifstream ifs{ "/proc/partitions" };
-        for (const string& line : read_lines(ifs) >> skip(2))
+        IF_NEGATIVE_EXIT(writer.write_h1("<a href=\"../file//proc/partitions\">硬盘分区信息</a>"));
+        texts.assign({ "名称", "大小" });
+        IF_NEGATIVE_EXIT(writer.write_table_start(texts));
         {
-            vector<string_view> arr = line >> split(' ') >> where([](auto s) { return !s.empty(); }) >> to_vector<string_view>();
-            texts.assign({ string(arr[3]), sprint("{:f2} GB", stoull(string(arr[2])) / 1048576.0) });
-            IF_NEGATIVE_EXIT(writer.write_tr(texts));
+            for (const string& line : read_lines(ifs) >> skip(2))
+            {
+                vector<string_view> arr = line >> split(' ') >> where([](auto s) { return !s.empty(); }) >> to_vector<string_view>();
+                texts.assign({ string(arr[3]), sprint("{:f2} GB", stoull(string(arr[2])) / 1048576.0) });
+                IF_NEGATIVE_EXIT(writer.write_tr(texts));
+            }
         }
+        IF_NEGATIVE_EXIT(writer.write_table_end());
     }
-    IF_NEGATIVE_EXIT(writer.write_table_end());
     IF_NEGATIVE_EXIT(writer.write_end());
     RETURN_RESULT;
 }
