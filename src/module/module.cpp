@@ -6,7 +6,8 @@ using namespace std;
 module::module(string_view name, const http_request& request)
     : handle(dlopen(name.data(), RTLD_LAZY))
 {
-    init(request);
+    if (!init(request))
+        handle = nullptr;
 }
 
 template <typename T>
@@ -61,5 +62,3 @@ string module::type() { return module_helper<const char*>::invoke(handle, "res_t
 ssize_t module::send(int fd) { return module_helper<ssize_t>::invoke(handle, "res_send", -1, fd); }
 
 void module::destory() { module_helper<void>::invoke(handle, "res_destory"); }
-
-string module::last_error() { return module_helper<const char*>::invoke(handle, "res_last_error", ""); }

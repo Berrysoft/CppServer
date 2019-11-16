@@ -24,7 +24,6 @@ extern "C"
     const char* res_type();
     ssize_t res_send(int fd);
     void res_destory();
-    const char* res_last_error();
 
 #ifdef __cplusplus
 }

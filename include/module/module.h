@@ -45,5 +45,4 @@ public:
     std::int64_t length();
     std::string type();
     ssize_t send(int fd);
-    std::string last_error();
 };
