@@ -40,10 +40,10 @@ public:
             this->task = std::move(task);
             if (dojob < 1)
                 dojob = 1;
-            do_threads.resize(dojob);
+            do_threads.reserve(dojob);
             for (std::size_t i = 0; i < dojob; i++)
             {
-                do_threads[i] = std::thread(mem_fn_bind(&thread_pool::do_job, this));
+                do_threads.emplace_back(std::thread(mem_fn_bind(&thread_pool::do_job, this)));
             }
         }
     }

@@ -17,6 +17,14 @@ markdown_response::markdown_response(init_response_arg* arg) : filename(arg->com
     file_exists = exists(this->filename);
 }
 
+int markdown_response::status()
+{
+    if (file_exists)
+        return 200;
+    else
+        return 404;
+}
+
 string deal_with_code(string line)
 {
     int index;
@@ -188,6 +196,8 @@ int32_t res_init(init_response_arg* arg)
     }
     return -1;
 }
+
+int32_t res_status() { return res_ptr->status(); }
 
 ssize_t res_send(int fd) { return res_ptr->send(fd); }
 

@@ -13,5 +13,6 @@ public:
     markdown_response(init_response_arg* arg);
     ~markdown_response() {}
 
+    int status();
     ssize_t send(int fd);
 };
