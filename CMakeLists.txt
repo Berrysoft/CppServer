@@ -16,6 +16,6 @@ add_subdirectory(read_modules)
 
 add_subdirectory(modules)
 
-add_subdirectory(server)
+add_subdirectory(host)
 
 configure_file(README.md ${CMAKE_BINARY_DIR}/README.md COPYONLY)
