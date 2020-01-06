@@ -3,7 +3,6 @@
 #include <http/http_head.h>
 #include <module/module.h>
 #include <module/read_modules.h>
-#include <module/response.h>
 #include <sstream>
 #include <sys/socket.h>
 

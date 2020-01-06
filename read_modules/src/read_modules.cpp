@@ -7,7 +7,7 @@
 using namespace std;
 using namespace linq;
 
-const char modules_file[] = "modules";
+const char modules_file[] = "modules.txt";
 
 vector<string> read_modules_file()
 {

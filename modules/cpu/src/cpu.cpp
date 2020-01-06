@@ -3,10 +3,10 @@
 #include <linq/aggregate.hpp>
 #include <linq/query.hpp>
 #include <linq/to_container.hpp>
-#include <module/cpu/proc_cpuinfo.h>
-#include <module/cpu/proc_pid_stat.h>
-#include <module/cpu/proc_stat.h>
 #include <module/response.h>
+#include <proc_cpuinfo.h>
+#include <proc_pid_stat.h>
+#include <proc_stat.h>
 #include <sf/sformat.hpp>
 #include <string>
 #include <sys/socket.h>

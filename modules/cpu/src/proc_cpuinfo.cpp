@@ -1,6 +1,6 @@
 #include <fstream>
 #include <linq/string.hpp>
-#include <module/cpu/proc_cpuinfo.h>
+#include <proc_cpuinfo.h>
 #include <sf/sformat.hpp>
 #include <string>
 

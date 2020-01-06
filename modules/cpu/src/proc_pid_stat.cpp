@@ -1,5 +1,5 @@
 #include <fstream>
-#include <module/cpu/proc_pid_stat.h>
+#include <proc_pid_stat.h>
 #include <sf/sformat.hpp>
 
 using namespace std;

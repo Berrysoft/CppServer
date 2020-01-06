@@ -1,5 +1,5 @@
 #include <fstream>
-#include <module/cpu/proc_stat.h>
+#include <proc_stat.h>
 #include <string>
 
 using std::getline;
