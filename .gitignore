@@ -51,3 +51,7 @@ CTestTestfile.cmake
 
 # Build
 build
+out
+
+# clangd
+.clangd

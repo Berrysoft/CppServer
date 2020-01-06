@@ -1,13 +1,9 @@
 cmake_minimum_required(VERSION 3.1)
-project(CppServer)
+project(CppServer CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 include_directories(include)
-
-set(CMAKE_CXX_FLAGS "-Wall")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto")
 
 find_package(sf CONFIG REQUIRED)
 find_package(cpplinq CONFIG REQUIRED)
