@@ -8,4 +8,4 @@ add_subdirectory(disk)
 add_subdirectory(markdown)
 add_subdirectory(version)
 
-configure_file(modules ${CMAKE_BINARY_DIR}/modules.txt COPYONLY)
+configure_file(modules ${CMAKE_BINARY_DIR}/bin/modules.txt COPYONLY)
