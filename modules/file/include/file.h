@@ -8,7 +8,7 @@ class file_response
 {
 private:
     std::string filename;
-    std::map<std::string, std::string> requires;
+    std::map<std::string, std::string> m_requires;
     bool israw;
     bool file_exists;
 

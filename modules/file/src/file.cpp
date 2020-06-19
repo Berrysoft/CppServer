@@ -34,16 +34,16 @@ file_response::file_response(init_response_arg* request) : filename(request->com
         vector<string> rls = rs >> split('=') >> to_vector<string>();
         if (rls.size() >= 2)
         {
-            requires.emplace(rls[0], rls[1]);
+            m_requires.emplace(rls[0], rls[1]);
         }
         else
         {
-            requires.emplace(rls[0], string());
+            m_requires.emplace(rls[0], string());
         }
     }
     israw = false;
-    auto it = requires.find("raw");
-    if (it != requires.end())
+    auto it = m_requires.find("raw");
+    if (it != m_requires.end())
     {
         string raw_str = it->second;
         if (!raw_str.empty())

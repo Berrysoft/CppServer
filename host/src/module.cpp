@@ -8,65 +8,17 @@ using namespace std::filesystem;
 constexpr std::string_view module_prefix{ "lib" };
 constexpr std::string_view module_extension{ ".so" };
 
-static path get_right_path(string_view name)
+static path get_full_path(path name)
 {
-    path p = name;
-    if (!p.has_extension()) p.replace_extension(module_extension);
-    return p;
-}
-
-static path get_in_lib_path(string_view name)
-{
-    path p{ name.begin(), name.end() };
-    if (p.has_parent_path())
+    if (name != name.filename()) return name;
+    if (!string_view{ name.c_str() }.starts_with(module_prefix))
     {
-        if (p.has_filename())
-        {
-            return p.parent_path() / path{ ".." } / path{ "lib" } / p.filename();
-        }
-        else
-        {
-            return p;
-        }
+        path res = module_prefix;
+        res += name;
+        name = move(res);
     }
-    else
-    {
-        return path{ ".." } / path{ "lib" } / p;
-    }
-}
-
-static path get_full_path(string_view name, bool in_lib = false)
-{
-    path p = get_right_path(name);
-    if (exists(p))
-    {
-        return p;
-    }
-    else
-    {
-        if (name.length() >= module_prefix.length() && module_prefix == name.substr(0, 3))
-        {
-            p = get_right_path(name.substr(4));
-        }
-        else
-        {
-            auto filename = path{ "lib" };
-            filename += p.filename();
-            p.remove_filename();
-            p += filename;
-            string nname = p.string();
-            p = get_right_path(nname);
-        }
-        if (exists(p))
-            return p;
-        else if (!in_lib)
-        {
-            p = get_in_lib_path(name);
-            return get_full_path(p.string(), true);
-        }
-        else
-            return name;
-    }
+    name.replace_extension(module_extension);
+    return name;
 }
 
 module::module(string_view name, const http_request& request) : handle(nullptr)
