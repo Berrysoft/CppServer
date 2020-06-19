@@ -11,7 +11,7 @@ $ cmake .. -GNinja
 $ ninja
 $ ./server
 ```
-编译本程序需要我开发的库StreamFormat与CppLinq。
+编译本程序需要我开发的库[StreamFormat](https://github.com/Berrysoft/StreamFormat)与[CppLinq](https://github.com/Berrysoft/CppLinq)。
 
 如果需要复杂的参数：
 ``` bash
@@ -41,7 +41,7 @@ Berrysoft.Linux.Cpp.Server
 * `server`
 
 本程序需要以下文件才能正常使用：
-* `modules`（模块列表文件）
+* `modules.txt`（模块列表文件）
 * `libread_modules.so`（读取列表模块）
 * `libhtml_writer.so`（HTML模块）
 * `libfile.so`（文件模块）
@@ -56,7 +56,7 @@ Berrysoft.Linux.Cpp.Server
 ## 功能
 在服务器端输入`r`刷新模块加载，输入`c`清理所有连接，输入`q`退出。
 
-可以通过更改`modules`文件实现动态更改模块加载。
+可以通过更改`modules.txt`文件实现动态更改模块加载。
 
 超过时钟等待循环数的连接会自动清理。一些浏览器（如Edge）会一直使用一个连接进行导航，可能因此导致连接中断，刷新即可。
 
@@ -83,7 +83,7 @@ WSL没有`/proc/partitions`文件，因此采用VFS文件系统获取根目录�
 ### Markdown解释器
 默认用的是`README.md`绝对路径，打开的就是本文件。
 
-这个解释器实现了Markdown的一些基本功能，使得至少本文件能够显示正常。
+这个解释器使用了`md4c-html`库来实现转换。
 ## 压力测试
 下面是用ApacheBench进行并发100、总数1000000的压力测试结果：
 ```
