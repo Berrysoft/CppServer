@@ -24,7 +24,7 @@ file_response::file_response(init_response_arg* request) : filename(request->com
     {
         r += '&';
     }
-    if (request->method == "POST"s)
+    if (request->method == "POST"sv)
     {
         r += request->content;
     }
@@ -45,7 +45,7 @@ file_response::file_response(init_response_arg* request) : filename(request->com
     auto it = m_requires.find("raw");
     if (it != m_requires.end())
     {
-        string raw_str = it->second;
+        const string& raw_str = it->second;
         if (!raw_str.empty())
         {
             israw = stoi(raw_str);
@@ -101,7 +101,7 @@ const char* file_response::type()
         else
         {
             string ex = path(filename).extension();
-            if (!ex.empty() && ex.front() == '.')
+            if (!ex.empty())
             {
                 ex.erase(ex.begin());
             }

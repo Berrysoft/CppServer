@@ -5,17 +5,15 @@
 using namespace std;
 using namespace std::filesystem;
 
-constexpr std::string_view module_prefix{ "lib" };
-constexpr std::string_view module_extension{ ".so" };
+static const string module_prefix{ "lib" };
+static const path module_extension{ ".so" };
 
 static path get_full_path(path name)
 {
     if (name != name.filename()) return name;
     if (!string_view{ name.c_str() }.starts_with(module_prefix))
     {
-        path res = module_prefix;
-        res += name;
-        name = move(res);
+        name = module_prefix + name.string();
     }
     name.replace_extension(module_extension);
     return name;
