@@ -8,6 +8,7 @@
 #include <proc_pid_stat.h>
 #include <proc_stat.h>
 #include <sf/sformat.hpp>
+#include <span>
 #include <string>
 #include <sys/socket.h>
 #include <vector>
@@ -20,7 +21,7 @@ using namespace linq;
 void push_linuxcpu(vector<string>& texts, const linuxcpu& cpu)
 {
     int* p = (int*)(&cpu);
-    get_enumerable(move(p), p + 10) >>
+    span<int>(p, 10) >>
         select([](int& i) { return to_string(i); }) >>
         for_each([&texts](string s) { texts.push_back(move(s)); });
 }

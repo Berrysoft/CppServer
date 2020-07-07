@@ -21,7 +21,7 @@ $ ./server -v -a 127.0.0.1 -p 8080 -c 64 -t 16 -e 1000 -i 1 -o 2
 ```
 $ ./server -h
 Berrysoft.Linux.Cpp.Server
-网站在Edge、IE、Chrome、Safari(iPhone)下测试通过。
+网站在Edge、IE、Chrome、FireFox、Safari(iPhone)下测试通过。
 请使用支持chunked的浏览器打开网站。
 用法：./server [-h] [-p port] [-c count] [-t threads]
                 [epoll-timeout] [clock-interval] [clock-timeout]

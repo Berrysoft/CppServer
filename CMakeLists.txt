@@ -12,8 +12,8 @@ if(ENABLE_IPO)
     message(STATUS "LTO is enabled for Release")
 endif()
 
-find_package(sf CONFIG REQUIRED)
-find_package(cpplinq CONFIG REQUIRED)
+find_package(sf REQUIRED)
+find_package(cpplinq REQUIRED)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
