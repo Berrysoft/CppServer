@@ -16,13 +16,14 @@ class thread_pool
 {
 private:
     std::function<void(TArgs...)> task;
-    std::vector<std::thread> do_threads;
 
     safe_queue<std::tuple<TArgs...>> jobs;
     std::condition_variable cond;
     std::mutex cond_mutex;
 
     std::atomic<bool> stopped;
+
+    std::vector<std::thread> do_threads;
 
 public:
     thread_pool() : stopped(true) {}
@@ -34,16 +35,15 @@ public:
 
     void start(std::size_t dojob, std::function<void(TArgs...)>&& task)
     {
-        if (stopped)
+        if (stopped.exchange(false))
         {
-            stopped = false;
             this->task = std::move(task);
             if (dojob < 1)
                 dojob = 1;
             do_threads.reserve(dojob);
             for (std::size_t i = 0; i < dojob; i++)
             {
-                do_threads.emplace_back(std::thread(mem_fn_bind(&thread_pool::do_job, this)));
+                do_threads.emplace_back(mem_fn_bind(&thread_pool::do_job, this));
             }
         }
     }
@@ -56,9 +56,8 @@ public:
 
     void stop()
     {
-        if (!stopped)
+        if (!stopped.exchange(true))
         {
-            stopped = true;
             cond.notify_all();
             for (std::thread& t : do_threads)
             {
@@ -67,18 +66,18 @@ public:
         }
     }
 
+    ~thread_pool() { stop(); }
+
 private:
     void do_job()
     {
-        while (true)
+        while (!stopped)
         {
             if (jobs.empty())
             {
                 std::unique_lock<std::mutex> locker(cond_mutex);
                 cond.wait(locker);
             }
-            if (stopped)
-                break;
             std::optional<std::tuple<TArgs...>> j = jobs.try_pop();
             if (j)
             {
