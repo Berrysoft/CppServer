@@ -30,6 +30,8 @@ server::server(int amount, size_t doj, bool verbose)
     println(make_color_arg("初始化Socket...", yellow));
     sock = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
     NEGATIVE_RETURN(sock, "Socket初始化失败。");
+    int enable = 1;
+    NEGATIVE_RETURN(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)), "Socket属性设置失败");
     println(make_color_arg("初始化时钟...", yellow));
     time_stamp = 0;
     timer_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
